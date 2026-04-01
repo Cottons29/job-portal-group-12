@@ -21,8 +21,13 @@ const router = createRouter({
     {
       path: '/onboarding',
       name: 'onboarding',
-      component: () => import('@/view/PlaceholderView.vue'),
-      meta: { title: 'Complete Your Profile' },
+      redirect: '/onboarding/student',
+    },
+    {
+      path: '/onboarding/student',
+      name: 'student-setup',
+      component: () => import('@/view/StudentSetup.vue'),
+      meta: { title: 'Student Profile Setup' },
     },
     {
       path: '/dashboard',
