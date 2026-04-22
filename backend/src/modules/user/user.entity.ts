@@ -7,8 +7,8 @@ import {
   OneToOne,
 } from 'typeorm';
 
-import { UserRole } from '../common/enums/user-role.enum';
-import { AccountStatus } from '../common/enums/account-status.enum';
+import { UserRole } from '../../common/enums/user-role.enum';
+import { AccountStatus } from '../../common/enums/account-status.enum';
 import { StudentProfile } from '../studentProfile/student-profile.entity';
 import { EmployerProfile } from '../employerProfile/company-profile.entity';
 
