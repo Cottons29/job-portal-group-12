@@ -35,5 +35,10 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "dependencies": {
+    "@nestjs/typeorm": "^11.0.0",
+    "mysql2": "^3.20.0",
+    "typeorm": "^0.3.28"
   }
 }
