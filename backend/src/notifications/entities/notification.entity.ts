@@ -1,10 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('notifications')
 export class Notification {
@@ -14,7 +8,7 @@ export class Notification {
   @Column()
   userId: string;
 
-  @Column()
+  @Column('text')
   message: string;
 
   @Column({ default: false })

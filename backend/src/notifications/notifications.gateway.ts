@@ -5,89 +5,47 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // tighten this to your frontend origin in production
+    origin: '*',
   },
 })
-export class NotificationsGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  private readonly logger = new Logger(NotificationsGateway.name);
+  // Simple in-memory map: userId -> socketId
+  // In a multi-instance production environment, consider using Redis adapter
+  private activeUsers = new Map<string, string>();
 
-  /**
-   * In-memory mapping of userId → Set of connected socket IDs.
-   * A single user may have multiple tabs/devices open simultaneously,
-   * so we track a Set rather than a single socket ID.
-   */
-  private readonly userSocketMap = new Map<string, Set<string>>();
-
-  // ─── Lifecycle hooks ────────────────────────────────────────────
-
-  handleConnection(client: Socket): void {
+  handleConnection(client: Socket) {
+    // Usually you'd extract the user ID from the JWT token during connection handshakes
     const userId = client.handshake.query.userId as string;
-
-    if (!userId) {
-      this.logger.warn(
-        `Socket ${client.id} connected without a userId — disconnecting.`,
-      );
-      client.disconnect();
-      return;
+    
+    if (userId) {
+      this.activeUsers.set(userId, client.id);
+      console.log(`User ${userId} connected with socket ${client.id}`);
     }
-
-    // Register the socket under its userId
-    if (!this.userSocketMap.has(userId)) {
-      this.userSocketMap.set(userId, new Set());
-    }
-    this.userSocketMap.get(userId)!.add(client.id);
-
-    this.logger.log(`✔ User ${userId} connected  [socket: ${client.id}]`);
   }
 
-  handleDisconnect(client: Socket): void {
-    const userId = client.handshake.query.userId as string;
-
-    if (userId && this.userSocketMap.has(userId)) {
-      const sockets = this.userSocketMap.get(userId)!;
-      sockets.delete(client.id);
-
-      // Clean up the entry entirely if no sockets remain
-      if (sockets.size === 0) {
-        this.userSocketMap.delete(userId);
+  handleDisconnect(client: Socket) {
+    // Find and remove the disconnected user
+    for (const [userId, socketId] of this.activeUsers.entries()) {
+      if (socketId === client.id) {
+        this.activeUsers.delete(userId);
+        console.log(`User ${userId} disconnected`);
+        break;
       }
     }
-
-    this.logger.log(`✖ Socket ${client.id} disconnected`);
   }
 
-  // ─── Public API ─────────────────────────────────────────────────
-
-  /**
-   * Emit a `notification.created` event to every socket that belongs
-   * to the given userId. If the user is offline the event is silently
-   * dropped (they will see the notification on next fetch from the DB).
-   */
-  emitToUser(userId: string, payload: Record<string, any>): void {
-    const socketIds = this.userSocketMap.get(userId);
-
-    if (!socketIds || socketIds.size === 0) {
-      this.logger.debug(
-        `User ${userId} is offline — notification not pushed via WS.`,
-      );
-      return;
-    }
-
-    for (const socketId of socketIds) {
+  emitNotification(userId: string, payload: any) {
+    const socketId = this.activeUsers.get(userId);
+    if (socketId) {
       this.server.to(socketId).emit('notification.created', payload);
+      return true;
     }
-
-    this.logger.log(
-      `📨 Emitted notification.created to user ${userId} (${socketIds.size} socket(s))`,
-    );
+    return false; // User not currently online
   }
 }

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import axios from 'axios'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
@@ -17,6 +17,11 @@ export const useAuthStore = defineStore('auth', () => {
   // ── Authenticated user ──
   const user = ref(null)
   const token = ref(localStorage.getItem('fs_token') || '')
+
+  // ── Computed guards (used by router beforeEach) ──
+  const isAuthenticated = computed(() => !!token.value && !!user.value)
+  const needsEmailRecovery = computed(() => isAuthenticated.value && !user.value?.email)
+  const needsOnboarding = computed(() => isAuthenticated.value && !!user.value?.email && !user.value?.profileCompleted)
 
   // ── Actions ──
   function resetForm() {
@@ -129,6 +134,9 @@ export const useAuthStore = defineStore('auth', () => {
     error,
     user,
     token,
+    isAuthenticated,
+    needsEmailRecovery,
+    needsOnboarding,
     resetForm,
     setMode,
     setRole,
