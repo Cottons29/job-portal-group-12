@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  UnauthorizedException
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
@@ -19,23 +20,48 @@ export class AuthController {
 
   @Post('register')
   async register(
-    @Body() body: { email: string; password: string },
+    @Body() body: { phone: string; password: string; role: string },
     @Req() req: Request,
   ) {
-    const user = await this.authService.register(body.email, body.password);
+    const user = await this.authService.register(body.phone, body.password, body.role);
     (req.session as any).userId = user.id;
-    return { message: 'Registration successful', user };
+    const token = `token-${user.id}-${Date.now()}`;
+    return { message: 'Registration successful', user, token };
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
-    @Body() body: { email: string; password: string },
+    @Body() body: { phone: string; password: string },
     @Req() req: Request,
   ) {
-    const user = await this.authService.validateUser(body.email, body.password);
+    const user = await this.authService.validateUser(body.phone, body.password);
     (req.session as any).userId = user.id;
-    return { message: 'Login successful', user };
+    const token = `token-${user.id}-${Date.now()}`;
+    return { message: 'Login successful', user, token };
+  }
+
+  @Post('send-otp')
+  @HttpCode(HttpStatus.OK)
+  async sendOtp(@Body() body: { email: string }) {
+    await this.authService.sendOtp(body.email);
+    return { message: 'Verification code sent to email.' };
+  }
+
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyOtp(
+    @Body() body: { email: string; code: string; userId?: number },
+    @Req() req: Request,
+  ) {
+    // Attempt to extract userId from session (if cookies are passed), or fallback to body payload (for naive JWT implementation)
+    const userId = (req.session as any).userId || body.userId;
+    if (!userId) {
+      throw new UnauthorizedException('User is not properly authenticated to link email');
+    }
+
+    const user = await this.authService.verifyOtpAndAttachEmail(userId, body.email, body.code);
+    return { message: 'Email forcefully secured', user };
   }
 
   @Post('logout')
