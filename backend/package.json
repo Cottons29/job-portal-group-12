@@ -36,17 +36,6 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   },
-  "dependencies": {
-    "@nestjs/platform-express": "^11.1.18",
-    "@nestjs/platform-socket.io": "^11.1.19",
-    "@nestjs/websockets": "^11.1.19",
-    "@sendgrid/mail": "^8.1.6",
-    "bcrypt": "^6.0.0",
-    "dotenv": "^17.4.2",
-    "express-session": "^1.19.0",
-    "nodemailer": "^8.0.5",
-    "socket.io": "^4.8.3"
-  },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/express-session": "^1.18.2",
