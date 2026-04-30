@@ -1,7 +1,8 @@
 import { Injectable, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
-
+import {config} from "dotenv";
+config();
 export interface User {
   id: number;
   phone: string;
@@ -80,6 +81,8 @@ export class AuthService {
 
     this.otps = this.otps.filter(o => o.email !== email); 
     this.otps.push({ email, code, expiresAt });
+
+    console.log(`ENV : ${process.env}`);
 
     try {
       if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {

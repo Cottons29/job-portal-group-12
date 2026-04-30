@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, reactive, computed } from 'vue'
-import axios from 'axios'
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+import api from '@/lib/api'
 
 export const useAuthStore = defineStore('auth', () => {
   // ── Form state ──
@@ -50,7 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     isLoading.value = true
     try {
-      const { data } = await axios.post(`${API_BASE}/auth/login`, {
+      const { data } = await api.post('/auth/login', {
         phone: `+855${phone.value.replace(/\s/g, '')}`,
         password: password.value,
         role: role.value,
@@ -96,7 +94,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     isLoading.value = true
     try {
-      const { data } = await axios.post(`${API_BASE}/auth/register`, {
+      const { data } = await api.post('/auth/register', {
         phone: `+855${phone.value.replace(/\s/g, '')}`,
         password: password.value,
         role: role.value,
