@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import api from '@/lib/api'
 
 export const useStudentProfileStore = defineStore('studentProfile', () => {
   // ── Step tracking ──
@@ -29,6 +30,10 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
   const currency = ref('USD') // 'USD' | 'KHR'
   const cvFile = ref(null)
   const cvFileName = ref('')
+
+  // ── Save state ──
+  const isSaving = ref(false)
+  const saveError = ref('')
 
   // ── Validation ──
   const step1Valid = computed(() => {
@@ -74,6 +79,50 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
     cvFileName.value = file ? file.name : ''
   }
 
+  /**
+   * Persist the full onboarding form to the backend.
+   *
+   * Sends a `multipart/form-data` payload to `POST /student-profile` so the
+   * optional CV file can ride alongside the JSON-encoded fields. Complex
+   * shapes (`skills`, `availability`) are serialised as JSON strings since
+   * `FormData` only carries scalars.
+   *
+   * Returns the saved profile on success; throws on failure (the caller
+   * is expected to handle UX). `saveError` is also populated for stores
+   * that prefer to render the error reactively.
+   */
+  async function saveProfile() {
+    saveError.value = ''
+    isSaving.value = true
+    try {
+      const formData = new FormData()
+      formData.append('fullName', fullName.value)
+      formData.append('university', university.value)
+      formData.append('major', major.value)
+      formData.append('yearLevel', yearLevel.value || '')
+      formData.append('bio', bio.value || '')
+      formData.append('jobType', jobType.value || '')
+      formData.append('expectedSalary', expectedSalary.value || '')
+      formData.append('currency', currency.value || '')
+      formData.append('skills', JSON.stringify(skills.value))
+      formData.append('availability', JSON.stringify(availability.value))
+      if (cvFile.value) {
+        formData.append('cv', cvFile.value)
+      }
+
+      const { data } = await api.post('/student-profile', formData)
+      return data.profile
+    } catch (err) {
+      saveError.value =
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to save profile. Please try again.'
+      throw err
+    } finally {
+      isSaving.value = false
+    }
+  }
+
   function resetForm() {
     currentStep.value = 1
     fullName.value = ''
@@ -96,6 +145,8 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
     currency.value = 'USD'
     cvFile.value = null
     cvFileName.value = ''
+    isSaving.value = false
+    saveError.value = ''
   }
 
   return {
@@ -113,6 +164,8 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
     currency,
     cvFile,
     cvFileName,
+    isSaving,
+    saveError,
     step1Valid,
     step2Valid,
     nextStep,
@@ -121,6 +174,7 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
     removeSkill,
     toggleCurrency,
     setCvFile,
+    saveProfile,
     resetForm,
   }
 })

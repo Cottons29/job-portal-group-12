@@ -48,13 +48,20 @@ function handleFileSelect(e) {
 }
 
 // ── Form submission ──
-const isSaving = ref(false)
+// `isSaving` and `saveError` live on the store so other views (e.g. a future
+// "review" step) can react to them too. We expose them via computed shortcuts
+// to keep the template terse.
+const isSaving = computed(() => profile.isSaving)
+const saveError = computed(() => profile.saveError)
+
 async function handleSave() {
-  isSaving.value = true
-  // simulate API call
-  await new Promise(r => setTimeout(r, 1500))
-  isSaving.value = false
-  router.push('/dashboard')
+  try {
+    await profile.saveProfile()
+    router.push('/dashboard')
+  } catch {
+    // Error is surfaced via `profile.saveError`; keep the user on the page so
+    // they can retry without losing the form contents.
+  }
 }
 
 // ── Universities list ──
@@ -401,6 +408,16 @@ function getSkillColor(index) {
                   </p>
                 </template>
               </div>
+            </div>
+
+            <!-- Save Error Banner -->
+            <div
+              v-if="saveError"
+              class="mt-6 rounded-2xl bg-red-50 border border-red-200 px-5 py-3 text-sm text-red-700 flex items-start gap-2"
+              role="alert"
+            >
+              <span class="font-semibold">Could not save:</span>
+              <span class="flex-1">{{ saveError }}</span>
             </div>
 
             <!-- Complete Profile Button Section -->
