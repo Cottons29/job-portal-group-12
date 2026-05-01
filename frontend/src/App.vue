@@ -1,20 +1,23 @@
 <script setup>
-import { computed } from 'vue'
-import { RouterView, useRoute } from 'vue-router'
+import {computed} from 'vue'
+import {RouterView, useRoute} from 'vue-router'
 import Navbar from './components/navbar.vue'
 import Footer from './components/footer.vue'
 import ThemeModeToggle from './components/ThemeModeToggle.vue'
 
 const route = useRoute()
-const showGlobalThemeToggle = computed(() => route.path !== '/dashboard')
+const placeholderRouteNames = ['welcome', 'home', 'search', 'messages', 'notifications', 'create', 'profile', 'settings']
+const isPlaceholderRoute = computed(() => placeholderRouteNames.includes(route.name?.toString() || ''))
+const showGlobalThemeToggle = computed(() => !isPlaceholderRoute.value)
+const showFooter = computed(() => !isPlaceholderRoute.value)
 </script>
 
 
 <template>
   <!--  <Navbar />-->
-  <ThemeModeToggle v-if="showGlobalThemeToggle" />
-  <RouterView />
-  <Footer />
+  <ThemeModeToggle v-if="showGlobalThemeToggle"/>
+  <RouterView/>
+  <Footer v-if="showFooter"/>
 </template>
 
 
