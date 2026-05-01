@@ -137,7 +137,7 @@ const closeMenu = () => {
   min-height: 46px;
   padding: 0 24px;
   color: #ffffff;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: #2563eb;
   border-radius: 999px;
   box-shadow: 0 14px 26px rgba(37, 99, 235, 0.26);
   text-decoration: none;
