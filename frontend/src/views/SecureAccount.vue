@@ -64,7 +64,7 @@ const handleVerifyOtp = async () => {
     if (authStore.needsOnboarding) {
       router.push('/onboarding')
     } else {
-      router.push('/dashboard')
+      router.push('/home')
     }
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Invalid or expired code. Please try again.'
