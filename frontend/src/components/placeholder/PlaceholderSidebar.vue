@@ -5,7 +5,7 @@
       'fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-[#1b1c1e] px-3 py-2 text-white transition-all duration-300 lg:static lg:flex lg:min-h-screen lg:shrink-0 lg:flex-col lg:border-r lg:border-t-0 lg:px-4 lg:py-5'
     ]"
   >
-    <RouterLink to="/dashboard" class="mb-4 hidden justify-center lg:flex">
+    <RouterLink to="/home" class="mb-4 hidden justify-center lg:flex">
       <span class="grid h-8 w-8 place-items-center rounded-lg bg-[#a8c0ff] text-sm font-black text-[#25386b]">FS</span>
     </RouterLink>
 
@@ -21,9 +21,12 @@
     </button>
 
     <nav class="flex items-center justify-between gap-1 lg:flex-col lg:items-stretch lg:justify-start lg:gap-1.5">
-      <button
+      <component
+          :is="item.to ? RouterLink : 'button'"
           v-for="item in items"
           :key="item.label"
+          :to="item.to"
+          :type="item.to ? undefined : 'button'"
           :class="[
           item.active ? 'lg:rounded-full' : 'hover:bg-white/8 lg:rounded-full',
           showLabels ? 'lg:justify-start lg:gap-3 lg:px-2.5' : 'lg:justify-center lg:gap-0 lg:px-0',
@@ -34,22 +37,22 @@
           <component :is="item.icon" :class="[item.color, 'h-7 w-7 lg:h-5 lg:w-5']"/>
         </span>
         <SidebarLabel :show-labels="showLabels">{{ item.label }}</SidebarLabel>
-      </button>
+      </component>
     </nav>
 
     <div class="mt-auto hidden border-t border-white/10 pt-4 lg:block">
-      <button
+      <RouterLink
           :class="[
           showLabels ? 'justify-start gap-3 px-2.5' : 'justify-center gap-0 px-0',
           'group relative flex w-full items-center rounded-full py-1.5 text-left transition-colors hover:bg-white/8'
         ]"
-          type="button"
+          to="/settings"
       >
         <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#f5df7e]">
           <Cog6ToothIcon class="h-5 w-5 text-[#745b00]"/>
         </span>
         <SidebarLabel :show-labels="showLabels" desktop-only>Settings</SidebarLabel>
-      </button>
+      </RouterLink>
     </div>
 
     <div class="relative mt-3 hidden lg:block">
