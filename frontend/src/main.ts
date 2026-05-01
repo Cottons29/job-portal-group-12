@@ -4,6 +4,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import { initializeThemeMode } from './composables/useThemeMode'
 import { useAuthStore } from './stores/auth'
 
 declare global {
@@ -11,6 +12,8 @@ declare global {
     __setTestUser__: (hasEmail?: boolean, hasProfile?: boolean) => void
   }
 }
+
+initializeThemeMode()
 
 const app = createApp(App)
 
