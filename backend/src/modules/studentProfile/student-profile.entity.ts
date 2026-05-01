@@ -17,10 +17,6 @@ export class StudentProfile {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // Nullable for now: AuthService stores users in-memory and the FK target row
-  // may not exist in the `users` table yet. We keep the relation so the User
-  // entity's inverse OneToOne still resolves; once auth persists users to DB,
-  // this can be made non-nullable again.
   @Column({ nullable: true })
   userId?: string | null;
 
@@ -28,11 +24,6 @@ export class StudentProfile {
   @JoinColumn({ name: 'userId' })
   user?: User | null;
 
-  // Tracks the (in-memory) session user that created this profile, so we can
-  // upsert across requests without depending on a DB-persisted User row.
-  // NOTE: we set `type: 'varchar'` explicitly because the TypeScript type
-  // `string | null` is reflected as `Object`, which TypeORM can't map to a
-  // Postgres column type (DataTypeNotSupportedError).
   @Column({ type: 'varchar', nullable: true })
   sessionUserId?: string | null;
 
@@ -54,12 +45,10 @@ export class StudentProfile {
   @Column()
   major: string;
 
-  // Mapped from the UI's "Year 1..4 / Graduate" label.
   @Column({ type: 'int', nullable: true })
   yearOfStudy?: number | null;
 
-  // Raw label kept for display fidelity (e.g. "Graduate").
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   yearLevel?: string;
 
   @Column({ type: 'text', nullable: true })

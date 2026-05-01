@@ -2,6 +2,8 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStudentProfileStore } from '@/stores/studentProfile'
+import { useAuthStore } from '@/stores/auth'
+import axios from 'axios'
 import {
   AcademicCapIcon,
   DocumentTextIcon,
@@ -48,19 +50,49 @@ function handleFileSelect(e) {
 }
 
 // ── Form submission ──
-// `isSaving` and `saveError` live on the store so other views (e.g. a future
-// "review" step) can react to them too. We expose them via computed shortcuts
-// to keep the template terse.
-const isSaving = computed(() => profile.isSaving)
-const saveError = computed(() => profile.saveError)
+const isSaving = ref(false)
+const saveError = ref('')
+const authStore = useAuthStore()
 
 async function handleSave() {
+  isSaving.value = true
+  saveError.value = ''
+
   try {
-    await profile.saveProfile()
+    const formData = new FormData()
+    formData.append('fullName', profile.fullName)
+    formData.append('university', profile.university)
+    formData.append('major', profile.major)
+    formData.append('yearLevel', profile.yearLevel)
+    formData.append('skills', JSON.stringify(profile.skills))
+    formData.append('bio', profile.bio)
+    formData.append('jobType', profile.jobType)
+    formData.append('availability', JSON.stringify(profile.availability))
+    formData.append('expectedSalary', profile.expectedSalary)
+    formData.append('currency', profile.currency)
+
+    if (profile.cvFile) {
+      formData.append('cvFile', profile.cvFile)
+    }
+
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+
+    await axios.post(`${API_BASE}/student-profile/setup`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${authStore.token}`,
+      },
+    })
+
+    if (authStore.user) {
+      authStore.user.profileCompleted = true
+    }
     router.push('/dashboard')
-  } catch {
-    // Error is surfaced via `profile.saveError`; keep the user on the page so
-    // they can retry without losing the form contents.
+  } catch (err) {
+    console.error('Failed to save profile:', err)
+    saveError.value = err.response?.data?.message || 'Failed to complete profile. Please try again.'
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -421,7 +453,10 @@ function getSkillColor(index) {
             </div>
 
             <!-- Complete Profile Button Section -->
-            <div class="mt-10 flex justify-center pb-8 border-b border-transparent">
+            <div class="mt-10 flex flex-col items-center pb-8 border-b border-transparent">
+              <div v-if="errorMsg" class="mb-4 text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg font-medium">
+                {{ errorMsg }}
+              </div>
               <button
                 id="save-btn"
                 @click="handleSave"

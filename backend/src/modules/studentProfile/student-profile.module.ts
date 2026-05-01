@@ -4,15 +4,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 
+import { User } from '../user/user.entity';
 import { StudentProfile } from './student-profile.entity';
 import { StudentProfileController } from './student-profile.controller';
 import { StudentProfileService } from './student-profile.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([StudentProfile]),
-    // Local Multer registration (mirrors `UploadModule` settings) so the
-    // FileInterceptor in the controller has somewhere to put uploaded CVs.
+    TypeOrmModule.forFeature([StudentProfile, User]),
     MulterModule.register({
       storage: diskStorage({
         destination: './uploads',
@@ -22,7 +21,7 @@ import { StudentProfileService } from './student-profile.service';
           cb(null, uniqueSuffix + extname(file.originalname));
         },
       }),
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+      limits: { fileSize: 5 * 1024 * 1024 },
     }),
   ],
   controllers: [StudentProfileController],

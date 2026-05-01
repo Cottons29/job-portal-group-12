@@ -11,41 +11,48 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import type { Request } from 'express';
 
 import { AuthenticatedGuard } from '../../auth/authenticated.guard';
 import { StudentProfileService } from './student-profile.service';
-import { SaveStudentProfileDto } from './dto/save-student-profile.dto';
 
-/**
- * REST surface for the student onboarding form.
- *
- * `POST /api/student-profile` is multipart so the optional CV file can be
- * attached under the `cv` field. Every endpoint requires an authenticated
- * session (cookie-based — see `AuthenticatedGuard`).
- */
 @Controller('student-profile')
 @UseGuards(AuthenticatedGuard)
 export class StudentProfileController {
-  constructor(private readonly service: StudentProfileService) {}
+  constructor(private readonly studentProfileService: StudentProfileService) {}
 
   @Post()
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(FileInterceptor('cv'))
+  @UseInterceptors(FileInterceptor('cvFile'))
   async save(
-    @Body() body: SaveStudentProfileDto,
-    @UploadedFile() cv: Express.Multer.File | undefined,
-    @Req() req: Request,
+    @Req() req: any,
+    @Body() body: Record<string, unknown>,
+    @UploadedFile() file: Express.Multer.File | undefined,
   ) {
-    const userId = (req.session as any)?.userId;
-    const profile = await this.service.save(userId, body, cv);
+    const userId = req.user.sub;
+    const profile = await this.studentProfileService.createOrUpdateProfile(
+      userId,
+      body,
+      file,
+    );
     return { message: 'Profile saved', profile };
   }
 
+  @Post('setup')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor('cvFile'))
+  async setupProfile(
+    @Req() req: any,
+    @Body() body: Record<string, unknown>,
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ) {
+    const userId = req.user.sub;
+    return this.studentProfileService.createOrUpdateProfile(userId, body, file);
+  }
+
   @Get('me')
-  async getMine(@Req() req: Request) {
-    const userId = (req.session as any)?.userId;
-    const profile = await this.service.findBySessionUser(userId);
+  async getMine(@Req() req: any) {
+    const userId = req.user.sub;
+    const profile = await this.studentProfileService.findByUser(userId);
     return { profile };
   }
 }

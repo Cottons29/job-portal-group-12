@@ -8,7 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-  UnauthorizedException
+  UnauthorizedException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
@@ -21,11 +21,12 @@ export class AuthController {
   @Post('register')
   async register(
     @Body() body: { phone: string; password: string; role: string },
-    @Req() req: Request,
   ) {
-    const user = await this.authService.register(body.phone, body.password, body.role);
-    (req.session as any).userId = user.id;
-    const token = `token-${user.id}-${Date.now()}`;
+    const { user, token } = await this.authService.register(
+      body.phone,
+      body.password,
+      body.role,
+    );
     return { message: 'Registration successful', user, token };
   }
 
@@ -33,11 +34,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() body: { phone: string; password: string },
-    @Req() req: Request,
   ) {
-    const user = await this.authService.validateUser(body.phone, body.password);
-    (req.session as any).userId = user.id;
-    const token = `token-${user.id}-${Date.now()}`;
+    const { user, token } = await this.authService.validateUser(body.phone, body.password);
     return { message: 'Login successful', user, token };
   }
 
@@ -50,35 +48,36 @@ export class AuthController {
 
   @Post('verify-otp')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthenticatedGuard)
   async verifyOtp(
-    @Body() body: { email: string; code: string; userId?: number },
-    @Req() req: Request,
+    @Body() body: { email: string; code: string; userId?: string },
+    @Req() req: any,
   ) {
-    // Attempt to extract userId from session (if cookies are passed), or fallback to body payload (for naive JWT implementation)
-    const userId = (req.session as any).userId || body.userId;
+    // Extract userId from the decoded JWT payload added by AuthenticatedGuard
+    const userId = req.user?.sub || body.userId;
     if (!userId) {
-      throw new UnauthorizedException('User is not properly authenticated to link email');
+      throw new UnauthorizedException(
+        'User is not properly authenticated to link email',
+      );
     }
 
-    const user = await this.authService.verifyOtpAndAttachEmail(userId, body.email, body.code);
+    const user = await this.authService.verifyOtpAndAttachEmail(
+      userId,
+      body.email,
+      body.code,
+    );
     return { message: 'Email forcefully secured', user };
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@Req() req: Request, @Res() res: Response) {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Logout failed' });
-      }
-      res.clearCookie('connect.sid');
-      return res.json({ message: 'Logout successful' });
-    });
+  logout() {
+    return { message: 'Logout successful' };
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get('me')
-  getProfile(@Req() req: Request) {
-    return { userId: (req.session as any).userId };
+  getProfile(@Req() req: any) {
+    return { userId: req.user?.sub };
   }
 }

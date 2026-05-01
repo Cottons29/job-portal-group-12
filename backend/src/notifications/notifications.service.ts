@@ -12,13 +12,17 @@ export class NotificationsService {
     private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
-  async createNotification(userId: string, message: string): Promise<Notification> {
+  async createNotification(
+    userId: string,
+    message: string,
+  ): Promise<Notification> {
     // 1. Save to the PostgreSQL database
     const notification = this.notificationRepository.create({
       userId,
       message,
     });
-    const savedNotification = await this.notificationRepository.save(notification);
+    const savedNotification =
+      await this.notificationRepository.save(notification);
 
     // 2. Emit the real-time event to the specific connected user
     this.notificationsGateway.emitNotification(userId, savedNotification);

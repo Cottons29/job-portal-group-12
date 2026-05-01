@@ -1,16 +1,17 @@
-import { Injectable, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
-import {config} from "dotenv";
-config();
-export interface User {
-  id: number;
-  phone: string;
-  email: string | null;
-  password: string;
-  role: string;
-  profileCompleted: boolean;
-}
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { UserRole } from '../common/enums/user-role.enum';
+import { AccountStatus } from '../common/enums/account-status.enum';
+import { User } from '../modules/user/user.entity';
 
 export interface OtpRecord {
   email: string;
@@ -20,43 +21,46 @@ export interface OtpRecord {
 
 @Injectable()
 export class AuthService {
-  private users: User[] = [];
   private otps: OtpRecord[] = [];
-  private idCounter = 1;
 
   private transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_PASS, 
+      pass: process.env.GMAIL_PASS,
     },
   });
 
-  constructor() {}
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private jwtService: JwtService,
+  ) {}
 
-  async register(phone: string, password: string, role: string): Promise<Omit<User, 'password'>> {
-    const existing = this.users.find((u) => u.phone === phone);
+  async register(phone: string, password: string, role: string) {
+    const existing = await this.userRepository.findOne({ where: { phone } });
     if (existing) {
       throw new ConflictException('Phone number already registered');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user: User = {
-      id: this.idCounter++,
+    const user = this.userRepository.create({
       phone,
-      email: null,
       password: hashedPassword,
-      role: role || 'student',
-      profileCompleted: false
-    };
-    this.users.push(user);
+      role: role === 'employer' ? UserRole.EMPLOYER : UserRole.STUDENT,
+      status: AccountStatus.ACTIVE,
+    });
 
+    await this.userRepository.save(user);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...result } = user;
-    return result;
+    const token = this.jwtService.sign({ sub: user.id, role: user.role });
+    return { user: result, token };
   }
 
-  async validateUser(phone: string, password: string): Promise<Omit<User, 'password'>> {
-    const user = this.users.find((u) => u.phone === phone);
+  async validateUser(phone: string, password: string) {
+    const user = await this.userRepository.findOne({ where: { phone } });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -66,20 +70,22 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...result } = user;
-    return result;
+    const token = this.jwtService.sign({ sub: user.id, role: user.role });
+    return { user: result, token };
   }
 
   async sendOtp(email: string): Promise<void> {
-    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit OTP
-    const expiresAt = Date.now() + 10 * 60 * 1000; // valid for 10 min
-    
-    // Check if email already in use by another user
-    if (this.users.find(u => u.email === email)) {
-      throw new ConflictException("Email is already used by another account.");
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+
+    const existing = await this.userRepository.findOne({ where: { email } });
+    if (existing) {
+      throw new ConflictException('Email is already used by another account.');
     }
 
-    this.otps = this.otps.filter(o => o.email !== email); 
+    this.otps = this.otps.filter((o) => o.email !== email);
     this.otps.push({ email, code, expiresAt });
 
     console.log(`ENV : ${process.env}`);
@@ -88,7 +94,7 @@ export class AuthService {
       if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
         await this.transporter.sendMail({
           from: `"FirstStep Security" <${process.env.GMAIL_USER}>`,
-          to: email, // Sending directly to whatever email they type into the SecureAccount.vue view!
+          to: email,
           subject: 'FirstStep Security Authentication Code',
           html: `<div style="font-family: sans-serif; padding: 20px; background-color: #f8fafc; border-radius: 12px;">
                    <h2 style="color: #0f172a; margin-bottom: 20px;">Your Security Code</h2>
@@ -99,22 +105,15 @@ export class AuthService {
                    <p style="color: #64748b; font-size: 14px;">This code will automatically expire in 10 minutes.</p>
                  </div>`,
         });
-        console.log(`\n\n══════════════════════════════════════`);
-        console.log(`[SMTP SUCCESS] NODEMAILER OTP SENT!`);
-        console.log(`Destination: ${email}`);
-        console.log(`══════════════════════════════════════\n\n`);
-      } else {
-        console.log(`[DEV MODE] NODEMAILER CREDENTIALS MISSING. Check .env!`);
       }
     } catch (error) {
-      console.error('Nodemailer Error:', error);
       throw new BadRequestException('Could not dispatch email via Gmail SMTP.');
     }
   }
 
-  async verifyOtpAndAttachEmail(userId: number, email: string, code: string): Promise<Omit<User, 'password'>> {
-    const record = this.otps.find(o => o.email === email && o.code === code);
-    
+  async verifyOtpAndAttachEmail(userId: string, email: string, code: string) {
+    const record = this.otps.find((o) => o.email === email && o.code === code);
+
     if (!record) {
       throw new BadRequestException('Invalid verification code');
     }
@@ -122,14 +121,17 @@ export class AuthService {
       throw new BadRequestException('Verification code has expired');
     }
 
-    const user = this.users.find(u => u.id === userId);
+    const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
-        throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('User not found');
     }
-    
+
     user.email = email;
-    this.otps = this.otps.filter(o => o.email !== email); // consume OTP
-    
+    await this.userRepository.save(user);
+
+    this.otps = this.otps.filter((o) => o.email !== email);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...result } = user;
     return result;
   }
