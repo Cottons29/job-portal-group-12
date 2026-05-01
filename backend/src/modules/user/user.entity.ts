@@ -5,12 +5,14 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { UserRole } from '../../common/enums/user-role.enum';
 import { AccountStatus } from '../../common/enums/account-status.enum';
 import { StudentProfile } from '../studentProfile/student-profile.entity';
 import { EmployerProfile } from '../employerProfile/company-profile.entity';
+import { PasskeyCredential } from '../../auth/passkey-credential.entity';
 
 @Entity('users') // table name
 export class User {
@@ -47,6 +49,9 @@ export class User {
 
   @OneToOne(() => EmployerProfile, (profile) => profile.user)
   employerProfile: EmployerProfile;
+
+  @OneToMany(() => PasskeyCredential, (credential) => credential.user)
+  passkeyCredentials: PasskeyCredential[];
 
   @CreateDateColumn()
   createdAt: Date;
