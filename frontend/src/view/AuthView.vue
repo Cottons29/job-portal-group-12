@@ -261,6 +261,18 @@ function handleSubmit() {
         <!-- Social Buttons — tonal surface, no borders -->
         <div class="flex items-center justify-center gap-4">
           <button
+            v-if="!isSignUp"
+            id="btn-passkey"
+            type="button"
+            @click="auth.loginWithPasskey(router)"
+            :disabled="auth.isLoading"
+            class="flex items-center justify-center rounded-full bg-surface-container px-5 py-3 text-sm font-black text-on-surface transition-all duration-200 hover:bg-surface-container-high disabled:opacity-60 cursor-pointer border border-outline-variant/30"
+            style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20)"
+            aria-label="Continue with passkey"
+          >
+            Use passkey
+          </button>
+          <button
             id="btn-google"
             type="button"
             class="flex items-center justify-center w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high transition-all duration-200 cursor-pointer border border-outline-variant/30"
