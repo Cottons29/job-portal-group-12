@@ -4,10 +4,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { User } from '../modules/user/user.entity';
+import { PasskeyCredential } from './passkey-credential.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, PasskeyCredential]),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET || 'fallback_secret',

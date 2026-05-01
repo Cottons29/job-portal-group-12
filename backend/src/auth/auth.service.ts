@@ -9,9 +9,21 @@ import * as nodemailer from 'nodemailer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
+import {
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyAuthenticationResponse,
+  verifyRegistrationResponse,
+} from '@simplewebauthn/server';
+import type {
+  AuthenticationResponseJSON,
+  AuthenticatorTransportFuture,
+  RegistrationResponseJSON,
+} from '@simplewebauthn/server';
 import { UserRole } from '../common/enums/user-role.enum';
 import { AccountStatus } from '../common/enums/account-status.enum';
 import { User } from '../modules/user/user.entity';
+import { PasskeyCredential } from './passkey-credential.entity';
 
 export interface OtpRecord {
   email: string;
@@ -19,9 +31,17 @@ export interface OtpRecord {
   expiresAt: number;
 }
 
+interface ChallengeRecord {
+  challenge: string;
+  userId?: string;
+  expiresAt: number;
+}
+
 @Injectable()
 export class AuthService {
   private otps: OtpRecord[] = [];
+  private registrationChallenges = new Map<string, ChallengeRecord>();
+  private authenticationChallenges = new Map<string, ChallengeRecord>();
 
   private transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -34,8 +54,56 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(PasskeyCredential)
+    private passkeyRepository: Repository<PasskeyCredential>,
     private jwtService: JwtService,
   ) {}
+
+  private get rpName() {
+    return process.env.WEBAUTHN_RP_NAME || 'FirstStep';
+  }
+
+  private get rpId() {
+    return process.env.WEBAUTHN_RP_ID || 'localhost';
+  }
+
+  private get origin() {
+    return process.env.WEBAUTHN_ORIGIN || 'http://localhost:5173';
+  }
+
+  private createToken(user: User) {
+    return this.jwtService.sign({ sub: user.id, role: user.role });
+  }
+
+  private sanitizeUser(user: User) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...result } = user;
+    return result;
+  }
+
+  private bufferToBase64(buffer: Uint8Array) {
+    return Buffer.from(buffer).toString('base64');
+  }
+
+  private base64ToBuffer(value: string) {
+    return new Uint8Array(Buffer.from(value, 'base64'));
+  }
+
+  private pruneChallenges() {
+    const now = Date.now();
+
+    for (const [key, record] of this.registrationChallenges) {
+      if (record.expiresAt < now) {
+        this.registrationChallenges.delete(key);
+      }
+    }
+
+    for (const [key, record] of this.authenticationChallenges) {
+      if (record.expiresAt < now) {
+        this.authenticationChallenges.delete(key);
+      }
+    }
+  }
 
   async register(phone: string, password: string, role: string) {
     const existing = await this.userRepository.findOne({ where: { phone } });
@@ -53,10 +121,8 @@ export class AuthService {
 
     await this.userRepository.save(user);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...result } = user;
-    const token = this.jwtService.sign({ sub: user.id, role: user.role });
-    return { user: result, token };
+    const token = this.createToken(user);
+    return { user: this.sanitizeUser(user), token };
   }
 
   async validateUser(phone: string, password: string) {
@@ -70,10 +136,196 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...result } = user;
-    const token = this.jwtService.sign({ sub: user.id, role: user.role });
-    return { user: result, token };
+    const token = this.createToken(user);
+    return { user: this.sanitizeUser(user), token };
+  }
+
+  async getCurrentUser(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return this.sanitizeUser(user);
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    if (!currentPassword || !newPassword) {
+      throw new BadRequestException('Current password and new password are required');
+    }
+
+    if (newPassword.length < 8) {
+      throw new BadRequestException('New password must be at least 8 characters');
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await this.userRepository.save(user);
+  }
+
+  async listPasskeys(userId: string) {
+    return this.passkeyRepository.find({
+      where: { userId },
+      select: ['id', 'createdAt', 'updatedAt'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async startPasskeyRegistration(userId: string) {
+    this.pruneChallenges();
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const existingCredentials = await this.passkeyRepository.find({ where: { userId } });
+    const options = await generateRegistrationOptions({
+      rpName: this.rpName,
+      rpID: this.rpId,
+      userID: Buffer.from(user.id),
+      userName: user.email || user.phone,
+      userDisplayName: user.email || user.phone,
+      attestationType: 'none',
+      excludeCredentials: existingCredentials.map((credential) => ({
+        id: credential.credentialId,
+        transports: credential.transports as AuthenticatorTransportFuture[],
+      })),
+      authenticatorSelection: {
+        residentKey: 'preferred',
+        userVerification: 'preferred',
+      },
+    });
+
+    this.registrationChallenges.set(options.challenge, {
+      challenge: options.challenge,
+      userId,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    });
+
+    return options;
+  }
+
+  async finishPasskeyRegistration(userId: string, response: RegistrationResponseJSON) {
+    this.pruneChallenges();
+
+    const challengeRecord = [...this.registrationChallenges.values()].find(
+      (record) => record.userId === userId,
+    );
+    if (!challengeRecord) {
+      throw new BadRequestException('Passkey registration challenge expired');
+    }
+
+    const verification = await verifyRegistrationResponse({
+      response,
+      expectedChallenge: challengeRecord.challenge,
+      expectedOrigin: this.origin,
+      expectedRPID: this.rpId,
+      requireUserVerification: false,
+    });
+
+    this.registrationChallenges.delete(challengeRecord.challenge);
+
+    if (!verification.verified) {
+      throw new BadRequestException('Passkey registration failed');
+    }
+
+    const { credential, credentialDeviceType, credentialBackedUp } = verification.registrationInfo;
+    const existing = await this.passkeyRepository.findOne({
+      where: { credentialId: credential.id },
+    });
+    if (existing) {
+      throw new ConflictException('This passkey is already registered');
+    }
+
+    await this.passkeyRepository.save(
+      this.passkeyRepository.create({
+        userId,
+        credentialId: credential.id,
+        publicKey: this.bufferToBase64(credential.publicKey),
+        counter: credential.counter,
+        transports: response.response.transports || [],
+        deviceType: credentialDeviceType,
+        backedUp: credentialBackedUp,
+      }),
+    );
+
+    return this.listPasskeys(userId);
+  }
+
+  async startPasskeyAuthentication() {
+    this.pruneChallenges();
+
+    const credentials = await this.passkeyRepository.find();
+    const options = await generateAuthenticationOptions({
+      rpID: this.rpId,
+      allowCredentials: credentials.map((credential) => ({
+        id: credential.credentialId,
+        transports: credential.transports as AuthenticatorTransportFuture[],
+      })),
+      userVerification: 'preferred',
+    });
+
+    this.authenticationChallenges.set(options.challenge, {
+      challenge: options.challenge,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    });
+
+    return options;
+  }
+
+  async finishPasskeyAuthentication(response: AuthenticationResponseJSON) {
+    this.pruneChallenges();
+
+    const challengeRecord = this.authenticationChallenges.get(response.response.clientDataJSON)
+      || [...this.authenticationChallenges.values()][0];
+    if (!challengeRecord) {
+      throw new BadRequestException('Passkey login challenge expired');
+    }
+
+    const passkey = await this.passkeyRepository.findOne({
+      where: { credentialId: response.id },
+      relations: ['user'],
+    });
+    if (!passkey) {
+      throw new UnauthorizedException('Passkey is not registered');
+    }
+
+    const verification = await verifyAuthenticationResponse({
+      response,
+      expectedChallenge: challengeRecord.challenge,
+      expectedOrigin: this.origin,
+      expectedRPID: this.rpId,
+      requireUserVerification: false,
+      credential: {
+        id: passkey.credentialId,
+        publicKey: this.base64ToBuffer(passkey.publicKey),
+        counter: passkey.counter,
+        transports: passkey.transports as AuthenticatorTransportFuture[],
+      },
+    });
+
+    this.authenticationChallenges.delete(challengeRecord.challenge);
+
+    if (!verification.verified) {
+      throw new UnauthorizedException('Passkey login failed');
+    }
+
+    passkey.counter = verification.authenticationInfo.newCounter;
+    passkey.deviceType = verification.authenticationInfo.credentialDeviceType;
+    passkey.backedUp = verification.authenticationInfo.credentialBackedUp;
+    await this.passkeyRepository.save(passkey);
+
+    return { user: this.sanitizeUser(passkey.user), token: this.createToken(passkey.user) };
   }
 
   async sendOtp(email: string): Promise<void> {
@@ -131,8 +383,6 @@ export class AuthService {
 
     this.otps = this.otps.filter((o) => o.email !== email);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...result } = user;
-    return result;
+    return this.sanitizeUser(user);
   }
 }
