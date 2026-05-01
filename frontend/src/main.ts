@@ -25,7 +25,7 @@ window.__setTestUser__ = (hasEmail = false, hasProfile = false) => {
   store.token = 'mock-test-token-123'
   // Mock missing email initially
   store.user = {
-    id: 1,
+    id: "1",
     phone: '+85512345678',
     email: hasEmail ? 'test@example.com' : null,
     profileCompleted: hasProfile,

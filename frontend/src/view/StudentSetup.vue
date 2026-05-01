@@ -87,7 +87,7 @@ async function handleSave() {
     if (authStore.user) {
       authStore.user.profileCompleted = true
     }
-    router.push('/dashboard')
+    router.push('/home')
   } catch (err) {
     console.error('Failed to save profile:', err)
     saveError.value = err.response?.data?.message || 'Failed to complete profile. Please try again.'

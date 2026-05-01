@@ -70,6 +70,8 @@ export class StudentProfileService {
     profile.userId = userId;
     profile.sessionUserId = userId;
     profile.fullName = String(data.fullName);
+    profile.gender = data.gender ? String(data.gender) : undefined;
+    profile.phone = data.phone ? String(data.phone) : undefined;
     profile.university = String(data.university);
     profile.major = String(data.major);
     profile.yearLevel = data.yearLevel ? String(data.yearLevel) : undefined;
@@ -86,8 +88,20 @@ export class StudentProfileService {
         data.availability,
       ) ?? null;
 
+    if (data.email) {
+      user.email = String(data.email).trim();
+    }
+
+    if (data.phone) {
+      user.phone = String(data.phone).trim();
+    }
+
     if (file) {
       profile.cvUrl = `/uploads/${file.filename}`;
+    }
+
+    if (data.profileImageUrl) {
+      profile.profileImageUrl = String(data.profileImageUrl);
     }
 
     try {

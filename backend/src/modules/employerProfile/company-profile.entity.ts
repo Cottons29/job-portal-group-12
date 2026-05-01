@@ -34,13 +34,13 @@ export class EmployerProfile {
   @Column({ default: false })
   isVerified: boolean;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   companyDescription: string;
 
   @Column()
   industry: string;
 
-  @Column()
+  @Column({nullable: true})
   phone: string;
 
   @Column()
