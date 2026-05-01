@@ -1,26 +1,26 @@
 <template>
   <div class="min-h-screen bg-surface">
     <!-- Top Bar Navigation -->
-    <header class="sticky top-0 z-50 bg-surface-container-lowest border-b border-outline-variant px-4 py-3 flex items-center justify-between">
-      <!-- Logo -->
-      <div class="flex items-center">
-        <h1 class="text-xl font-display font-bold text-primary">FirstStep</h1>
-      </div>
-      <!-- Links -->
-      <nav class="hidden md:flex items-center gap-6">
-        <a href="#" class="text-sm font-semibold text-on-surface hover:text-primary transition-colors">Browse Jobs</a>
-        <a href="#" class="text-sm font-semibold text-on-surface hover:text-primary transition-colors">For Students</a>
-        <a href="#" class="text-sm font-semibold text-on-surface hover:text-primary transition-colors">For Employers</a>
-      </nav>
-      <!-- Auth Actions -->
-      <div class="flex items-center gap-4">
-        <router-link to="/auth" class="text-sm font-semibold text-primary hover:text-primary-container transition-colors">Log In</router-link>
-        <!-- Generic Avatar placeholder -->
-        <div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
-           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-        </div>
-      </div>
-    </header>
+<!--    <header class="sticky top-0 z-50 bg-surface-container-lowest border-b border-outline-variant px-4 py-3 flex items-center justify-between">-->
+<!--      &lt;!&ndash; Logo &ndash;&gt;-->
+<!--      <div class="flex items-center">-->
+<!--        <h1 class="text-xl font-display font-bold text-primary">FirstStep</h1>-->
+<!--      </div>-->
+<!--      &lt;!&ndash; Links &ndash;&gt;-->
+<!--      <nav class="hidden md:flex items-center gap-6">-->
+<!--        <a href="#" class="text-sm font-semibold text-on-surface hover:text-primary transition-colors">Browse Jobs</a>-->
+<!--        <a href="#" class="text-sm font-semibold text-on-surface hover:text-primary transition-colors">For Students</a>-->
+<!--        <a href="#" class="text-sm font-semibold text-on-surface hover:text-primary transition-colors">For Employers</a>-->
+<!--      </nav>-->
+<!--      &lt;!&ndash; Auth Actions &ndash;&gt;-->
+<!--      <div class="flex items-center gap-4">-->
+<!--        <router-link to="/auth" class="text-sm font-semibold text-primary hover:text-primary-container transition-colors">Log In</router-link>-->
+<!--        &lt;!&ndash; Generic Avatar placeholder &ndash;&gt;-->
+<!--        <div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">-->
+<!--           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </header>-->
 
     <!-- Main Layout Container -->
     <main class="max-w-5xl mx-auto pt-8 pb-20 px-4 flex flex-col md:flex-row gap-8">
