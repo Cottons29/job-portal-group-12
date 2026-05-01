@@ -282,10 +282,10 @@
           <!-- Mini Footer -->
           <div class="flex flex-col mt-2 px-2">
             <div class="flex flex-wrap gap-x-3 gap-y-1.5">
-              <a href="#" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">About Us</a>
-              <a href="#" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">Privacy Policy</a>
-              <a href="#" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">Terms of Service</a>
-              <a href="#" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">Contact Support</a>
+              <RouterLink to="/about-us" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">About Us</RouterLink>
+              <RouterLink to="/privacy-policy" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">Privacy Policy</RouterLink>
+              <RouterLink to="/terms-of-service" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">Terms of Service</RouterLink>
+              <RouterLink to="/contact" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">Contact Support</RouterLink>
             </div>
             <p class="text-[11px] text-on-surface-variant/80 mt-3">© 2024 FirstStep Editor, Empowering the next generation.</p>
           </div>
