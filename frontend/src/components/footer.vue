@@ -29,10 +29,10 @@
       <!-- Support -->
       <div class="footer-links">
         <h3>Support</h3>
-        <a href="#">About Us</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Contact</a>
+        <RouterLink to="/about-us">About Us</RouterLink>
+        <RouterLink to="/privacy-policy">Privacy Policy</RouterLink>
+        <RouterLink to="/terms-of-service">Terms of Service</RouterLink>
+        <RouterLink to="/contact">Contact</RouterLink>
       </div>
 
     </div>
