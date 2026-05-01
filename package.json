@@ -30,6 +30,7 @@
     "socket.io": "^4.8.3",
     "typeorm": "^0.3.28",
     "vue": "^3.5.29",
-    "vue-router": "^5.0.4"
+    "vue-router": "^5.0.4",
+    "data_transfer": "file:data_transfer"
   }
 }
