@@ -1,0 +1,164 @@
+.info-shell {
+    --info-accent: var(--fs-primary);
+    --info-home-icon-bg: var(--fs-primary-container);
+
+    min-height: 100vh;
+    padding: 48px 24px;
+    background: var(--fs-surface);
+    color: var(--fs-on-surface);
+}
+
+[data-theme='dark'] .info-shell {
+    --info-accent: #a8c7fa;
+    --info-home-icon-bg: #a8c7fa;
+}
+
+.info-panel {
+    width: min(920px, 100%);
+    margin: 0 auto;
+}
+
+.home-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 48px;
+    padding: 16px 32px 16px 16px;
+    border-radius: 999px;
+    background: var(--fs-tertiary-fixed);
+    color: var(--fs-on-surface);
+    font-size: 28px;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: var(--fs-elevated-shadow);
+}
+
+.home-pill svg {
+    box-sizing: content-box;
+    padding: 16px;
+    border-radius: 50%;
+    background: var(--info-home-icon-bg);
+    color: var(--fs-primary);
+}
+
+.page-heading {
+    max-width: 760px;
+    margin-bottom: 36px;
+}
+
+.eyebrow {
+    margin: 0 0 12px;
+    color: var(--info-accent);
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+h1 {
+    margin: 0 0 18px;
+    font-size: clamp(42px, 7vw, 72px);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+}
+
+.page-heading p,
+.info-row p {
+    margin: 0;
+    color: var(--fs-on-surface-variant);
+    font-size: 17px;
+    line-height: 1.65;
+}
+
+.info-list {
+    display: grid;
+    gap: 16px;
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 24px;
+    padding: 16px;
+    border-radius: 34px;
+    background: transparent;
+    transition: background-color 0.2s ease;
+}
+
+.info-row:hover {
+    background: var(--fs-surface-container-low);
+}
+
+.icon-bubble {
+    display: grid;
+    width: 80px;
+    height: 80px;
+    place-items: center;
+    border-radius: 50%;
+}
+
+.tone-blue {
+    background: #8fd3ff;
+    color: #17415f;
+}
+
+.tone-green {
+    background: #91e4a6;
+    color: #18572a;
+}
+
+.tone-purple {
+    background: #d7b8ff;
+    color: #5f35a5;
+}
+
+.tone-pink {
+    background: #f8a5df;
+    color: #8a1d68;
+}
+
+.tone-orange {
+    background: #ffc48f;
+    color: #794000;
+}
+
+.tone-yellow {
+    background: #ffe082;
+    color: #624500;
+}
+
+h2 {
+    margin: 0 0 8px;
+    color: var(--fs-on-surface);
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.info-row a {
+    color: var(--info-accent);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.info-row a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+    .info-shell {
+        padding: 32px 16px;
+    }
+
+    .home-pill {
+        margin-bottom: 36px;
+        font-size: 22px;
+    }
+
+    .info-row {
+        grid-template-columns: 1fr;
+        justify-items: start;
+    }
+}
