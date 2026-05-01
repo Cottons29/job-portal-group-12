@@ -28,53 +28,13 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-surface font-sans">
-    <!-- ════════════════════════════════════════════
-         LEFT HERO PANEL
-         ════════════════════════════════════════════ -->
-    <div
-      class="hidden lg:flex lg:w-[48%] relative flex-col items-center justify-center overflow-hidden"
-      style="background: #D3E4FE"
-    >
-      <!-- Warm decorative blobs -->
-      <div class="absolute -top-24 -left-24 w-96 h-96 bg-yellow-200/30 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 right-0 w-80 h-80 bg-amber-200/25 rounded-full blur-3xl"></div>
-      <div class="absolute top-1/4 -right-8 w-52 h-52 bg-orange-100/30 rounded-full blur-2xl"></div>
-
-      <!-- Hero content -->
-      <div class="relative z-10 px-10 flex flex-col items-center max-w-[500px]">
-        <!-- Illustration card — "surface-on-surface" layering per design rules -->
-        <div
-          class="w-[320px] h-[320px] xl:w-[360px] xl:h-[360px] mb-10 flex-shrink-0 rounded-[2rem] bg-surface-container-lowest overflow-hidden rotate-[-2deg] hover:rotate-0 transition-transform duration-500"
-          style="box-shadow: 0 20px 40px rgba(11, 28, 48, 0.08)"
-        >
-          <img
-            src="/images/hero-illustration.png"
-            alt="Students and employers connecting"
-            class="w-full h-full object-cover"
-          />
-        </div>
-
-        <!-- Editorial heading — Plus Jakarta Sans, display scale -->
-        <h1 class="font-display text-[2.75rem] xl:text-[3.25rem] font-extrabold text-on-surface text-center leading-tight tracking-tight">
-          Welcome to
-          <span class="block mt-1">First<span style="color: #2196F3">Step</span>.</span>
-        </h1>
-        <p class="mt-4 text-center text-on-surface-variant text-base xl:text-lg max-w-sm" style="line-height: 1.6">
-          The upward ascent for Cambodia's next generation of professional talent.
-        </p>
-      </div>
-    </div>
-
-    <!-- ════════════════════════════════════════════
-         RIGHT FORM PANEL
-         ════════════════════════════════════════════ -->
-    <div class="flex-1 flex items-center justify-center px-6 py-10 relative overflow-hidden bg-surface">
+  <div class="auth-page app-page">
+    <div class="auth-page__form-panel">
       <!-- Tonal layering decorative elements -->
-      <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-surface-container-low rounded-full"></div>
-      <div class="absolute top-12 left-12 w-20 h-20 bg-surface-container rounded-full"></div>
+      <div class="auth-page__top-line"></div>
+      <div class="auth-page__soft-circle"></div>
 
-      <div class="w-full max-w-[420px] relative z-10">
+      <div class="auth-page__form-content">
         <!-- Logo -->
         <div class="mb-8">
           <img
@@ -85,25 +45,25 @@ function handleSubmit() {
         </div>
 
         <!-- Editorial heading -->
-        <h2 class="font-display text-[1.85rem] font-bold text-on-surface tracking-tight leading-tight">
-          {{ isSignUp ? 'Create your account' : 'Log in or Sign Up' }}
+        <h2 class="font-display text-[1.85rem] font-bold text-on-surface text-center tracking-tight leading-tight">
+          {{ isSignUp ? 'Create your account' : 'Login or SignUp' }}
         </h2>
         <p class="mt-2 text-on-surface-variant text-[0.95rem]" style="line-height: 1.6">
           {{ isSignUp ? 'Start your career journey today.' : 'Join thousands of students building their future.' }}
         </p>
 
         <!-- Login / Sign Up Tabs — tonal layering, no borders -->
-        <div class="mt-7 flex rounded-[1.25rem] bg-surface-container-low p-1.5">
+        <div class="mt-7 flex rounded-full bg-surface-container p-1.5 border border-outline-variant/30">
           <button
             id="tab-login"
             @click="auth.setMode('login')"
             :class="[
-              'flex-1 py-2.5 text-sm font-semibold rounded-[1rem] transition-all duration-300 cursor-pointer',
+              'flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 cursor-pointer',
               auth.mode === 'login'
                 ? 'bg-surface-container-lowest text-on-surface'
                 : 'text-on-surface-variant hover:text-on-surface',
             ]"
-            :style="auth.mode === 'login' ? 'box-shadow: 0 2px 8px rgba(11, 28, 48, 0.06)' : ''"
+            :style="auth.mode === 'login' ? 'box-shadow: 0 1px 6px rgba(0, 0, 0, 0.28)' : ''"
           >
             Log In
           </button>
@@ -111,29 +71,29 @@ function handleSubmit() {
             id="tab-signup"
             @click="auth.setMode('signup')"
             :class="[
-              'flex-1 py-2.5 text-sm font-semibold rounded-[1rem] transition-all duration-300 cursor-pointer',
+              'flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 cursor-pointer',
               auth.mode === 'signup'
                 ? 'bg-surface-container-lowest text-on-surface'
                 : 'text-on-surface-variant hover:text-on-surface',
             ]"
-            :style="auth.mode === 'signup' ? 'box-shadow: 0 2px 8px rgba(11, 28, 48, 0.06)' : ''"
+            :style="auth.mode === 'signup' ? 'box-shadow: 0 1px 6px rgba(0, 0, 0, 0.28)' : ''"
           >
             Sign Up
           </button>
         </div>
 
-        <!-- Role Toggle — using primary gradient for active -->
-        <div class="mt-4 flex rounded-[1.25rem] bg-surface-container-low p-1.5">
+        <!-- Role Toggle — flat primary active state -->
+        <div class="mt-4 flex rounded-full bg-surface-container p-1.5 border border-outline-variant/30">
           <button
             id="role-student"
             @click="auth.setRole('student')"
             :class="[
-              'flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-semibold rounded-[1rem] transition-all duration-300 cursor-pointer',
+              'flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 cursor-pointer',
               auth.role === 'student'
-                ? 'bg-gradient-to-r from-primary to-primary-container text-on-primary'
+                ? 'bg-primary text-surface-container-lowest'
                 : 'text-on-surface-variant hover:text-on-surface',
             ]"
-            :style="auth.role === 'student' ? 'box-shadow: 0 4px 16px rgba(0, 74, 198, 0.2)' : ''"
+            :style="auth.role === 'student' ? 'box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28)' : ''"
           >
             <AcademicCapIcon class="w-4 h-4" />
             Student
@@ -142,12 +102,12 @@ function handleSubmit() {
             id="role-employer"
             @click="auth.setRole('employer')"
             :class="[
-              'flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-semibold rounded-[1rem] transition-all duration-300 cursor-pointer',
+              'flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 cursor-pointer',
               auth.role === 'employer'
-                ? 'bg-gradient-to-r from-primary to-primary-container text-on-primary'
+                ? 'bg-primary text-surface-container-lowest'
                 : 'text-on-surface-variant hover:text-on-surface',
             ]"
-            :style="auth.role === 'employer' ? 'box-shadow: 0 4px 16px rgba(0, 74, 198, 0.2)' : ''"
+            :style="auth.role === 'employer' ? 'box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28)' : ''"
           >
             <BuildingOfficeIcon class="w-4 h-4" />
             Employer
@@ -165,7 +125,7 @@ function handleSubmit() {
         >
           <div
             v-if="auth.error"
-            class="mt-4 flex items-center gap-2 rounded-[1rem] bg-red-50 px-4 py-3 text-sm text-red-700"
+            class="mt-4 flex items-center gap-2 rounded-2xl bg-red-950/50 px-4 py-3 text-sm text-red-200 border border-red-900/60"
           >
             {{ auth.error }}
           </div>
@@ -178,10 +138,7 @@ function handleSubmit() {
             <label for="phone-input" class="block text-sm font-semibold text-on-surface mb-2">
               Phone Number
             </label>
-            <div class="flex items-center rounded-[1.5rem] bg-surface-container-low focus-within:bg-surface-container-lowest transition-all duration-200"
-                 :style="'box-shadow: none'"
-                 @focusin="$event.currentTarget.style.boxShadow = '0 0 0 2px rgba(0, 74, 198, 0.15)'"
-                 @focusout="$event.currentTarget.style.boxShadow = 'none'"
+            <div class="field-shell"
             >
               <span class="flex items-center gap-1.5 pl-5 pr-3 text-sm text-on-surface-variant">
                 <PhoneIcon class="w-4 h-4" />
@@ -192,7 +149,7 @@ function handleSubmit() {
                 v-model="auth.phone"
                 type="tel"
                 placeholder="12 345 678"
-                class="flex-1 bg-transparent px-2 py-3.5 text-sm text-on-surface placeholder:text-outline-variant outline-none"
+                class="field-control auth-page__input"
               />
             </div>
           </div>
@@ -202,10 +159,7 @@ function handleSubmit() {
             <label for="password-input" class="block text-sm font-semibold text-on-surface mb-2">
               Password
             </label>
-            <div class="flex items-center rounded-[1.5rem] bg-surface-container-low focus-within:bg-surface-container-lowest transition-all duration-200"
-                 :style="'box-shadow: none'"
-                 @focusin="$event.currentTarget.style.boxShadow = '0 0 0 2px rgba(0, 74, 198, 0.15)'"
-                 @focusout="$event.currentTarget.style.boxShadow = 'none'"
+            <div class="field-shell"
             >
               <span class="pl-5 pr-2 text-on-surface-variant">
                 <LockClosedIcon class="w-4 h-4" />
@@ -215,7 +169,7 @@ function handleSubmit() {
                 v-model="auth.password"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="Enter your password"
-                class="flex-1 bg-transparent px-2 py-3.5 text-sm text-on-surface placeholder:text-outline-variant outline-none"
+                class="field-control auth-page__input"
               />
               <button
                 type="button"
@@ -242,9 +196,9 @@ function handleSubmit() {
               <label for="confirm-password-input" class="block text-sm font-semibold text-on-surface mb-2">
                 Confirm Password
               </label>
-              <div class="flex items-center rounded-[1.5rem] bg-surface-container-low focus-within:bg-surface-container-lowest transition-all duration-200"
+              <div class="flex items-center rounded-full bg-surface-container focus-within:bg-surface-container-low transition-all duration-200 border border-outline-variant/30"
                    :style="'box-shadow: none'"
-                   @focusin="$event.currentTarget.style.boxShadow = '0 0 0 2px rgba(0, 74, 198, 0.15)'"
+                   @focusin="$event.currentTarget.style.boxShadow = '0 0 0 2px rgba(138, 180, 248, 0.28)'"
                    @focusout="$event.currentTarget.style.boxShadow = 'none'"
               >
                 <span class="pl-5 pr-2 text-on-surface-variant">
@@ -255,7 +209,7 @@ function handleSubmit() {
                   v-model="auth.confirmPassword"
                   :type="showConfirmPassword ? 'text' : 'password'"
                   placeholder="Confirm your password"
-                  class="flex-1 bg-transparent px-2 py-3.5 text-sm text-on-surface placeholder:text-outline-variant outline-none"
+                  class="field-control auth-page__input"
                 />
                 <button
                   type="button"
@@ -277,13 +231,12 @@ function handleSubmit() {
             </button>
           </div>
 
-          <!-- Submit Button — Signature gradient CTA per design rules -->
+          <!-- Submit Button — flat primary CTA -->
           <button
             id="submit-btn"
             type="submit"
             :disabled="auth.isLoading"
-            class="w-full flex items-center justify-center gap-2 rounded-[1rem] py-3.5 text-sm font-bold text-on-primary transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer hover:-translate-y-0.5 active:translate-y-0"
-            style="background: linear-gradient(135deg, #004ac6, #2563eb); box-shadow: 0 8px 24px rgba(0, 74, 198, 0.25)"
+            class="btn-primary auth-page__submit"
           >
             <svg
               v-if="auth.isLoading"
@@ -310,8 +263,8 @@ function handleSubmit() {
           <button
             id="btn-google"
             type="button"
-            class="flex items-center justify-center w-12 h-12 rounded-[1rem] bg-surface-container-low hover:bg-surface-container transition-all duration-200 cursor-pointer"
-            style="box-shadow: 0 2px 8px rgba(11, 28, 48, 0.05)"
+            class="flex items-center justify-center w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high transition-all duration-200 cursor-pointer border border-outline-variant/30"
+            style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20)"
             aria-label="Continue with Google"
           >
             <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -324,8 +277,8 @@ function handleSubmit() {
           <button
             id="btn-facebook"
             type="button"
-            class="flex items-center justify-center w-12 h-12 rounded-[1rem] bg-surface-container-low hover:bg-surface-container transition-all duration-200 cursor-pointer"
-            style="box-shadow: 0 2px 8px rgba(11, 28, 48, 0.05)"
+            class="flex items-center justify-center w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high transition-all duration-200 cursor-pointer border border-outline-variant/30"
+            style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20)"
             aria-label="Continue with Facebook"
           >
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2">

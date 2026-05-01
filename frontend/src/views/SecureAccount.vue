@@ -143,7 +143,7 @@ const handleVerifyOtp = async () => {
                 type="submit" 
                 :disabled="isLoading"
                 class="w-full flex items-center justify-center gap-3 rounded-[1.25rem] py-4 md:py-5 text-base font-bold text-on-primary transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer hover:-translate-y-1 hover:shadow-xl active:translate-y-0"
-                style="background: linear-gradient(135deg, #004ac6, #2563eb); box-shadow: 0 8px 32px rgba(0, 74, 198, 0.25)"
+                style="background: #2563eb; box-shadow: 0 8px 32px rgba(0, 74, 198, 0.25)"
               >
                 <svg v-if="isLoading" class="w-6 h-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -204,7 +204,7 @@ const handleVerifyOtp = async () => {
                 type="submit" 
                 :disabled="isLoading"
                 class="w-full flex items-center justify-center gap-3 rounded-[1.25rem] py-4 md:py-5 text-base font-bold text-on-primary transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer hover:-translate-y-1 hover:shadow-xl active:translate-y-0"
-                style="background: linear-gradient(135deg, #004ac6, #2563eb); box-shadow: 0 8px 32px rgba(0, 74, 198, 0.25)"
+                style="background: #2563eb; box-shadow: 0 8px 32px rgba(0, 74, 198, 0.25)"
               >
                 <svg v-if="isLoading" class="w-6 h-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
