@@ -20,6 +20,7 @@
     "@sendgrid/mail": "^8.1.6",
     "axios": "1.15.0",
     "bcrypt": "^6.0.0",
+    "data_transfer": "file:data_transfer",
     "dotenv": "^17.4.2",
     "express-session": "^1.19.0",
     "nodemailer": "^8.0.5",
@@ -30,7 +31,6 @@
     "socket.io": "^4.8.3",
     "typeorm": "^0.3.28",
     "vue": "^3.5.29",
-    "vue-router": "^5.0.4",
-    "data_transfer": "file:data_transfer"
+    "vue-router": "^4.6.4"
   }
 }
