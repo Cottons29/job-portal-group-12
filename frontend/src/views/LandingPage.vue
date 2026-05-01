@@ -1,364 +1,477 @@
 <template>
-  <div class="min-h-screen bg-surface">
-    <!-- Top Bar Navigation -->
-<!--    <header class="sticky top-0 z-50 bg-surface-container-lowest border-b border-outline-variant px-4 py-3 flex items-center justify-between">-->
-<!--      &lt;!&ndash; Logo &ndash;&gt;-->
-<!--      <div class="flex items-center">-->
-<!--        <h1 class="text-xl font-display font-bold text-primary">FirstStep</h1>-->
-<!--      </div>-->
-<!--      &lt;!&ndash; Links &ndash;&gt;-->
-<!--      <nav class="hidden md:flex items-center gap-6">-->
-<!--        <a href="#" class="text-sm font-semibold text-on-surface hover:text-primary transition-colors">Browse Jobs</a>-->
-<!--        <a href="#" class="text-sm font-semibold text-on-surface hover:text-primary transition-colors">For Students</a>-->
-<!--        <a href="#" class="text-sm font-semibold text-on-surface hover:text-primary transition-colors">For Employers</a>-->
-<!--      </nav>-->
-<!--      &lt;!&ndash; Auth Actions &ndash;&gt;-->
-<!--      <div class="flex items-center gap-4">-->
-<!--        <router-link to="/auth" class="text-sm font-semibold text-primary hover:text-primary-container transition-colors">Log In</router-link>-->
-<!--        &lt;!&ndash; Generic Avatar placeholder &ndash;&gt;-->
-<!--        <div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">-->
-<!--           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </header>-->
+  <div class="min-h-screen overflow-hidden bg-surface text-on-surface">
+    <header class="sticky top-0 z-50 px-4 py-4">
+      <div
+          class="mx-auto flex max-w-7xl items-center justify-between rounded-[1rem] bg-surface-container-lowest/80 px-4 py-3 shadow-[0_20px_60px_rgba(11,28,48,0.08)] backdrop-blur-xl sm:px-6">
+        <RouterLink to="/" class="flex items-center gap-3">
+          <span
+              class="grid h-11 w-11 place-items-center rounded-lg bg-primary text-sm font-black text-on-primary shadow-[0_12px_30px_rgba(0,74,198,0.28)]">FS</span>
+          <span class="font-display text-xl font-black tracking-tight text-on-surface">FirstStep</span>
+        </RouterLink>
 
-    <!-- Main Layout Container -->
-    <main class="max-w-5xl mx-auto pt-8 pb-20 px-4 flex flex-col md:flex-row gap-8">
-      
-      <!-- Feed Column -->
-      <div class="w-full md:w-[65%] flex flex-col gap-8">
-        
-        <!-- Partner Stories -->
-        <section class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-4 overflow-x-auto flex gap-4 no-scrollbar">
-          <!-- Story Rings -->
-          <div v-for="partner in partners" :key="partner.name" class="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
-            <div class="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary to-cyan-400 group-hover:scale-105 transition-transform">
-              <div class="w-full h-full rounded-full bg-surface-container-lowest border-2 border-surface-container-lowest overflow-hidden flex items-center justify-center p-2">
-                <span class="text-[10px] font-bold text-center leading-tight text-on-surface">{{ partner.name }}</span>
-              </div>
-            </div>
-            <span class="text-[10px] text-on-surface-variant font-medium text-center truncate w-full px-1">{{ partner.status }}</span>
-          </div>
-        </section>
-
-        <!-- Hero "Post" -->
-        <section class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
-          <div class="p-4 flex items-center justify-between border-b border-outline-variant/30">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">FS</div>
-              <div class="flex flex-col">
-                <span class="text-sm font-semibold text-on-surface leading-none">FirstStep Official</span>
-                <span class="text-xs text-on-surface-variant mt-1">Phnom Penh, KH</span>
-              </div>
-            </div>
-            <button class="text-primary text-sm font-bold hover:text-primary-container transition-colors">Follow</button>
-          </div>
-          
-          <div class="p-8 text-center bg-surface-container-low/30">
-            <h2 class="text-4xl font-display font-extrabold text-on-surface tracking-tight mb-4">
-              Your First <span class="text-primary">Career Step</span> Starts Here.
-            </h2>
-            <p class="text-on-surface-variant text-sm max-w-md mx-auto mb-8">
-              Connect with top local SMEs, discover campus opportunities, and build your professional journey while you study.
-            </p>
-
-            <!-- Search Bar -->
-            <div class="relative max-w-lg mx-auto bg-surface-container-lowest rounded-xl shadow-md flex items-center p-2 border border-outline-variant/50 focus-within:border-primary/50 transition-colors">
-              <MagnifyingGlassIcon class="w-5 h-5 text-on-surface-variant ml-2" />
-              <input type="text" placeholder="Search for jobs, skills, or companies..." class="w-full bg-transparent border-none focus:ring-0 text-sm px-3 text-on-surface placeholder:text-on-surface-variant/70 outline-none" />
-              <button class="bg-primary hover:bg-primary-container text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">Search</button>
-            </div>
-            
-            <div class="flex justify-center gap-2 mt-4 flex-wrap">
-              <span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-semibold text-on-surface-variant cursor-pointer hover:bg-primary hover:text-white transition-colors">Marketing</span>
-              <span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-semibold text-on-surface-variant cursor-pointer hover:bg-primary hover:text-white transition-colors">Design</span>
-              <span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-semibold text-on-surface-variant cursor-pointer hover:bg-primary hover:text-white transition-colors">Tech</span>
-            </div>
-          </div>
-          
-          <div class="p-4 flex gap-4 text-on-surface-variant">
-            <HeartIcon class="w-6 h-6 hover:text-red-500 cursor-pointer transition-colors" />
-            <ChatBubbleOvalLeftIcon class="w-6 h-6 hover:text-primary cursor-pointer transition-colors" />
-            <PaperAirplaneIcon class="w-6 h-6 hover:text-primary cursor-pointer transition-colors" />
-          </div>
-          <div class="px-4 pb-4">
-            <span class="font-semibold text-sm text-on-surface">1,245 likes</span>
-            <p class="text-sm mt-1 text-on-surface"><span class="font-semibold">firststep</span> We've just launched our new portal! Start browsing thousands of entry-level jobs tailored for students in Cambodia. 🚀</p>
-          </div>
-        </section>
-
-        <!-- Real-Time Stats -->
-        <section class="grid grid-cols-3 gap-4">
-          <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
-            <BuildingStorefrontIcon class="w-6 h-6 text-primary mb-2" />
-            <span class="text-lg font-bold text-on-surface">50+</span>
-            <span class="text-xs text-on-surface-variant font-medium mt-1">Trusted Employers</span>
-          </div>
-          <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
-            <AcademicCapIcon class="w-6 h-6 text-primary mb-2" />
-            <span class="text-lg font-bold text-on-surface">1,200+</span>
-            <span class="text-xs text-on-surface-variant font-medium mt-1">Active Students</span>
-          </div>
-          <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
-            <BriefcaseIcon class="w-6 h-6 text-primary mb-2" />
-            <span class="text-lg font-bold text-on-surface">200+</span>
-            <span class="text-xs text-on-surface-variant font-medium mt-1">Active Jobs</span>
-          </div>
-        </section>
-
-        <!-- Explore Pathways (Categories) -->
-        <section class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-6">
-          <h3 class="text-lg font-bold text-on-surface mb-4">Explore Pathways</h3>
-          <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
-            <div v-for="category in categories" :key="category.title" class="flex flex-col p-4 rounded-xl border border-outline-variant/30 hover:border-primary/50 hover:shadow-md cursor-pointer transition-all group bg-surface">
-              <component :is="category.icon" class="w-6 h-6 text-on-surface-variant group-hover:text-primary mb-3 transition-colors" />
-              <h4 class="text-sm font-semibold text-on-surface mb-1">{{ category.title }}</h4>
-              <p class="text-xs text-on-surface-variant">{{ category.desc }}</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Path to Employment (Timeline) -->
-        <section class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-6">
-          <h3 class="text-lg font-bold text-on-surface mb-4">Your Path to Employment</h3>
-          <div class="flex flex-col md:flex-row gap-4">
-            <div class="flex-1 flex items-center gap-3 bg-surface p-3 rounded-xl border border-outline-variant/30 shadow-sm">
-              <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">1</div>
-              <span class="text-sm font-semibold text-on-surface">Create Profile</span>
-            </div>
-            <div class="flex-1 flex items-center gap-3 bg-surface p-3 rounded-xl border border-outline-variant/30 shadow-sm">
-              <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">2</div>
-              <span class="text-sm font-semibold text-on-surface">Quick Apply</span>
-            </div>
-            <div class="flex-1 flex items-center gap-3 bg-surface p-3 rounded-xl border border-outline-variant/30 shadow-sm">
-              <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">3</div>
-              <span class="text-sm font-semibold text-on-surface">Start Working</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- Featured Opportunities (Jobs Feed) -->
-        <div class="flex flex-col gap-6">
-          <h3 class="text-lg font-bold text-on-surface px-2">Featured Opportunities</h3>
-          
-          <article v-for="job in jobs" :key="job.title" class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
-            <!-- Header -->
-            <div class="p-4 flex items-center justify-between border-b border-outline-variant/30">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden">
-                  <span class="text-sm font-bold text-primary">{{ job.company.charAt(0) }}</span>
-                </div>
-                <div class="flex flex-col">
-                  <span class="text-sm font-semibold text-on-surface leading-none">{{ job.company }}</span>
-                  <span class="text-xs text-on-surface-variant mt-1">{{ job.location }}</span>
-                </div>
-              </div>
-              <span class="text-xs font-medium text-on-surface-variant">{{ job.time }}</span>
-            </div>
-            
-            <!-- Graphic -->
-            <div class="bg-surface-container h-48 flex items-center justify-center border-b border-outline-variant/30 relative overflow-hidden group">
-               <!-- Abstract decorative background for the job graphic -->
-               <div class="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary to-transparent"></div>
-               <div class="relative z-10 text-center px-4">
-                 <h4 class="text-2xl font-display font-bold text-primary">{{ job.title }}</h4>
-                 <p class="text-sm font-semibold text-on-surface-variant mt-2">{{ job.wage }}</p>
-               </div>
-            </div>
-            
-            <!-- Actions -->
-            <div class="p-4 flex items-center justify-between">
-              <div class="flex gap-4 text-on-surface-variant">
-                <HeartIcon class="w-6 h-6 hover:text-red-500 cursor-pointer transition-colors" />
-                <PaperAirplaneIcon class="w-6 h-6 hover:text-primary cursor-pointer transition-colors" />
-              </div>
-              <BookmarkIcon class="w-6 h-6 text-on-surface-variant hover:text-primary cursor-pointer transition-colors" />
-            </div>
-            
-            <!-- Details & CTA -->
-            <div class="px-4 pb-4">
-              <p class="text-sm text-on-surface mb-4 line-clamp-2">
-                <span class="font-semibold">{{ job.company }}</span> is looking for a {{ job.title }}. {{ job.desc }}
-              </p>
-              <button class="w-full bg-primary hover:bg-primary-container text-white py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm hover:shadow">Apply Now</button>
-            </div>
-          </article>
-          
-          <!-- Get More Updates Callout -->
-          <article class="bg-gradient-to-r from-primary to-primary-container rounded-2xl shadow-md p-8 text-center text-white mt-2">
-            <h3 class="text-xl font-display font-bold mb-2">Get More Updates</h3>
-            <p class="text-sm text-white/90 mb-6 max-w-sm mx-auto">Sign up to see 200+ other active roles tailored just for you!</p>
-            <router-link to="/auth" class="bg-white text-primary px-6 py-2.5 rounded-lg text-sm font-bold transition-all hover:bg-surface shadow-sm inline-block hover:scale-105 transform">Create Your Free Account</router-link>
-          </article>
-
-          <!-- SME Testimonials (Aesthetic Push) -->
-          <section class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-6 mt-4">
-            <h3 class="text-lg font-bold text-on-surface mb-4">Upcoming SME Partner Spotlights</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-               <div class="bg-surface p-4 rounded-xl border border-outline-variant/30 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow">
-                 <div class="flex items-center gap-3">
-                   <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-sm font-bold text-primary">R</div>
-                   <div>
-                     <p class="text-sm font-semibold text-on-surface">Rithy Sok</p>
-                     <p class="text-xs text-on-surface-variant">Owner, Local Cafe</p>
-                   </div>
-                 </div>
-                 <p class="text-xs italic text-on-surface-variant leading-relaxed">"FirstStep connected us with enthusiastic student baristas who fit perfectly into our weekend shifts."</p>
-               </div>
-               <div class="bg-surface p-4 rounded-xl border border-outline-variant/30 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow">
-                 <div class="flex items-center gap-3">
-                   <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-sm font-bold text-primary">M</div>
-                   <div>
-                     <p class="text-sm font-semibold text-on-surface">Maly Chheng</p>
-                     <p class="text-xs text-on-surface-variant">HR Manager, Tech Corp</p>
-                   </div>
-                 </div>
-                 <p class="text-xs italic text-on-surface-variant leading-relaxed">"Finding reliable data entry and tech support talent has never been faster. Highly recommend the platform."</p>
-               </div>
-            </div>
-          </section>
-
+        <div class="flex items-center gap-2">
+          <RouterLink to="/auth"
+                      class="hidden rounded-full border-2 border-transparent px-4 py-2 text-sm font-extrabold text-primary transition-colors hover:border-primary hover:bg-surface-container-low sm:inline-flex">
+            Log in
+          </RouterLink>
+          <RouterLink to="/auth"
+                      class="rounded-full border-2 border-transparent bg-primary px-5 py-2.5 text-sm font-extrabold text-on-primary transition-all hover:border-primary hover:bg-primary-container hover:text-primary">
+            Get started
+          </RouterLink>
         </div>
       </div>
-      
-      <!-- Suggestions Column (Sticky on Desktop) -->
-      <div class="w-full md:w-[35%] hidden md:block">
-        <div class="sticky top-24 flex flex-col gap-6">
-          
-          <!-- User Mini Profile -->
-          <div class="flex items-center justify-between bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/30 shadow-sm">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center">
-                 <svg class="w-6 h-6 text-on-surface-variant" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-sm font-bold text-on-surface">Welcome, Student</span>
-                <span class="text-[11px] text-on-surface-variant mt-0.5">Create an account to track applications</span>
+    </header>
+
+    <main>
+      <section class="relative px-4 pb-16 pt-8 sm:pb-24 lg:pt-12">
+        <div
+            class="absolute left-1/2 top-0 -z-10 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-primary-container/10 blur-3xl"></div>
+        <div class="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+          <div class="space-y-8">
+            <div
+                class="inline-flex items-center gap-2 rounded-full bg-surface-container-low px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-primary">
+              <SparklesIcon class="h-4 w-4"/>
+              Material 3 student career hub
+            </div>
+
+            <div class="space-y-6">
+              <h1 class="font-display text-5xl font-black leading-[0.95] tracking-[-0.045em] text-on-surface sm:text-6xl lg:text-7xl">
+                Your first career step should feel clear, local, and exciting.
+              </h1>
+              <p class="max-w-2xl text-lg leading-8 text-on-surface-variant">
+                Discover student-friendly roles, trusted Cambodian SMEs, and campus opportunities through a softer
+                Material Design 3 experience built around focus, movement, and confidence.
+              </p>
+            </div>
+
+            <div class="rounded-[1rem] bg-surface-container p-2 shadow-[0_24px_70px_rgba(11,28,48,0.08)]">
+              <div
+                  class="flex flex-col gap-3 rounded-[0.75rem] bg-surface-container-lowest p-3 sm:flex-row sm:items-center">
+                <div
+                    class="flex flex-1 items-center gap-3 rounded-[0.625rem] bg-surface-container-low px-4 py-3 transition-colors focus-within:bg-surface-container-lowest focus-within:ring-2 focus-within:ring-primary/20">
+                  <MagnifyingGlassIcon class="h-5 w-5 text-primary"/>
+                  <input type="text" placeholder="Search jobs, skills, companies..."
+                         class="w-full bg-transparent text-sm font-semibold text-on-surface outline-none placeholder:text-on-surface-variant/70"/>
+                </div>
+                <button
+                    class="rounded-[0.625rem] border-2 border-transparent bg-primary px-7 py-3 text-sm font-black text-on-primary shadow-[0_16px_35px_rgba(0,74,198,0.25)] transition-all hover:border-primary hover:bg-primary-container hover:text-primary">
+                  Search jobs
+                </button>
               </div>
             </div>
-            <router-link to="/auth" class="text-xs font-bold text-primary hover:text-primary-container transition-colors">Sign Up</router-link>
+
+            <div class="flex flex-wrap gap-3">
+              <button v-for="chip in quickChips" :key="chip.label"
+                      :class="[
+                        chip.bg,
+                        chip.text,
+                        'rounded-full border-2 border-transparent px-4 py-2 text-sm font-extrabold transition-all hover:border-primary hover:bg-tertiary-fixed hover:text-on-surface'
+                      ]">
+                {{ chip.label }}
+              </button>
+            </div>
           </div>
-          
-          <!-- Trending SMEs -->
-          <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/30 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-bold text-on-surface-variant">Trending SMEs in Phnom Penh</h3>
-              <button class="text-xs font-bold text-on-surface hover:text-primary transition-colors">See All</button>
-            </div>
-            <div class="flex flex-col gap-4">
-              <div v-for="sme in trendingSmes" :key="sme.name" class="flex items-center justify-between group">
-                <div class="flex items-center gap-3 cursor-pointer">
-                  <div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-xs font-bold text-primary group-hover:scale-105 transition-transform">{{ sme.name.charAt(0) }}</div>
-                  <div class="flex flex-col">
-                    <span class="text-sm font-semibold text-on-surface">{{ sme.name }}</span>
-                    <span class="text-[11px] text-on-surface-variant mt-0.5">{{ sme.type }}</span>
+
+          <div class="relative">
+            <div class="absolute -right-4 top-10 hidden h-28 w-28 rounded-[1rem] bg-tertiary-fixed md:block"></div>
+            <div class="absolute -left-4 bottom-8 hidden h-20 w-20 rounded-[0.75rem] bg-primary/10 md:block"></div>
+
+            <div class="relative rounded-[1.5rem] bg-surface-container p-4 shadow-[0_30px_90px_rgba(11,28,48,0.12)]">
+              <div class="rounded-[1.25rem] bg-surface-container-lowest p-6">
+                <div class="mb-6 flex items-start justify-between gap-4">
+                  <div>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-primary">Featured match</p>
+                    <h2 class="mt-2 font-display text-3xl font-black tracking-tight text-on-surface">Senior Barista &
+                      Shift Lead</h2>
+                  </div>
+                  <span
+                      class="rounded-full bg-tertiary-fixed px-3 py-1 text-xs font-black text-on-surface">$18.50/hr</span>
+                </div>
+
+                <div class="mb-6 rounded-[1rem] bg-primary p-6 text-on-primary">
+                  <div class="flex items-center gap-4">
+                    <div
+                        class="grid h-14 w-14 place-items-center rounded-lg bg-gray-100/99 text-lg font-black backdrop-blur">
+                      B
+                    </div>
+                    <div>
+                      <p class="font-black">Brown Coffee</p>
+                      <p class="text-sm text-gray/50">BKK1, Phnom Penh · 5h ago</p>
+                    </div>
+                  </div>
+                  <p class="mt-8 max-w-sm text-sm leading-6 text-gray/85">Lead weekend shifts, mentor junior staff, and
+                    build real customer-service experience while you study.</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                  <div v-for="stat in stats" :key="stat.label"
+                       :class="[
+                         stat.bg,
+                         'rounded-[0.75rem] p-4 text-center'
+                       ]">
+                    <component :is="stat.icon" :class="['mx-auto mb-2 h-5 w-5', stat.iconColor]"/>
+                    <p :class="['text-xl font-black', stat.textColor]">{{ stat.value }}</p>
+                    <p :class="['mt-1 text-[11px] font-bold leading-tight', stat.labelColor]">{{ stat.label }}</p>
                   </div>
                 </div>
-                <button class="text-xs font-bold text-primary hover:text-primary-container transition-colors">Follow</button>
               </div>
             </div>
           </div>
-          
-          <!-- Campus Role Gaps -->
-          <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/30 shadow-sm">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-bold text-on-surface-variant">Campus Role Gaps</h3>
+        </div>
+      </section>
+
+      <section id="partners" class="px-4 py-10">
+        <div class="mx-auto max-w-7xl rounded-[1.5rem] bg-surface-container-low px-5 py-6 sm:px-8">
+          <div class="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <p class="text-xs font-black uppercase tracking-[0.2em] text-primary">Trusted network</p>
+              <h2 class="mt-2 font-display text-3xl font-black tracking-tight text-on-surface">Active partners around
+                campus</h2>
             </div>
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center justify-between bg-surface p-2.5 rounded-xl border border-outline-variant/30 hover:border-primary/30 cursor-pointer transition-colors group" v-for="gap in roleGaps" :key="gap.role">
-                <span class="text-xs font-semibold text-on-surface group-hover:text-primary transition-colors">{{ gap.role }}</span>
-                <span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">High Demand</span>
+            <RouterLink to="/auth" class="text-sm font-black text-primary hover:text-primary-container">Join the
+              network
+            </RouterLink>
+          </div>
+          <div class="no-scrollbar flex gap-4 overflow-x-auto pb-1">
+            <div v-for="partner in partners" :key="partner.name"
+                 class="min-w-[11rem] rounded-[1rem] bg-surface-container-lowest p-4 shadow-[0_18px_40px_rgba(11,28,48,0.06)]">
+              <div
+                  class="mb-5 flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-sm font-black text-primary">
+                {{ partner.name.charAt(0) }}
+              </div>
+              <h3 class="font-black text-on-surface">{{ partner.name }}</h3>
+              <p class="mt-1 text-xs font-bold text-on-surface-variant">{{ partner.status }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="pathways" class="px-4 py-16">
+        <div class="mx-auto max-w-7xl">
+          <div class="mb-10 max-w-2xl">
+            <p class="text-xs font-black uppercase tracking-[0.2em] text-primary">Explore pathways</p>
+            <h2 class="mt-3 font-display text-4xl font-black tracking-[-0.03em] text-on-surface sm:text-5xl">Choose a
+              path that fits your semester.</h2>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <article v-for="category in categories" :key="category.title"
+                     class="group rounded-[1.125rem] bg-surface-container-lowest p-6">
+              <div
+                  :class="[
+                    category.iconBg,
+                    category.iconColor,
+                    'mb-8 grid h-14 w-14 place-items-center rounded-lg transition-colors'
+                  ]">
+                <component :is="category.icon" class="h-7 w-7"/>
+              </div>
+              <h3 class="text-lg font-black text-on-surface">{{ category.title }}</h3>
+              <p class="mt-2 text-sm leading-6 text-on-surface-variant">{{ category.desc }}</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="px-4 py-8">
+        <div class="mx-auto grid max-w-7xl gap-4 lg:grid-cols-3">
+          <div v-for="(step, index) in steps" :key="step.title"
+               class="relative rounded-[1.25rem] bg-surface-container-low p-6">
+            <div class="mb-8 flex items-center justify-between">
+              <span class="grid h-12 w-12 place-items-center rounded-lg bg-primary text-lg font-black text-on-primary">{{
+                  index + 1
+                }}</span>
+              <CheckCircleIcon class="h-7 w-7 text-primary"/>
+            </div>
+            <h3 class="font-display text-2xl font-black tracking-tight text-on-surface">{{ step.title }}</h3>
+            <p class="mt-3 text-sm leading-6 text-on-surface-variant">{{ step.desc }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="opportunities" class="px-4 py-16">
+        <div class="mx-auto max-w-7xl">
+          <div class="mb-10 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+            <div>
+              <p class="text-xs font-black uppercase tracking-[0.2em] text-primary">Featured opportunities</p>
+              <h2 class="mt-3 font-display text-4xl font-black tracking-[-0.03em] text-on-surface sm:text-5xl">Fresh
+                roles, designed for student schedules.</h2>
+            </div>
+            <RouterLink to="/auth"
+                        class="inline-flex w-fit rounded-full border-2 border-transparent bg-surface-container-high px-5 py-3 text-sm font-black text-primary transition-colors hover:border-primary hover:bg-tertiary-fixed">
+              See all 200+ jobs
+            </RouterLink>
+          </div>
+
+          <div class="grid gap-5 lg:grid-cols-3">
+            <article v-for="job in jobs" :key="job.title"
+                     class="flex rounded-[1.25rem] bg-surface-container-low p-3 transition-all">
+              <div class="flex w-full flex-col rounded-[1rem] bg-surface-container-lowest p-5">
+                <div class="mb-7 flex items-center justify-between gap-4">
+                  <div class="flex items-center gap-3">
+                    <span
+                        class="grid h-12 w-12 place-items-center rounded-lg bg-surface-container text-sm font-black text-primary">{{
+                        job.company.charAt(0)
+                      }}</span>
+                    <div>
+                      <p class="text-sm font-black text-on-surface">{{ job.company }}</p>
+                      <p class="text-xs font-bold text-on-surface-variant">{{ job.location }}</p>
+                    </div>
+                  </div>
+                  <span class="text-xs font-black text-primary">{{ job.time }}</span>
+                </div>
+
+                <h3 class="font-display text-2xl font-black leading-tight tracking-tight text-on-surface">{{
+                    job.title
+                  }}</h3>
+                <p class="mt-2 text-sm font-black text-primary">{{ job.wage }}</p>
+                <p class="mt-4 flex-1 text-sm leading-6 text-on-surface-variant">{{ job.desc }}</p>
+
+                <div class="mt-7 flex items-center gap-3">
+                  <button
+                      class="flex-1 rounded-[0.625rem] border-2 border-transparent bg-primary px-4 py-3 text-sm font-black text-on-primary transition-colors hover:border-primary hover:bg-primary-container hover:text-primary">
+                    Apply now
+                  </button>
+                  <button
+                      class="grid h-12 w-12 place-items-center rounded-[0.625rem] border-2 border-transparent bg-surface-container-low text-on-surface-variant transition-colors hover:border-primary hover:bg-tertiary-fixed hover:text-on-surface"
+                      aria-label="Save job">
+                    <BookmarkIcon class="h-5 w-5"/>
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="px-4 py-12">
+        <div class="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <div class="rounded-[1.5rem] bg-primary p-8 text-on-primary shadow-[0_28px_80px_rgba(0,74,198,0.2)] sm:p-10">
+            <p class="text-xs font-black uppercase tracking-[0.2em] text-gray/70">For employers</p>
+            <h2 class="mt-4 font-display text-4xl font-black tracking-[-0.03em]">Hire local talent without the portal
+              fatigue.</h2>
+            <p class="mt-4 text-sm leading-7 text-gray/80">Post open roles, surface campus-ready candidates, and support
+              the next generation of Cambodian professionals.</p>
+            <button
+                class="mt-8 rounded-full border-2 border-transparent bg-white px-6 py-3 text-sm font-black text-primary transition-all  hover:border-primary hover:bg-tertiary-fixed/80">
+              Post a job
+            </button>
+          </div>
+
+          <div class="rounded-3xl bg-surface-container-low p-6 sm:p-8">
+            <div class="mb-6 flex items-center justify-between">
+              <div>
+                <p class="text-xs font-black uppercase tracking-[0.2em] text-primary">Live demand</p>
+                <h2 class="mt-2 font-display text-3xl font-black tracking-tight text-on-surface">Campus role gaps</h2>
+              </div>
+              <BriefcaseIcon class="h-9 w-9 text-primary"/>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-3">
+              <div v-for="gap in roleGaps" :key="gap.role" class="rounded-[0.875rem] bg-surface-container-lowest p-5">
+                <p class="font-black text-on-surface">{{ gap.role }}</p>
+                <span
+                    class="mt-4 inline-flex rounded-full bg-tertiary-fixed px-3 py-1 text-[11px] font-black text-on-surface">High Demand</span>
               </div>
             </div>
           </div>
-          
-          <!-- Employer CTA -->
-          <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 text-center shadow-sm">
-            <h3 class="text-sm font-bold text-on-surface mb-2">Looking to Hire Local Talent?</h3>
-            <p class="text-[11px] text-on-surface-variant mb-4 leading-relaxed">Post your open roles to reach thousands of active university students in Cambodia.</p>
-            <button class="w-full bg-transparent border border-primary text-primary hover:bg-primary/5 py-2 rounded-lg text-sm font-bold transition-colors">Post a Job</button>
-          </div>
+        </div>
+      </section>
 
-          <!-- Mini Footer -->
-          <div class="flex flex-col mt-2 px-2">
-            <div class="flex flex-wrap gap-x-3 gap-y-1.5">
-              <RouterLink to="/about-us" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">About Us</RouterLink>
-              <RouterLink to="/privacy-policy" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">Privacy Policy</RouterLink>
-              <RouterLink to="/terms-of-service" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">Terms of Service</RouterLink>
-              <RouterLink to="/contact" class="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">Contact Support</RouterLink>
-            </div>
-            <p class="text-[11px] text-on-surface-variant/80 mt-3">© 2024 FirstStep Editor, Empowering the next generation.</p>
+      <section class="px-4 pb-20 pt-8">
+        <div
+            class="mx-auto max-w-7xl rounded-[1.5rem] bg-surface-container-lowest p-8 text-center shadow-[0_24px_70px_rgba(11,28,48,0.08)] sm:p-12">
+          <h2 class="mx-auto max-w-3xl font-display text-4xl font-black tracking-[-0.03em] text-on-surface sm:text-5xl">
+            Ready to turn your next free afternoon into experience?</h2>
+          <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-on-surface-variant">Create your free account to save
+            jobs, track applications, and follow SMEs that match your goals.</p>
+          <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <RouterLink to="/auth"
+                        class="rounded-full border-2 border-transparent bg-primary px-7 py-3 text-sm font-black text-on-primary transition-colors hover:border-primary hover:bg-primary-container hover:text-primary">
+              Create account
+            </RouterLink>
+            <RouterLink to="/about-us"
+                        class="rounded-full border-2 border-transparent bg-surface-container-high px-7 py-3 text-sm font-black text-primary transition-colors hover:border-primary hover:bg-tertiary-fixed">
+              Learn about FirstStep
+            </RouterLink>
           </div>
+        </div>
+      </section>
+    </main>
 
+    <footer class="px-4 pb-8">
+      <div
+          class="mx-auto flex max-w-7xl flex-col justify-between gap-4 rounded-[1rem] bg-surface-container-low px-6 py-5 text-xs font-bold text-on-surface-variant sm:flex-row sm:items-center">
+        <p>© 2024 FirstStep Editor, empowering the next generation.</p>
+        <div class="flex flex-wrap gap-4">
+          <RouterLink to="/privacy-policy" class="hover:text-primary">Privacy Policy</RouterLink>
+          <RouterLink to="/terms-of-service" class="hover:text-primary">Terms of Service</RouterLink>
+          <RouterLink to="/contact" class="hover:text-primary">Contact Support</RouterLink>
         </div>
       </div>
-      
-    </main>
+    </footer>
   </div>
 </template>
 
 <script setup>
-import { 
-  MagnifyingGlassIcon, 
+import {
+  MagnifyingGlassIcon,
   BriefcaseIcon,
   AcademicCapIcon,
   BuildingStorefrontIcon,
   PaintBrushIcon,
   ComputerDesktopIcon,
   DocumentTextIcon,
-  HeartIcon,
   ChatBubbleOvalLeftIcon,
-  PaperAirplaneIcon,
-  BookmarkIcon
+  BookmarkIcon,
+  SparklesIcon,
+  CheckCircleIcon,
 } from '@heroicons/vue/24/outline'
 
+const quickChips = [
+  {label: 'Marketing', bg: 'bg-[#aecbfa]', text: 'text-[#1a4fa3]'},
+  {label: 'Design', bg: 'bg-[#d7b7ff]', text: 'text-[#6a39b8]'},
+  {label: 'Tech', bg: 'bg-[#8ccaff]', text: 'text-[#235d84]'},
+  {label: 'Part-time', bg: 'bg-[#8fd99b]', text: 'text-[#246b36]'},
+  {label: 'Internships', bg: 'bg-[#ffc28e]', text: 'text-[#8a4a11]'},
+]
+
 const partners = [
-  { name: 'Brown Coffee', status: 'Recently Active' },
-  { name: 'Chip Mong', status: 'Featured SME' },
-  { name: 'RUPP', status: 'University' },
-  { name: 'Smart Axiata', status: 'Featured SME' },
-  { name: 'Wing Bank', status: 'Recently Active' },
-  { name: 'Pi Pay', status: 'Featured SME' },
-  { name: 'Foodpanda', status: 'Recently Active' },
+  {name: 'Brown Coffee', status: 'Recently Active'},
+  {name: 'Chip Mong', status: 'Featured SME'},
+  {name: 'RUPP', status: 'University'},
+  {name: 'Smart Axiata', status: 'Featured SME'},
+  {name: 'Wing Bank', status: 'Recently Active'},
+  {name: 'Pi Pay', status: 'Featured SME'},
+  {name: 'Foodpanda', status: 'Recently Active'},
+]
+
+const stats = [
+  {
+    value: '50+',
+    label: 'Trusted Employers',
+    icon: BuildingStorefrontIcon,
+    bg: 'bg-[#aecbfa]',
+    iconColor: 'text-[#1a4fa3]',
+    textColor: 'text-[#1a4fa3]',
+    labelColor: 'text-[#1a4fa3]/80'
+  },
+  {
+    value: '1.2k+',
+    label: 'Active Students',
+    icon: AcademicCapIcon,
+    bg: 'bg-[#d7b7ff]',
+    iconColor: 'text-[#6a39b8]',
+    textColor: 'text-[#6a39b8]',
+    labelColor: 'text-[#6a39b8]/80'
+  },
+  {
+    value: '200+',
+    label: 'Active Jobs',
+    icon: BriefcaseIcon,
+    bg: 'bg-[#8fd99b]',
+    iconColor: 'text-[#246b36]',
+    textColor: 'text-[#246b36]',
+    labelColor: 'text-[#246b36]/80'
+  },
 ]
 
 const categories = [
-  { title: 'Academic Tutoring', desc: 'Peer teaching & mentoring', icon: AcademicCapIcon },
-  { title: 'Retail', desc: 'Customer service & sales', icon: BuildingStorefrontIcon },
-  { title: 'Hospitality', desc: 'Cafes, restaurants & events', icon: ChatBubbleOvalLeftIcon },
-  { title: 'Creative', desc: 'Design, writing & media', icon: PaintBrushIcon },
-  { title: 'Tech Support', desc: 'IT & software assistance', icon: ComputerDesktopIcon },
-  { title: 'Admin', desc: 'Data entry & organization', icon: DocumentTextIcon },
+  {
+    title: 'Academic Tutoring',
+    desc: 'Peer teaching, mentoring, and subject-support work close to campus.',
+    icon: AcademicCapIcon,
+    iconBg: 'bg-[#aecbfa]',
+    iconColor: 'text-[#1a4fa3]'
+  },
+  {
+    title: 'Retail',
+    desc: 'Customer service and sales roles with flexible student-friendly shifts.',
+    icon: BuildingStorefrontIcon,
+    iconBg: 'bg-[#8fd99b]',
+    iconColor: 'text-[#246b36]'
+  },
+  {
+    title: 'Hospitality',
+    desc: 'Cafes, restaurants, events, and guest-facing experience builders.',
+    icon: ChatBubbleOvalLeftIcon,
+    iconBg: 'bg-[#8ccaff]',
+    iconColor: 'text-[#235d84]'
+  },
+  {
+    title: 'Creative',
+    desc: 'Design, writing, media, and content work for growing local brands.',
+    icon: PaintBrushIcon,
+    iconBg: 'bg-[#d7b7ff]',
+    iconColor: 'text-[#6a39b8]'
+  },
+  {
+    title: 'Tech Support',
+    desc: 'IT helpdesk, software assistance, and practical digital operations.',
+    icon: ComputerDesktopIcon,
+    iconBg: 'bg-[#f8a9dc]',
+    iconColor: 'text-[#9b1f70]'
+  },
+  {
+    title: 'Admin',
+    desc: 'Data entry, document support, coordination, and organization roles.',
+    icon: DocumentTextIcon,
+    iconBg: 'bg-[#ffc28e]',
+    iconColor: 'text-[#8a4a11]'
+  },
+]
+
+const steps = [
+  {
+    title: 'Create Profile',
+    desc: 'Build a clean student profile that highlights availability, skills, and study schedule.'
+  },
+  {title: 'Quick Apply', desc: 'Use focused job cards and simple filters to apply to the right opportunities faster.'},
+  {
+    title: 'Start Working',
+    desc: 'Track applications, follow trusted SMEs, and gain experience that compounds over time.'
+  },
 ]
 
 const jobs = [
-  { company: 'Brown Coffee', location: 'BKK1, Phnom Penh', time: '5h ago', title: 'Senior Barista & Shift Lead', wage: '$18.50/hr', desc: 'We are looking for an experienced barista to lead weekend shifts and train new junior staff in coffee preparation and customer service.' },
-  { company: 'RUPP Writing Center', location: 'Toul Kork, Phnom Penh', time: '1d ago', title: 'Peer Writing Consultant', wage: '$15.00/hr', desc: 'Assist undergraduate students with essay structuring, grammar correction, and academic writing techniques during afternoon shifts.' },
-  { company: 'Chip Mong Supermarket', location: 'Sen Sok, Phnom Penh', time: '2d ago', title: 'Logistics & Inventory Associate', wage: '$16.00/hr', desc: 'Manage stock room organization, track incoming deliveries, and assist with floor replenishment on a flexible schedule.' },
-]
-
-const trendingSmes = [
-  { name: 'Smart Axiata', type: 'Telecommunications' },
-  { name: 'Wing Bank', type: 'Financial Services' },
-  { name: 'Koy Coffee', type: 'Food & Beverage' },
-  { name: 'Nham24', type: 'Delivery Tech' },
+  {
+    company: 'Brown Coffee',
+    location: 'BKK1, Phnom Penh',
+    time: '5h ago',
+    title: 'Senior Barista & Shift Lead',
+    wage: '$18.50/hr',
+    desc: 'Lead weekend shifts and train new junior staff in coffee preparation and customer service.'
+  },
+  {
+    company: 'RUPP Writing Center',
+    location: 'Toul Kork, Phnom Penh',
+    time: '1d ago',
+    title: 'Peer Writing Consultant',
+    wage: '$15.00/hr',
+    desc: 'Assist undergraduate students with essay structure, grammar, and academic writing techniques.'
+  },
+  {
+    company: 'Chip Mong Supermarket',
+    location: 'Sen Sok, Phnom Penh',
+    time: '2d ago',
+    title: 'Logistics & Inventory Associate',
+    wage: '$16.00/hr',
+    desc: 'Manage stock room organization, track incoming deliveries, and support floor replenishment.'
+  },
 ]
 
 const roleGaps = [
-  { role: 'English-Khmer Translators' },
-  { role: 'Data Entry Specialists' },
-  { role: 'Social Media Management' },
+  {role: 'English-Khmer Translators'},
+  {role: 'Data Entry Specialists'},
+  {role: 'Social Media Management'},
 ]
 </script>
 
 <style scoped>
-/* Hide scrollbar for Chrome, Safari and Opera */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-/* Hide scrollbar for IE, Edge and Firefox */
+
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>
