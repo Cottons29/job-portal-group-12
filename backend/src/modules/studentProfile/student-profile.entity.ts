@@ -12,7 +12,6 @@ import {
 import { User } from '../user/user.entity';
 
 @Entity('student_profiles')
-@Check(`"yearOfStudy" BETWEEN 1 AND 4`)
 export class StudentProfile {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -33,7 +32,7 @@ export class StudentProfile {
   @Column({ type: 'date', nullable: true })
   dateOfBirth?: Date;
 
-  @Column()
+  @Column({ nullable: true })
   phone: string;
 
   @Column()
@@ -42,16 +41,31 @@ export class StudentProfile {
   @Column()
   major: string;
 
-  @Column({ type: 'int' })
-  yearOfStudy: number;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  yearLevel: string;
 
-  @Column({ length: 255 })
+  @Column('simple-array', { nullable: true })
+  skills: string[];
+
+  @Column({ type: 'text', nullable: true })
   bio: string;
 
-  @Column()
+  @Column({ nullable: true })
+  jobType: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  availability: any;
+
+  @Column({ nullable: true })
+  expectedSalary: string;
+
+  @Column({ nullable: true })
+  currency: string;
+
+  @Column({ nullable: true })
   cvUrl: string;
 
-  @Column()
+  @Column({ nullable: true })
   profileImageUrl: string;
 
   @CreateDateColumn()

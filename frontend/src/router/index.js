@@ -6,7 +6,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/auth',
+      name: 'home',
+      component: () => import('@/views/LandingPage.vue'),
     },
     {
       path: '/auth',
@@ -36,6 +37,12 @@ const router = createRouter({
       name: 'dashboard',
       component: () => import('@/view/PlaceholderView.vue'),
       meta: { title: 'Dashboard', requiresAuth: true },
+    },
+    {
+      path: '/admin/moderation',
+      name: 'admin-moderation',
+      component: () => import('@/views/AdminModerationDashboard.vue'),
+      meta: { title: 'Admin Moderation', requiresAuth: false },
     },
   ],
 })

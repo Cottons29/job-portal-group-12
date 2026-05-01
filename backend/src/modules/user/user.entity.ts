@@ -18,6 +18,9 @@ export class User {
   id: string;
 
   @Column({ unique: true })
+  phone: string;
+
+  @Column({ unique: true, nullable: true })
   email: string;
 
   @Column()
@@ -36,11 +39,14 @@ export class User {
   })
   status: AccountStatus;
 
-  @OneToOne(()=>StudentProfile,(profile)=>profile.user)
-  studentProfile:StudentProfile;
+  @Column({ default: false })
+  profileCompleted: boolean;
 
-  @OneToOne(()=>EmployerProfile,(profile)=>profile.user)
-  employerProfile:EmployerProfile;
+  @OneToOne(() => StudentProfile, (profile) => profile.user)
+  studentProfile: StudentProfile;
+
+  @OneToOne(() => EmployerProfile, (profile) => profile.user)
+  employerProfile: EmployerProfile;
 
   @CreateDateColumn()
   createdAt: Date;

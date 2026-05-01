@@ -11,7 +11,9 @@ import { Server, Socket } from 'socket.io';
     origin: '*',
   },
 })
-export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class NotificationsGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -22,7 +24,7 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
   handleConnection(client: Socket) {
     // Usually you'd extract the user ID from the JWT token during connection handshakes
     const userId = client.handshake.query.userId as string;
-    
+
     if (userId) {
       this.activeUsers.set(userId, client.id);
       console.log(`User ${userId} connected with socket ${client.id}`);

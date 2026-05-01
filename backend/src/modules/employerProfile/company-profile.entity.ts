@@ -3,7 +3,6 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -19,9 +18,9 @@ export class EmployerProfile {
   @Column()
   userId: string;
 
- @OneToOne(() => User, (user) => user.employerProfile, {
-  nullable: false,
-  onDelete: 'CASCADE',
+  @OneToOne(() => User, (user) => user.employerProfile, {
+    nullable: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })
   user: User;

@@ -5,7 +5,8 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UploadModule } from './upload/upload.module';
 import { NotificationsModule } from './notifications/notifications.module';
-import { Notification } from './notifications/entities/notification.entity';
+import { AdminModule } from './modules/admin/admin.module';
+import { StudentProfileModule } from './modules/studentProfile/student-profile.module';
 
 @Module({
   imports: [
@@ -16,12 +17,14 @@ import { Notification } from './notifications/entities/notification.entity';
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME || 'firststep_db',
-      entities: [Notification], // Add any other entities here
+      autoLoadEntities: true, // Automatically loads entities from feature modules
       synchronize: true, // Auto-create tables in Dev mode
     }),
-    AuthModule, 
-    UploadModule, 
-    NotificationsModule
+    AuthModule,
+    UploadModule,
+    NotificationsModule,
+    AdminModule,
+    StudentProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
