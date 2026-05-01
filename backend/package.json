@@ -43,6 +43,7 @@
     "@nestjs/typeorm": "^11.0.1",
     "@nestjs/websockets": "^11.1.19",
     "@sendgrid/mail": "^8.1.6",
+    "@simplewebauthn/server": "^13.3.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",
     "express-session": "^1.19.0",
