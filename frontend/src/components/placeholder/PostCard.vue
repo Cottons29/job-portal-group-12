@@ -13,11 +13,12 @@
       <EllipsisHorizontalIcon class="h-6 w-6 text-on-surface-variant" />
     </div>
 
-    <div :class="[post.heroBg, 'rounded-[1.25rem] p-6']">
+    <div :class="[post.heroBg, 'rounded-[1.25rem] p-6', { 'cursor-pointer transition-opacity hover:opacity-90': !full }]" @click="!full && $emit('open', post)">
       <p class="text-xs font-black uppercase tracking-[0.2em] text-primary">{{ post.badge }}</p>
       <h2 class="mt-3 font-display text-3xl font-black tracking-[-0.04em] text-on-surface">{{ post.title }}</h2>
       <div
           class="post-markdown mt-3 max-w-2xl text-sm leading-7 text-on-surface-variant"
+          :class="{ 'line-clamp-6': !full }"
           v-html="post.descHtml || post.desc"
       />
       <img
@@ -68,7 +69,13 @@ defineProps({
     type: Object,
     required: true,
   },
+  full: {
+    type: Boolean,
+    default: false
+  }
 })
+
+defineEmits(['open'])
 
 const actions = [
   { label: 'Like post', icon: HeartIcon },
