@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/auth',
         name: 'auth',
-        component: () => import('@/view/AuthView.vue'),
+        component: () => import('@/views/AuthView.vue'),
     },
     {
         path: '/about-us',
@@ -60,49 +60,49 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/onboarding/student',
         name: 'student-setup',
-        component: () => import('@/view/StudentSetup.vue'),
+        component: () => import('@/views/StudentSetup.vue'),
         meta: {title: 'Student Profile Setup', requiresAuth: true},
     },
     {
         path: '/home',
         name: 'home',
-        component: () => import('@/view/PlaceholderView.vue'),
+        component: () => import('@/views/PlaceholderView.vue'),
         meta: {title: 'Home', requiresAuth: true},
     },
     {
         path: '/search',
         name: 'search',
-        component: () => import('@/view/PlaceholderView.vue'),
+        component: () => import('@/views/PlaceholderView.vue'),
         meta: {title: 'Search', requiresAuth: true},
     },
     {
         path: '/messages',
         name: 'messages',
-        component: () => import('@/view/PlaceholderView.vue'),
+        component: () => import('@/views/PlaceholderView.vue'),
         meta: {title: 'Messages', requiresAuth: true},
     },
     {
         path: '/notifications',
         name: 'notifications',
-        component: () => import('@/view/PlaceholderView.vue'),
+        component: () => import('@/views/PlaceholderView.vue'),
         meta: {title: 'Notifications', requiresAuth: true},
     },
     {
         path: '/create',
         name: 'create',
-        component: () => import('@/view/PlaceholderView.vue'),
+        component: () => import('@/views/PlaceholderView.vue'),
         meta: {title: 'Create', requiresAuth: true},
     },
     {
         path: '/profile',
         name: 'profile',
-        component: () => import('@/view/PlaceholderView.vue'),
+        component: () => import('@/views/PlaceholderView.vue'),
         meta: {title: 'Profile', requiresAuth: true},
     },
     {
         path: '/settings',
         name: 'settings',
-        component: () => import('@/view/PlaceholderView.vue'),
+        component: () => import('@/views/PlaceholderView.vue'),
         meta: {title: 'Settings', requiresAuth: true},
     },
     {

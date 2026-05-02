@@ -36,7 +36,7 @@
 
 :root,
 :root[data-theme='light'] {
-  --fs-primary: #050256;
+  --fs-primary: #031d8c;
   --fs-primary-container: #dbeafe;
   --fs-on-primary: #ffffff;
   --fs-secondary: #6d5bd0;
@@ -44,9 +44,9 @@
   --fs-on-secondary-container: #20145f;
   --fs-tertiary: #64748b;
   --fs-tertiary-fixed: #e2e8f0;
-  --fs-surface: #f8fafc;
+  --fs-surface: #eceaea;
   --fs-surface-container-lowest: #ffffff;
-  --fs-surface-container-low: #f1f5f9;
+  --fs-surface-container-low: #f3f9ff;
   --fs-surface-container: #e2e8f0;
   --fs-surface-container-high: #cbd5e1;
   --fs-on-surface: #0f172a;
@@ -428,4 +428,27 @@ select option {
       height: 22.5rem;
     }
   }
+}
+
+/* ── Modal Transitions ── */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active > div,
+.modal-enter-active > form,
+.modal-leave-active > div,
+.modal-leave-active > form {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-enter-from > div,
+.modal-enter-from > form {
+  transform: scale(0.95) translateY(10px);
 }

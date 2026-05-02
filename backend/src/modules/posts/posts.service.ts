@@ -6,6 +6,11 @@ import { User } from '../user/user.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostEntity } from './post.entity';
 
+interface FindAllPostsOptions {
+  page?: string;
+  limit?: string;
+}
+
 @Injectable()
 export class PostsService {
   constructor(
@@ -15,11 +20,22 @@ export class PostsService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async findAll() {
-    return this.postsRepository.find({
+  async findAll(options: FindAllPostsOptions = {}) {
+    const page = Math.max(Number.parseInt(options.page || '1', 10) || 1, 1);
+    const limit = Math.min(Math.max(Number.parseInt(options.limit || '10', 10) || 10, 1), 50);
+    const [posts, total] = await this.postsRepository.findAndCount({
       order: { createdAt: 'DESC' },
-      take: 50,
+      skip: (page - 1) * limit,
+      take: limit,
     });
+
+    return {
+      posts,
+      page,
+      limit,
+      total,
+      hasMore: page * limit < total,
+    };
   }
 
   async create(userId: string, dto: CreatePostDto) {
