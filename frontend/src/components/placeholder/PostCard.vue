@@ -16,7 +16,16 @@
     <div :class="[post.heroBg, 'rounded-[1.25rem] p-6']">
       <p class="text-xs font-black uppercase tracking-[0.2em] text-primary">{{ post.badge }}</p>
       <h2 class="mt-3 font-display text-3xl font-black tracking-[-0.04em] text-on-surface">{{ post.title }}</h2>
-      <p class="mt-3 max-w-2xl text-sm leading-7 text-on-surface-variant">{{ post.desc }}</p>
+      <div
+          class="post-markdown mt-3 max-w-2xl text-sm leading-7 text-on-surface-variant"
+          v-html="post.descHtml || post.desc"
+      />
+      <img
+          v-if="post.imageUrl"
+          :src="post.imageUrl"
+          :alt="post.title"
+          class="mt-5 max-h-96 w-full rounded-[1rem] object-cover"
+      />
       <div class="mt-6 flex flex-wrap gap-2">
           <span
               v-for="tag in post.tags"
@@ -67,3 +76,58 @@ const actions = [
   { label: 'Share post', icon: PaperAirplaneIcon },
 ]
 </script>
+
+<style scoped>
+.post-markdown :deep(p + p),
+.post-markdown :deep(ul),
+.post-markdown :deep(ol),
+.post-markdown :deep(blockquote),
+.post-markdown :deep(pre) {
+  margin-top: 0.75rem;
+}
+
+.post-markdown :deep(ul),
+.post-markdown :deep(ol) {
+  padding-left: 1.25rem;
+}
+
+.post-markdown :deep(ul) {
+  list-style: disc;
+}
+
+.post-markdown :deep(ol) {
+  list-style: decimal;
+}
+
+.post-markdown :deep(a) {
+  color: var(--fs-primary);
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+.post-markdown :deep(strong) {
+  color: var(--fs-on-surface);
+  font-weight: 900;
+}
+
+.post-markdown :deep(code) {
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--fs-surface-container-lowest) 80%, transparent);
+  padding: 0.15rem 0.35rem;
+  color: var(--fs-on-surface);
+  font-size: 0.8em;
+  font-weight: 800;
+}
+
+.post-markdown :deep(pre) {
+  overflow-x: auto;
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--fs-surface-container-lowest) 80%, transparent);
+  padding: 0.9rem;
+}
+
+.post-markdown :deep(pre code) {
+  background: transparent;
+  padding: 0;
+}
+</style>
