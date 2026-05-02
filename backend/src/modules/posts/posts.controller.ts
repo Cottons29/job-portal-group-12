@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, UseGuards } from '@nestjs/common';
 
 import { AuthenticatedGuard } from '../../auth/authenticated.guard';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -10,9 +10,9 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  async findAll() {
-    const posts = await this.postsService.findAll();
-    return { posts };
+  async findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
+    const result = await this.postsService.findAll({ page, limit });
+    return result;
   }
 
   @Post()
