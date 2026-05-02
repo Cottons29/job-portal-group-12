@@ -7,7 +7,11 @@
   "scripts": {
     "backend": "cd backend && npm run start",
     "backend:dev": "cd backend && npm run start:dev",
-    "frontend": "cd frontend && npm run dev"
+    "frontend": "cd frontend && npm run dev",
+    "book": "cd progress_book && mdbook serve --port 3080",
+    "file:serve": "cd file_service && cargo run",
+    "file:build": "cd file_service && cargo build",
+    "file:build_arm_linux": "cd file_service && cross build --target aarch64-unknown-linux-gnu"
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",

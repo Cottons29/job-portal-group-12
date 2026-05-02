@@ -3,3 +3,5 @@ node_modules
 package-lock.json
 pnpm-lock.yaml
 .junie
+file_service/target
+file_service/Cargo.lock
