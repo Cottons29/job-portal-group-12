@@ -8,6 +8,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { StudentProfileModule } from './modules/studentProfile/student-profile.module';
 import { PostsModule } from './modules/posts/posts.module';
+import { EmployerProfileModule } from './modules/employerProfile/employer-profile.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PostsModule } from './modules/posts/posts.module';
     AdminModule,
     StudentProfileModule,
     PostsModule,
+    EmployerProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

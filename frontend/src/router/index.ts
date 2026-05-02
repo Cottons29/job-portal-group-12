@@ -64,6 +64,12 @@ const routes: RouteRecordRaw[] = [
         meta: {title: 'Student Profile Setup', requiresAuth: true},
     },
     {
+        path: '/onboarding/employer',
+        name: 'employer-setup',
+        component: () => import('@/views/EmployerSetup.vue'),
+        meta: {title: 'Employer Profile Setup', requiresAuth: true},
+    },
+    {
         path: '/home',
         name: 'home',
         component: () => import('@/views/PlaceholderView.vue'),
@@ -150,7 +156,9 @@ router.beforeEach(async (to) => {
         if (authStore.needsOnboarding) {
             // Must allow them into the onboarding flow, otherwise redirect
             if (!to.path.startsWith('/onboarding')) {
-                return '/onboarding'
+                return authStore.user?.role === 'employer' 
+                    ? '/onboarding/employer' 
+                    : '/onboarding/student'
             }
             return true
         }

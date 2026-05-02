@@ -28,7 +28,7 @@ export class EmployerProfile {
   @Column()
   companyName: string;
 
-  @Column()
+  @Column({ nullable: true })
   patentUrl: string;
 
   @Column({ default: false })
@@ -40,7 +40,7 @@ export class EmployerProfile {
   @Column()
   industry: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   phone: string;
 
   @Column()
@@ -49,7 +49,7 @@ export class EmployerProfile {
   @Column({ nullable: true })
   website?: string;
 
-  @Column()
+  @Column({ nullable: true })
   logoUrl: string;
 
   @CreateDateColumn()
