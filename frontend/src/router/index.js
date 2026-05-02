@@ -30,10 +30,28 @@ const router = createRouter({
       meta: { title: 'Student Profile Setup' },
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('@/view/PlaceholderView.vue'),
-      meta: { title: 'Dashboard' },
+      path: '/',
+      component: () => import('@/layouts/DefaultLayout.vue'),
+      children: [
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: () => import('@/view/PlaceholderView.vue'),
+          meta: { title: 'Dashboard' },
+        },
+        {
+          path: 'job-feed',
+          name: 'jobs',
+          component: () => import('@/view/job/JobFeed.vue'),
+          meta: { title: 'Jobs' },
+        },
+        {
+          path: 'job-posting',
+          name: 'job-posting',
+          component: () => import('@/view/job/JobPosting.vue'),
+          meta: { title: 'Post Job' },
+        },
+      ],
     },
   ],
 })
