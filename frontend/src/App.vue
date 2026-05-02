@@ -14,9 +14,10 @@ const showFooter = computed(() => !isPlaceholderRoute.value)
 
 
 <template>
-  <!--  <Navbar />-->
   <ThemeModeToggle v-if="showGlobalThemeToggle"/>
-  <RouterView/>
+  <RouterView v-slot="{ Component }">
+    <component :is="Component"/>
+  </RouterView>
   <Footer v-if="showFooter"/>
 </template>
 

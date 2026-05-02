@@ -170,3 +170,134 @@ Based on the requirements and current implementation, the next work should focus
     - Build admin routes/screens.
     - Review employer proofs.
     - Moderate jobs and handle disputes.
+
+---
+
+# Current State Update (2, May, 2026)
+
+## Progress: Authentication Hardening, Social Posting, and Admin Employer Moderation
+
+This update records the current repository state after the latest implementation pass. The project has moved beyond the previous scaffold/status note in several areas, especially persistent authentication, passkey support, social-style posts, and employer verification moderation.
+
+### 1. Authentication & Account Management Status
+Current progress:
+- User records are persisted through the `users` table using the backend `User` entity.
+- Passwords are hashed with `bcrypt` during registration and checked during login.
+- JWTs are issued for register/login/passkey login responses and the authenticated guard accepts bearer tokens.
+- The authenticated guard still supports session fallback through `req.session.userId`, so the project currently uses a hybrid JWT/session authentication approach.
+- Passkey/WebAuthn support has been added with endpoints for login options, login verification, registration options, registration verification, and passkey listing.
+- Passkey credentials are stored through a dedicated backend entity.
+- Authenticated password change is implemented through the `POST /auth/password` endpoint and the frontend security settings modal.
+- OTP-based email linking/recovery remains available through the secure-account flow.
+
+Still pending or incomplete:
+- Google social login is not implemented yet.
+- Telegram login is not implemented yet.
+- Password reset for forgotten passwords is still not implemented as a separate unauthenticated recovery flow.
+- Authentication should be standardized by removing or intentionally documenting the remaining session fallback.
+- Role-based guards are still needed for admin/employer/student-only routes.
+- JWT secret and WebAuthn environment values need production-safe configuration before deployment.
+
+### 2. Student Profile and Frontend Account Experience Status
+Current progress:
+- Student onboarding remains wired at `/onboarding/student`.
+- Student profile data can be saved and read through the backend student profile module.
+- The authenticated placeholder shell now includes richer authenticated pages for home, create post, profile, settings, and related placeholder sections.
+- Settings include editable personal information rows and a security section for passkey registration and password updates.
+- Profile data is surfaced in the profile view, including avatar/initials fallback, profile statistics, bio/education/category information, and a gallery based on created posts.
+- Theme mode support is available in the placeholder shell through the sidebar toggle.
+
+Still pending or incomplete:
+- Built-in downloadable CV/profile generator is not implemented yet.
+- Dedicated student application tracking dashboard is not implemented yet.
+- Application statuses such as `Submitted`, `Viewed by Employer`, `Interview Scheduled`, and `Rejected` are not implemented yet.
+- The `/search`, `/messages`, and `/notifications` routes still use placeholder content rather than complete product flows.
+
+### 3. Social Posting / Feed Status
+Current progress:
+- A backend posts module is wired into the application module.
+- Authenticated users can create posts through `POST /posts` with title, markdown content, and optional image URL.
+- Posts are persisted through the backend post entity and associated with the author user.
+- The posts API validates required title/content and applies length limits.
+- Authenticated users can fetch the latest posts through `GET /posts`, currently limited to the latest 50 records ordered by creation date.
+- The frontend home page loads posts from the backend, displays loading/error/empty states, and renders post cards.
+- The frontend create page supports markdown content, a live preview, optional local image preview, and publishing posts to the backend.
+
+Still pending or incomplete:
+- Feed pagination is not implemented yet.
+- Job discovery is still separate from the social post feed and has not been implemented as a searchable job board.
+- Post image upload is not fully integrated end-to-end with backend storage from the create-post form.
+- Likes, comments, sharing, and moderation for posts are not implemented yet.
+
+### 4. Employer Feature Status
+Current progress:
+- Employer profile database support still exists through the employer/company profile entity.
+- Employer profiles include company details, patent/proof URL, verification status, and related company metadata.
+- Admin verification logic can query unverified employer profiles.
+- Admin approval can mark an employer profile as verified.
+- Admin rejection deletes the associated employer user, which removes/rejects the submitted employer account path.
+
+Still pending or incomplete:
+- Employer profile API/controller for employer self-service onboarding is still not wired as a complete employer-facing flow.
+- Employer onboarding UI is not implemented yet.
+- Public company profile page is not implemented yet.
+- Job posting management is not implemented yet.
+- Job fields such as salary range, working hours, requirements, location, and skills are not implemented as a job entity/workflow yet.
+- Applicant tracking or Kanban-style hiring board is not implemented yet.
+- Secure contact reveal after moving a candidate to interview stage is not implemented yet.
+
+### 5. Admin and Moderation Status
+Current progress:
+- Backend admin module, controller, and service are now present.
+- Admin endpoints exist for:
+    - Listing pending employers: `GET /admin/employers/pending`.
+    - Approving an employer: `PATCH /admin/employers/:id/approve`.
+    - Rejecting an employer: `DELETE /admin/employers/:id/reject`.
+- A frontend admin moderation dashboard exists at `/admin/moderation`.
+- The admin dashboard displays pending employer cards/table data, simple review metrics, a proof-review modal, and approve/reject actions.
+
+Still pending or incomplete:
+- The admin moderation frontend route is currently marked with `requiresAuth: false`, so it still needs authentication and role-based authorization protection.
+- Admin moderation is currently focused on employer verification only.
+- Job moderation, post moderation, dispute management, and broader admin analytics are not implemented yet.
+- Admin endpoints should be protected with an admin-only guard before production use.
+
+### 6. Non-Functional and Infrastructure Status
+Current progress:
+- PostgreSQL/TypeORM remains configured with auto-loaded entities.
+- The file upload module exists and student CV/profile fields can reference uploaded file URLs.
+- Notification gateway/service scaffolding remains present.
+- Public-facing informational pages now exist for About Us, Contact, Privacy Policy, and Terms of Service.
+- Docker-related project files are present at the repository root.
+
+Still pending or incomplete:
+- Full bilingual English/Khmer localization is not implemented yet.
+- Mobile responsiveness should still be reviewed across the expanded authenticated shell, admin dashboard, and public pages.
+- Production-safe file storage for resumes, company proofs, profile images, and post images still needs to be finalized.
+- Validation, error handling, and authorization should be hardened across backend modules.
+- Automated test coverage has not been updated to cover the new auth, passkey, posts, admin, and profile flows.
+
+### 7. Updated Recommended Next Priorities
+Based on the current state, the next development work should focus on securing and completing the MVP flows:
+1. Lock down authentication and authorization:
+    - Decide whether JWT or session auth is the single source of truth.
+    - Add role-based guards for student, employer, and admin routes.
+    - Protect `/admin/moderation` and backend admin endpoints with admin-only access.
+2. Complete employer onboarding:
+    - Add employer-facing profile controller/service endpoints.
+    - Build employer onboarding UI.
+    - Upload and serve company proof/logo files consistently.
+3. Implement job posting and discovery:
+    - Add job entity, service, and controller.
+    - Support salary range, working hours, requirements, location, skills, and job type.
+    - Add searchable and paginated frontend job discovery.
+4. Implement application workflow:
+    - Add application entity and statuses.
+    - Add student application tracking dashboard.
+    - Add employer applicant tracking board.
+5. Finish upload integration:
+    - Connect post image selection to backend upload/storage.
+    - Confirm CV, company proof, logo, profile image, and post image serving paths.
+6. Add tests and hardening:
+    - Cover auth, passkeys, posts, student profiles, and admin employer verification.
+    - Add validation and consistent API error responses.

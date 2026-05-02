@@ -33,8 +33,13 @@
           'group relative flex items-center justify-center gap-4 rounded-2xl px-2 py-2 text-left transition-colors lg:py-1.5'
         ]"
       >
-        <span :class="[item.bg, 'grid h-12 w-12 shrink-0 place-items-center rounded-full lg:h-10 lg:w-10']">
-          <component :is="item.icon" :class="[item.color, 'h-7 w-7 lg:h-5 lg:w-5']"/>
+        <span
+            :class="[
+            item.active ? [item.bg, item.color, 'rounded-2xl border-2 border-current'] : [item.bg, 'rounded-full border-2 border-transparent'],
+            'grid h-12 w-12 shrink-0 place-items-center transition-all duration-300 lg:h-10 lg:w-10'
+          ]"
+        >
+          <component :is="item.icon" :class="[item.color, 'h-7 w-7 transition-all duration-300 lg:h-5 lg:w-5']"/>
         </span>
         <SidebarLabel :show-labels="showLabels">{{ item.label }}</SidebarLabel>
       </component>

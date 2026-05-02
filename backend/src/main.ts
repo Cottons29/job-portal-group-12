@@ -6,6 +6,7 @@ import 'dotenv/config';
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
 import session from 'express-session';
+import {NestExpressApplication} from '@nestjs/platform-express';
 
 declare module 'express-session' {
     interface SessionData {
@@ -14,7 +15,7 @@ declare module 'express-session' {
 }
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
     app.setGlobalPrefix('api');
     app.enableCors({
         origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
