@@ -8,21 +8,34 @@ import api from '@/lib/api'
 type AuthMode = 'login' | 'signup'
 type UserRole = 'student' | 'employer'
 
-interface AuthUser {
+interface AuthUserPayload {
     id: string
-    phone: string
+    phone?: string | null
     email: string | null
+    user_name?: string | null
+    role?: UserRole
+    profileCompleted: boolean
+}
+
+interface SafeAuthUser {
+    id: string
+    phone: string | null
+    email: string | null
+    user_name: string | null
+    role: UserRole | null
     profileCompleted: boolean
 }
 
 interface AuthResponse {
     token: string
-    user: AuthUser
+    user: AuthUserPayload
 }
 
 interface CurrentUserResponse {
-    user: AuthUser
+    user: AuthUserPayload
 }
+
+type SafeAuthUserUpdate = Partial<Omit<SafeAuthUser, 'id'>> & Pick<SafeAuthUser, 'id'>
 
 function getErrorMessage(error: unknown, fallback: string) {
     if (isAxiosError<{ message?: string }>(error)) {
@@ -30,6 +43,17 @@ function getErrorMessage(error: unknown, fallback: string) {
     }
 
     return fallback
+}
+
+function toSafeAuthUser(userPayload: AuthUserPayload | SafeAuthUserUpdate): SafeAuthUser {
+    return {
+        id: userPayload.id,
+        phone: userPayload.phone ?? null,
+        email: userPayload.email ?? null,
+        user_name: userPayload.user_name ?? null,
+        role: userPayload.role ?? null,
+        profileCompleted: userPayload.profileCompleted ?? false,
+    }
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -43,7 +67,7 @@ export const useAuthStore = defineStore('auth', () => {
     const error = ref('')
 
     // ── Authenticated user ──
-    const user = ref<AuthUser | null>(null)
+    const user = ref<SafeAuthUser | null>(null)
     const token = ref(localStorage.getItem('fs_token') || '')
     const hasInitializedSession = ref(false)
 
@@ -69,6 +93,23 @@ export const useAuthStore = defineStore('auth', () => {
         role.value = newRole
     }
 
+    function setUser(userPayload: AuthUserPayload | SafeAuthUserUpdate | null) {
+        user.value = userPayload ? toSafeAuthUser(userPayload) : null
+    }
+
+    function updateUser(userUpdate: SafeAuthUserUpdate) {
+        user.value = toSafeAuthUser({
+            ...user.value,
+            ...userUpdate,
+        })
+    }
+
+    async function refreshUser() {
+        const {data} = await api.get<CurrentUserResponse>('/auth/me')
+        setUser(data.user)
+        return user.value
+    }
+
     async function initializeSession() {
         if (hasInitializedSession.value) {
             return
@@ -81,10 +122,9 @@ export const useAuthStore = defineStore('auth', () => {
         }
 
         try {
-            const {data} = await api.get<CurrentUserResponse>('/auth/me')
-            user.value = data.user
+            await refreshUser()
         } catch (err) {
-            user.value = null
+            setUser(null)
             token.value = ''
             localStorage.removeItem('fs_token')
         }
@@ -107,7 +147,7 @@ export const useAuthStore = defineStore('auth', () => {
             })
 
             token.value = data.token
-            user.value = data.user
+            setUser(data.user)
             localStorage.setItem('fs_token', data.token)
 
             // ── Post-login redirect logic ──
@@ -140,7 +180,7 @@ export const useAuthStore = defineStore('auth', () => {
             const {data} = await api.post<AuthResponse>('/auth/passkey/login/verify', {response})
 
             token.value = data.token
-            user.value = data.user
+            setUser(data.user)
             localStorage.setItem('fs_token', data.token)
 
             if (!data.user.email) {
@@ -184,7 +224,7 @@ export const useAuthStore = defineStore('auth', () => {
             })
 
             token.value = data.token
-            user.value = data.user
+            setUser(data.user)
             localStorage.setItem('fs_token', data.token)
 
             // New registrations always go to secure-account first
@@ -203,7 +243,7 @@ export const useAuthStore = defineStore('auth', () => {
             // Local logout should still succeed even if the backend is unavailable.
         }
 
-        user.value = null
+        setUser(null)
         token.value = ''
         hasInitializedSession.value = false
         localStorage.removeItem('fs_token')
@@ -228,6 +268,9 @@ export const useAuthStore = defineStore('auth', () => {
         resetForm,
         setMode,
         setRole,
+        setUser,
+        updateUser,
+        refreshUser,
         initializeSession,
         login,
         loginWithPasskey,
