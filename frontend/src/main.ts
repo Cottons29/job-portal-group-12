@@ -25,12 +25,12 @@ window.__setTestUser__ = (hasEmail = false, hasProfile = false) => {
     const store = useAuthStore()
     store.token = 'mock-test-token-123'
     // Mock missing email initially
-    store.user = {
+    store.setUser({
         id: "1",
         phone: '+85512345678',
         email: hasEmail ? 'test@example.com' : null,
         profileCompleted: hasProfile,
-    }
+    })
 }
 
 router.isReady().then(() => {
