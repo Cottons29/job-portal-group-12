@@ -7,6 +7,7 @@ import { UploadModule } from './upload/upload.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { StudentProfileModule } from './modules/studentProfile/student-profile.module';
+import { PostsModule } from './modules/posts/posts.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { StudentProfileModule } from './modules/studentProfile/student-profile.m
     NotificationsModule,
     AdminModule,
     StudentProfileModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
