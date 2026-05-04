@@ -1,5 +1,7 @@
 <script setup>
-import { CameraIcon } from '@heroicons/vue/24/outline'
+import { ref } from 'vue'
+import { CameraIcon, CommandLineIcon, SparklesIcon } from '@heroicons/vue/24/outline'
+import FriendlyEditor from './FriendlyEditor.vue'
 
 defineProps({
   postForm: {
@@ -40,12 +42,19 @@ defineProps({
   }
 })
 
-defineEmits([
+const emit = defineEmits([
   'submit',
   'handleMarkdownImageUpload',
   'handlePostPhotoChange',
-  'removePostPhoto'
+  'removePostPhoto',
+  'uploadImage'
 ])
+
+const isMarkdownMode = ref(false)
+
+const handleEditorUploadImage = (file, callback) => {
+  emit('uploadImage', file, callback)
+}
 </script>
 
 <template>
@@ -78,10 +87,39 @@ defineEmits([
         />
       </label>
 
-      <label class="block space-y-2">
-        <span class="flex flex-wrap items-center justify-between gap-3">
-          <span class="text-sm font-black text-on-surface">Markdown content</span>
+      <div class="block space-y-2">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-4">
+<!--            <span class="text-sm font-black text-on-surface">-->
+<!--              {{ isMarkdownMode ? 'Markdown content' : 'Friendly editor' }}-->
+<!--            </span>-->
+            <div class="flex items-center rounded-full bg-surface-container-high p-1">
+              <button
+                type="button"
+                @click="isMarkdownMode = false"
+                :class="[
+                  'flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider transition',
+                  !isMarkdownMode ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+                ]"
+              >
+                <SparklesIcon class="h-3 w-3" />
+                Friendly
+              </button>
+              <button
+                type="button"
+                @click="isMarkdownMode = true"
+                :class="[
+                  'flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider transition',
+                  isMarkdownMode ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+                ]"
+              >
+                <CommandLineIcon class="h-3 w-3" />
+                Markdown
+              </button>
+            </div>
+          </div>
           <label
+              v-if="isMarkdownMode"
               class="inline-flex cursor-pointer items-center rounded-full bg-surface-container-high px-4 py-2 text-xs font-black text-on-surface transition hover:bg-surface-container-highest">
             {{ isUploadingMarkdownImage ? 'Uploading images...' : 'Upload markdown images' }}
             <input
@@ -93,36 +131,20 @@ defineEmits([
                 @change="$emit('handleMarkdownImageUpload', $event)"
             />
           </label>
-        </span>
+        </div>
+
         <textarea
+            v-if="isMarkdownMode"
             v-model="postForm.content"
             class="min-h-72 w-full resize-y rounded-[1.25rem] bg-surface px-4 py-3 text-sm font-bold leading-6 text-on-surface outline-none ring-1 ring-outline/30 transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
             placeholder="Write with markdown: **bold**, _italic_, # headings, lists, links, and uploaded images."
         />
-      </label>
-
-      <div class="rounded-[1.25rem] border border-dashed border-outline/40 bg-surface/60 p-4">
-        <label
-            class="flex cursor-pointer flex-col items-center justify-center gap-3 text-center sm:flex-row sm:text-left">
-          <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#f8a9dc]">
-            <CameraIcon class="h-6 w-6 text-[#9b1f70]"/>
-          </span>
-          <span class="min-w-0 flex-1">
-            <span class="block text-sm font-black text-on-surface">Add a photo</span>
-            <span class="block text-xs font-bold text-on-surface-variant">Choose a JPG, PNG, GIF, or WebP image to include with your post.</span>
-          </span>
-          <span
-              class="rounded-full bg-surface-container-high px-4 py-2 text-xs font-black text-on-surface">Browse</span>
-          <input class="sr-only" accept="image/*" type="file" @change="$emit('handlePostPhotoChange', $event)"/>
-        </label>
-        <div v-if="postPhotoPreview" class="mt-4 overflow-hidden rounded-[1.25rem] bg-surface">
-          <img :src="postPhotoPreview" :alt="postPhotoName || 'Selected post photo'"
-               class="max-h-80 w-full object-cover"/>
-          <div class="flex items-center justify-between gap-3 px-4 py-3">
-            <p class="truncate text-xs font-bold text-on-surface-variant">{{ postPhotoName }}</p>
-            <button class="text-xs font-black text-primary" type="button" @click="$emit('removePostPhoto')">Remove</button>
-          </div>
-        </div>
+        <FriendlyEditor
+          v-else
+          v-model="postForm.content"
+          placeholder="Share a career update or ask your network..."
+          @uploadImage="handleEditorUploadImage"
+        />
       </div>
 
       <p v-if="postError" class="rounded-2xl bg-red-500/10 px-4 py-3 text-xs font-bold text-red-300">{{
@@ -140,7 +162,7 @@ defineEmits([
         <img v-if="postPhotoPreview" :src="postPhotoPreview" :alt="postPhotoName || 'Post photo preview'"
              class="mt-4 max-h-64 w-full rounded-[1.25rem] object-cover"/>
         <div
-            class="mt-4 space-y-3 text-sm font-semibold leading-6 text-on-surface-variant [&_a]:font-black [&_a]:text-primary [&_a]:underline [&_h1]:font-display [&_h1]:text-2xl [&_h1]:font-black [&_h1]:text-on-surface [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-black [&_h2]:text-on-surface [&_h3]:text-lg [&_h3]:font-black [&_h3]:text-on-surface [&_img]:max-h-72 [&_img]:w-full [&_img]:rounded-[1.25rem] [&_img]:object-cover [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-black [&_strong]"
+            class="create-post-preview mt-4 text-sm font-semibold leading-6 text-on-surface-variant"
             v-html="postPreviewHtml"
         ></div>
       </article>
@@ -157,3 +179,95 @@ defineEmits([
     </aside>
   </section>
 </template>
+
+<style scoped>
+.create-post-preview :deep(p + p),
+.create-post-preview :deep(h1),
+.create-post-preview :deep(h2),
+.create-post-preview :deep(h3),
+.create-post-preview :deep(h4),
+.create-post-preview :deep(ul),
+.create-post-preview :deep(ol),
+.create-post-preview :deep(blockquote),
+.create-post-preview :deep(img),
+.create-post-preview :deep(pre) {
+  margin-top: 0.75rem;
+}
+
+.create-post-preview :deep(h1),
+.create-post-preview :deep(h2),
+.create-post-preview :deep(h3),
+.create-post-preview :deep(h4) {
+  color: var(--fs-on-surface);
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+
+.create-post-preview :deep(h1) {
+  font-size: 1.75rem;
+}
+
+.create-post-preview :deep(h2) {
+  font-size: 1.45rem;
+}
+
+.create-post-preview :deep(h3) {
+  font-size: 1.2rem;
+}
+
+.create-post-preview :deep(a) {
+  color: var(--fs-primary);
+  font-weight: 900;
+  text-decoration: underline;
+}
+
+.create-post-preview :deep(strong) {
+  color: var(--fs-on-surface);
+  font-weight: 900;
+}
+
+.create-post-preview :deep(ul),
+.create-post-preview :deep(ol) {
+  padding-left: 1.25rem;
+}
+
+.create-post-preview :deep(ul) {
+  list-style: disc;
+}
+
+.create-post-preview :deep(ol) {
+  list-style: decimal;
+}
+
+.create-post-preview :deep(blockquote) {
+  border-left: 4px solid var(--fs-primary);
+  padding-left: 1rem;
+}
+
+.create-post-preview :deep(code) {
+  border-radius: 0.375rem;
+  background: var(--fs-surface-container-high);
+  padding: 0.125rem 0.375rem;
+}
+
+.create-post-preview :deep(pre) {
+  overflow-x: auto;
+  border-radius: 1rem;
+  background: var(--fs-surface-container-lowest);
+  padding: 1rem;
+}
+
+.create-post-preview :deep(pre code) {
+  background: transparent;
+  padding: 0;
+}
+
+.create-post-preview :deep(img) {
+  max-height: 18rem;
+  width: 100%;
+  border-radius: 1.25rem;
+  object-fit: cover;
+}
+</style>
