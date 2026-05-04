@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#18191b] text-on-surface lg:overflow-hidden">
+  <div class="min-h-screen bg-surface text-on-surface lg:overflow-hidden">
     <div class="mx-auto flex min-h-screen max-w-360 bg-surface">
       <PlaceholderSidebar
           :items="sidebarItems"
@@ -98,6 +98,7 @@
             @handle-post-photo-change="handlePostPhotoChange"
             @remove-post-photo="removePostPhoto"
             @submit="submitPost"
+            @upload-image="handleEditorUploadImage"
         />
 
 
@@ -596,10 +597,47 @@ function escapeHtml(value) {
       .replace(/'/g, '&#039;')
 }
 
+function sanitizeMarkdownHtml(html) {
+  if (typeof DOMParser === 'undefined') return escapeHtml(html)
+
+  const allowedTags = new Set([
+    'A', 'BLOCKQUOTE', 'BR', 'CODE', 'DEL', 'EM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+    'HR', 'IMG', 'LI', 'OL', 'P', 'PRE', 'STRONG', 'UL'
+  ])
+  const allowedAttributes = {
+    A: new Set(['href', 'title', 'target', 'rel']),
+    IMG: new Set(['src', 'alt', 'title'])
+  }
+  const parser = new DOMParser()
+  const document = parser.parseFromString(html, 'text/html')
+
+  document.body.querySelectorAll('*').forEach((element) => {
+    if (!allowedTags.has(element.tagName)) {
+      element.replaceWith(...Array.from(element.childNodes))
+      return
+    }
+
+    Array.from(element.attributes).forEach((attribute) => {
+      const allowedForTag = allowedAttributes[element.tagName]
+      const isSafeAttribute = allowedForTag?.has(attribute.name)
+      const value = attribute.value.trim().toLowerCase()
+
+      if (!isSafeAttribute || value.startsWith('javascript:') || value.startsWith('data:')) {
+        element.removeAttribute(attribute.name)
+      }
+    })
+
+    if (element.tagName === 'A') {
+      element.setAttribute('target', '_blank')
+      element.setAttribute('rel', 'noopener noreferrer')
+    }
+  })
+
+  return document.body.innerHTML
+}
+
 function renderMarkdown(value) {
-  return marked
-      .parse(escapeHtml(value), {async: false, breaks: true})
-      .replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ')
+  return sanitizeMarkdownHtml(marked.parse(value, {async: false, breaks: true}))
 }
 
 async function uploadPostImage(file) {
@@ -668,6 +706,17 @@ function handlePostPhotoChange(event) {
   postPhotoFile.value = file
   postPhotoName.value = file.name
   postPhotoPreview.value = URL.createObjectURL(file)
+}
+
+async function handleEditorUploadImage(file, callback) {
+  try {
+    const imageUrl = await uploadPostImage(file)
+    if (imageUrl) {
+      callback(imageUrl)
+    }
+  } catch (error) {
+    postError.value = getErrorMessage(error, 'Could not upload the image. Please try again.')
+  }
 }
 
 function removePostPhoto() {
