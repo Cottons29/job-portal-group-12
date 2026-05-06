@@ -78,13 +78,6 @@ defineEmits(['openPost'])
                   <h2 class="font-display text-2xl font-black tracking-[-0.05em] text-on-surface sm:text-3xl">
                     {{ profileHandle }}
                   </h2>
-                  <span
-                      class="grid h-6 w-6 place-items-center rounded-full bg-primary text-[0.625rem] font-black text-on-primary">✓</span>
-                  <button
-                      class="grid h-8 w-8 place-items-center rounded-full text-lg font-black text-on-surface-variant transition hover:bg-surface-container-high"
-                      type="button">
-                    ···
-                  </button>
                 </div>
                 <p class="mt-1 text-base font-black text-on-surface">{{ profileForm.name }}</p>
               </div>
