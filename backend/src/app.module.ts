@@ -20,7 +20,7 @@ import { EmployerProfileModule } from './modules/employerProfile/employer-profil
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME || 'firststep_db',
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
     }),
     AuthModule,
     UploadModule,

@@ -102,19 +102,19 @@
         />
 
 
-        <section v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <article
-              v-for="card in pageContent.cards"
-              :key="card.title"
-              class="rounded-[2rem] bg-surface-container-low p-6 shadow-sm ring-1 ring-white/5"
-          >
-            <span :class="[card.bg, 'grid h-12 w-12 place-items-center rounded-2xl']">
-              <component :is="card.icon" :class="[card.color, 'h-6 w-6']"/>
-            </span>
-            <h2 class="mt-5 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">{{ card.title }}</h2>
-            <p class="mt-2 text-sm font-semibold leading-6 text-on-surface-variant">{{ card.description }}</p>
-          </article>
-        </section>
+<!--        <section v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">-->
+<!--          <article-->
+<!--              v-for="card in pageContent.cards"-->
+<!--              :key="card.title"-->
+<!--              class="rounded-4xl bg-surface-container-low p-6 shadow-sm ring-1 ring-white/5"-->
+<!--          >-->
+<!--            <span :class="[card.bg, 'grid h-12 w-12 place-items-center rounded-2xl']">-->
+<!--              <component :is="card.icon" :class="[card.color, 'h-6 w-6']"/>-->
+<!--            </span>-->
+<!--            <h2 class="mt-5 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">{{ card.title }}</h2>-->
+<!--            <p class="mt-2 text-sm font-semibold leading-6 text-on-surface-variant">{{ card.description }}</p>-->
+<!--          </article>-->
+<!--        </section>-->
 
         <Teleport to="body">
           <Transition name="modal">
