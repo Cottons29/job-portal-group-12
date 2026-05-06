@@ -19,7 +19,7 @@ import { PostsModule } from './modules/posts/posts.module';
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME || 'firststep_db',
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
     }),
     AuthModule,
     UploadModule,
