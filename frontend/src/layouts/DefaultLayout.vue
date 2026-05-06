@@ -1,7 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <Navbar />
-
     <div class="p-6">
       <RouterView />
     </div>
