@@ -4,6 +4,7 @@ import {createApp} from 'vue'
 import {createPinia} from 'pinia'
 import App from './App.vue'
 import router from './router'
+import i18n from './i18n'
 import {initializeThemeMode} from './composables/useThemeMode'
 import {useAuthStore} from './stores/auth'
 
@@ -19,7 +20,8 @@ const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
-    .use(router)
+app.use(i18n)
+app.use(router)
 
 window.__setTestUser__ = (hasEmail = false, hasProfile = false) => {
     const store = useAuthStore()

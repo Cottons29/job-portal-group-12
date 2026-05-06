@@ -2,8 +2,8 @@
   <section class="rounded-[1.5rem] bg-surface-container-low p-5">
     <div class="mb-5 flex items-center justify-between">
       <div>
-        <p class="text-xs font-black uppercase tracking-[0.2em] text-primary">Today</p>
-        <h2 class="font-display text-2xl font-black tracking-tight text-on-surface">Your focus</h2>
+        <p class="text-xs font-black uppercase tracking-[0.2em] text-primary">{{ $t('home.todayLabel') }}</p>
+        <h2 class="font-display text-2xl font-black tracking-tight text-on-surface">{{ $t('home.yourFocus') }}</h2>
       </div>
       <SparklesIcon class="h-7 w-7 text-primary" />
     </div>

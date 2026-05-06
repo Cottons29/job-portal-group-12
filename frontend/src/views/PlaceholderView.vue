@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-surface text-on-surface lg:overflow-hidden">
-    <div class="mx-auto flex min-h-screen max-w-360 bg-surface">
+    <div class="mx-auto flex min-h-screen w-full bg-surface">
       <PlaceholderSidebar
           :items="sidebarItems"
           :show-labels="showSidebarLabels"
@@ -28,7 +28,7 @@
                 <MagnifyingGlassIcon class="h-5 w-5 text-primary"/>
                 <input
                     class="w-full bg-transparent outline-none placeholder:text-on-surface-variant/70"
-                    placeholder="Search jobs, people, companies"
+                    :placeholder="t('home.searchPlaceholder')"
                 />
               </label>
             </div>
@@ -164,6 +164,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {isAxiosError} from 'axios'
 import {marked} from 'marked'
 import {startRegistration} from '@simplewebauthn/browser'
+import {useI18n} from 'vue-i18n'
 
 import api from '@/lib/api'
 import PlaceholderSidebar from '@/components/placeholder/PlaceholderSidebar.vue'
@@ -202,6 +203,7 @@ import {
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const {t} = useI18n()
 const showSidebarLabels = ref(false)
 const {appliedTheme, setThemePreference} = useThemeMode()
 
@@ -459,8 +461,8 @@ const personalInfoRows = computed(() => [
 
 const pages = {
   home: {
-    eyebrow: 'Home feed',
-    title: `Welcome back, ${profileForm.user_name || 'Guest'}`,
+    eyebrow: t('home.eyebrow'),
+    title: t('home.welcomeBack'),
   },
   search: {
     eyebrow: 'Search',
@@ -1088,10 +1090,10 @@ async function updatePassword() {
   }
 }
 
-const navigationItems = [
-  {label: 'Home', page: 'home', icon: HomeIcon, bg: 'bg-[#a8c0ff]', color: 'text-[#243c78]', to: '/home'},
+const navigationItems = computed(() => [
+  {label: t('sidebar.home'), page: 'home', icon: HomeIcon, bg: 'bg-[#a8c0ff]', color: 'text-[#243c78]', to: '/home'},
   {
-    label: 'Search',
+    label: t('sidebar.search'),
     page: 'search',
     icon: MagnifyingGlassIcon,
     bg: 'bg-[#8fd99b]',
@@ -1099,7 +1101,7 @@ const navigationItems = [
     to: '/search'
   },
   {
-    label: 'Message',
+    label: t('sidebar.messages'),
     page: 'messages',
     icon: ChatBubbleOvalLeftEllipsisIcon,
     bg: 'bg-[#8ccaff]',
@@ -1107,25 +1109,25 @@ const navigationItems = [
     to: '/messages'
   },
   {
-    label: 'Notification',
+    label: t('sidebar.notifications'),
     page: 'notifications',
     icon: BellIcon,
     bg: 'bg-[#d7b7ff]',
     color: 'text-[#5b36a8]',
     to: '/notifications'
   },
-  {label: 'Create', page: 'create', icon: PlusCircleIcon, bg: 'bg-[#f8a9dc]', color: 'text-[#9b1f70]', to: '/create'},
+  {label: t('sidebar.create'), page: 'create', icon: PlusCircleIcon, bg: 'bg-[#f8a9dc]', color: 'text-[#9b1f70]', to: '/create'},
   {
-    label: 'Profile',
+    label: t('sidebar.profile'),
     page: 'profile',
     icon: UserCircleIcon,
     bg: 'bg-[#ffc28e]',
     color: 'text-[#83460e]',
     to: '/profile'
   },
-]
+])
 
-const sidebarItems = computed(() => navigationItems.map((item) => ({
+const sidebarItems = computed(() => navigationItems.value.map((item) => ({
   ...item,
   active: item.page === activePage.value,
 })))
@@ -1139,17 +1141,17 @@ const stories = [
   {name: 'Pi Pay', ring: 'bg-[#f8a9dc]'},
 ]
 
-const composeActions = [
-  {label: 'Post', icon: PlusCircleIcon, color: 'text-[#1a4fa3]'},
-  {label: 'Job alert', icon: BriefcaseIcon, color: 'text-[#246b36]'},
-  {label: 'Company', icon: BuildingStorefrontIcon, color: 'text-[#8a4a11]'},
-]
+const composeActions = computed(() => [
+  {label: t('home.post'), icon: PlusCircleIcon, color: 'text-[#1a4fa3]'},
+  {label: t('home.jobAlert'), icon: BriefcaseIcon, color: 'text-[#246b36]'},
+  {label: t('home.company'), icon: BuildingStorefrontIcon, color: 'text-[#8a4a11]'},
+])
 
-const focusCards = [
-  {label: 'Saved jobs', value: '8', desc: 'Three saved roles close in the next 48 hours.'},
-  {label: 'Applications', value: '5', desc: 'Two employers viewed your student profile today.'},
-  {label: 'Profile strength', value: '86%', desc: 'Add availability to improve match ranking.'},
-]
+const focusCards = computed(() => [
+  {label: t('home.savedJobs'), value: '8', desc: 'Three saved roles close in the next 48 hours.'},
+  {label: t('home.applications'), value: '5', desc: 'Two employers viewed your student profile today.'},
+  {label: t('home.profileStrength'), value: '86%', desc: 'Add availability to improve match ranking.'},
+])
 
 const suggestions = [
   {name: 'Sokha Recruiter', role: 'Hospitality roles near BKK1', bg: 'bg-[#8fd99b]', text: 'text-[#246b36]'},

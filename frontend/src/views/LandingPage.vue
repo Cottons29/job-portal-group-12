@@ -31,7 +31,7 @@
             <div
                 class="inline-flex items-center gap-2 rounded-full bg-surface-container-low px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-primary">
               <SparklesIcon class="h-4 w-4"/>
-              Material 3 student career hub
+              student career hub
             </div>
 
             <div class="space-y-6">

@@ -4,6 +4,13 @@ import {RouterLink} from 'vue-router'
 import {Cog6ToothIcon, MoonIcon, SunIcon} from '@heroicons/vue/24/outline'
 import SidebarLabel from './SidebarLabel.vue'
 import {Bars3Icon} from "@heroicons/vue/24/outline"
+import { useI18n } from 'vue-i18n'
+
+const { locale } = useI18n()
+
+const toggleLocale = () => {
+  locale.value = locale.value === 'en' ? 'km' : 'en'
+}
 
 const props = defineProps({
   items: {
@@ -53,7 +60,7 @@ watch(
         @click="$emit('toggle-labels')"
     >
       <Bars3Icon :class="'h-7 w-7 transition-all duration-300 scale-80'"/>
-      <span v-if="labelsVisible" class="whitespace-nowrap">Hide labels</span>
+      <span v-if="labelsVisible" class="whitespace-nowrap">{{ $t('sidebar.hideLabels') }}</span>
     </button>
 
     <nav class="flex items-center justify-between gap-1 lg:flex-col lg:items-stretch lg:justify-start lg:gap-1.5">
@@ -92,7 +99,7 @@ watch(
         <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#f5df7e]">
           <Cog6ToothIcon class="h-5 w-5 text-[#745b00]"/>
         </span>
-        <SidebarLabel :show-labels="labelsVisible" desktop-only>Settings</SidebarLabel>
+        <SidebarLabel :show-labels="labelsVisible" desktop-only>{{ $t('sidebar.settings') }}</SidebarLabel>
       </RouterLink>
     </div>
 
@@ -121,7 +128,24 @@ watch(
           />
         </span>
         <SidebarLabel :show-labels="labelsVisible" desktop-only>
-          {{ appliedTheme === 'dark' ? 'Light mode' : 'Dark mode' }}
+          {{ appliedTheme === 'dark' ? $t('sidebar.lightMode') : $t('sidebar.darkMode') }}
+        </SidebarLabel>
+      </button>
+
+      <!-- Language Toggle Button -->
+      <button
+          :class="[
+          labelsVisible ? 'justify-start gap-3 px-2.5' : 'justify-center gap-0 px-0',
+          'group flex w-full items-center rounded-full py-1.5 text-left transition-colors hover:bg-white/8'
+        ]"
+          type="button"
+          @click="toggleLocale"
+      >
+        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl transition-colors bg-[#8fd99b] text-[#1f6c3b]">
+          <span class="text-sm font-black">{{ locale === 'en' ? 'KM' : 'EN' }}</span>
+        </span>
+        <SidebarLabel :show-labels="labelsVisible" desktop-only>
+          {{ locale === 'en' ? 'ភាសាខ្មែរ' : 'English' }}
         </SidebarLabel>
       </button>
     </div>
