@@ -178,6 +178,7 @@ import PostModal from '@/components/placeholder/sections/PostModal.vue'
 import {useThemeMode} from '@/composables/useThemeMode'
 import {useAuthStore} from '@/stores/auth'
 import {
+  AcademicCapIcon,
   ArrowRightOnRectangleIcon,
   BellIcon,
   BriefcaseIcon,
@@ -194,6 +195,7 @@ import {
   PhoneIcon,
   PlusCircleIcon,
   ShieldCheckIcon,
+  SparklesIcon,
   SquaresPlusIcon,
   UserGroupIcon,
   UserCircleIcon,
@@ -227,6 +229,11 @@ const profileForm = reactive({
   currency: 'USD',
   skills: [],
   availability: null,
+  companyName: '',
+  industry: '',
+  address: '',
+  website: '',
+  companyDescription: '',
 })
 
 const profileLoadError = ref('')
@@ -407,57 +414,106 @@ const securityRows = computed(() => [
   },
 ])
 
-const personalInfoRows = computed(() => [
-  {
-    label: 'Profile picture',
-    field: 'avatar',
-    values: [],
-    icon: CameraIcon,
-    avatar: profileForm.avatar || defaultAvatar,
-    placeholder: 'Paste profile image URL',
-    inputType: 'url',
-  },
-  {
-    label: 'Name',
-    field: 'name',
-    values: [profileForm.name || 'Your name'],
-    icon: IdentificationIcon,
-    placeholder: 'Enter your full name',
-    inputType: 'text',
-  },
-  {
-    label: 'Username',
-    field: 'user_name',
-    values: [profileForm.user_name || '<Blank>'],
-    icon: UserCircleIcon,
-    placeholder: 'Enter your username',
-    inputType: 'text',
-  },
-  {
-    label: 'Gender',
-    field: 'gender',
-    values: [profileForm.gender || 'Not set'],
-    icon: UserIcon,
-    placeholder: 'Enter your gender',
-    inputType: 'text',
-  },
-  {
-    label: 'Email',
-    field: 'email',
-    values: [profileForm.email || 'No email linked'],
-    icon: EnvelopeIcon,
-    placeholder: 'Enter your email address',
-    inputType: 'email',
-  },
-  {
-    label: 'Phone',
-    field: 'phone',
-    values: [profileForm.phone || 'No phone number'],
-    icon: PhoneIcon,
-    placeholder: 'Enter your phone number',
-    inputType: 'tel',
-  },
-])
+const personalInfoRows = computed(() => {
+  const isEmployer = auth.user?.role === 'employer'
+  const isStudent = auth.user?.role === 'student'
+  
+  const baseRows = [
+    {
+      label: 'Profile picture',
+      field: 'avatar',
+      values: [],
+      icon: CameraIcon,
+      avatar: profileForm.avatar || defaultAvatar,
+      placeholder: 'Paste profile image URL',
+      inputType: 'url',
+    },
+    {
+      label: isEmployer ? 'Company name' : 'Name',
+      field: isEmployer ? 'companyName' : 'name',
+      values: [isEmployer ? profileForm.companyName || 'Your company' : profileForm.name || 'Your name'],
+      icon: isEmployer ? BuildingStorefrontIcon : IdentificationIcon,
+      placeholder: isEmployer ? 'Enter company name' : 'Enter your full name',
+      inputType: 'text',
+    },
+    {
+      label: 'Username',
+      field: 'user_name',
+      values: [profileForm.user_name || '<Blank>'],
+      icon: UserCircleIcon,
+      placeholder: 'Enter your username',
+      inputType: 'text',
+    },
+    {
+      label: 'Email',
+      field: 'email',
+      values: [profileForm.email || 'No email linked'],
+      icon: EnvelopeIcon,
+      placeholder: 'Enter your email address',
+      inputType: 'email',
+    },
+    {
+      label: 'Phone',
+      field: 'phone',
+      values: [profileForm.phone || 'No phone number'],
+      icon: PhoneIcon,
+      placeholder: 'Enter your phone number',
+      inputType: 'tel',
+    },
+  ]
+
+  const studentRows = [
+    {
+      label: 'University',
+      field: 'university',
+      values: [profileForm.university || 'Not set'],
+      icon: AcademicCapIcon,
+      placeholder: 'Enter your university',
+      inputType: 'text',
+    },
+    {
+      label: 'Major',
+      field: 'major',
+      values: [profileForm.major || 'Not set'],
+      icon: SparklesIcon,
+      placeholder: 'Enter your major',
+      inputType: 'text',
+    },
+  ]
+
+  const employerRows = [
+    {
+      label: 'Industry',
+      field: 'industry',
+      values: [profileForm.industry || 'Not set'],
+      icon: BriefcaseIcon,
+      placeholder: 'Enter your industry',
+      inputType: 'text',
+    },
+    {
+      label: 'Address',
+      field: 'address',
+      values: [profileForm.address || 'Not set'],
+      icon: HomeIcon,
+      placeholder: 'Enter your address',
+      inputType: 'text',
+    },
+    {
+      label: 'Website',
+      field: 'website',
+      values: [profileForm.website || 'No website'],
+      icon: SparklesIcon,
+      placeholder: 'Enter company website URL',
+      inputType: 'url',
+    },
+  ]
+
+  if (isEmployer) {
+    return [...baseRows, ...employerRows]
+  }
+
+  return [...baseRows, ...studentRows]
+})
 
 const pages = {
   home: {
@@ -868,8 +924,11 @@ function applyProfileData(profile, user) {
   if (profile?.gender) profileForm.gender = profile.gender
   if (profile?.phone || user?.phone) profileForm.phone = profile?.phone || user.phone
   if (profile?.profileImageUrl) profileForm.avatar = profile.profileImageUrl
+  if (profile?.logoUrl) profileForm.avatar = profile.logoUrl
+  
   profileForm.user_name = user?.user_name || ''
   if (user?.email) profileForm.email = user.email
+  
   if (profile?.university) profileForm.university = profile.university
   if (profile?.major) profileForm.major = profile.major
   if (profile?.yearLevel) profileForm.yearLevel = profile.yearLevel
@@ -879,14 +938,23 @@ function applyProfileData(profile, user) {
   if (profile?.currency) profileForm.currency = profile.currency
   if (Array.isArray(profile?.skills)) profileForm.skills = profile.skills
   if (profile?.availability) profileForm.availability = profile.availability
+  
+  if (profile?.companyName) profileForm.companyName = profile.companyName
+  if (profile?.industry) profileForm.industry = profile.industry
+  if (profile?.address) profileForm.address = profile.address
+  if (profile?.website) profileForm.website = profile.website
+  if (profile?.companyDescription) profileForm.companyDescription = profile.companyDescription
 }
 
 async function fetchPersonalInfo() {
   profileLoadError.value = ''
 
   try {
+    const isEmployer = auth.user?.role === 'employer'
+    const endpoint = isEmployer ? '/employer-profile/me' : '/student-profile/me'
+    
     const [{data: profileData}, accountUser] = await Promise.all([
-      api.get('/student-profile/me'),
+      api.get(endpoint),
       auth.refreshUser(),
     ])
 
@@ -910,21 +978,32 @@ function closePersonalInfoEditor() {
 
 function buildProfileFormData() {
   const formData = new FormData()
-  formData.append('fullName', profileForm.name || 'Student User')
+  const isEmployer = auth.user?.role === 'employer'
+  
   formData.append('user_name', profileForm.user_name || '')
   formData.append('email', profileForm.email || '')
-  formData.append('gender', profileForm.gender || '')
   formData.append('phone', profileForm.phone || '')
-  formData.append('profileImageUrl', profileForm.avatar || '')
-  formData.append('university', profileForm.university || 'Not set')
-  formData.append('major', profileForm.major || 'Not set')
-  formData.append('yearLevel', profileForm.yearLevel || '')
-  formData.append('bio', profileForm.bio || '')
-  formData.append('jobType', profileForm.jobType || '')
-  formData.append('expectedSalary', profileForm.expectedSalary || '')
-  formData.append('currency', profileForm.currency || 'USD')
-  formData.append('skills', JSON.stringify(profileForm.skills || []))
-  formData.append('availability', JSON.stringify(profileForm.availability || null))
+  
+  if (isEmployer) {
+    formData.append('companyName', profileForm.companyName || '')
+    formData.append('industry', profileForm.industry || '')
+    formData.append('address', profileForm.address || '')
+    formData.append('website', profileForm.website || '')
+    formData.append('companyDescription', profileForm.companyDescription || '')
+  } else {
+    formData.append('fullName', profileForm.name || 'Student User')
+    formData.append('gender', profileForm.gender || '')
+    formData.append('profileImageUrl', profileForm.avatar || '')
+    formData.append('university', profileForm.university || 'Not set')
+    formData.append('major', profileForm.major || 'Not set')
+    formData.append('yearLevel', profileForm.yearLevel || '')
+    formData.append('bio', profileForm.bio || '')
+    formData.append('jobType', profileForm.jobType || '')
+    formData.append('expectedSalary', profileForm.expectedSalary || '')
+    formData.append('currency', profileForm.currency || 'USD')
+    formData.append('skills', JSON.stringify(profileForm.skills || []))
+    formData.append('availability', JSON.stringify(profileForm.availability || null))
+  }
   return formData
 }
 
@@ -937,8 +1016,11 @@ async function savePersonalInfoEdit() {
 
   try {
     profileForm[field] = editValue.value.trim()
-    const {data} = await api.post('/student-profile', buildProfileFormData())
-    applyProfileData(data.profile, null)
+    const isEmployer = auth.user?.role === 'employer'
+    const endpoint = isEmployer ? '/employer-profile/setup' : '/student-profile'
+    
+    const {data} = await api.post(endpoint, buildProfileFormData())
+    applyProfileData(isEmployer ? data : data.profile, null)
     closePersonalInfoEditor()
   } catch (error) {
     profileSaveError.value = getErrorMessage(error, 'Failed to save your personal info.')

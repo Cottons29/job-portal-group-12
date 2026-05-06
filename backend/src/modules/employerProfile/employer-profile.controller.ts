@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Post,
   UseGuards,
   Req,
@@ -15,6 +16,19 @@ import { EmployerProfileService } from './employer-profile.service';
 @Controller('employer-profile')
 export class EmployerProfileController {
   constructor(private readonly employerProfileService: EmployerProfileService) {}
+
+  @Get('me')
+  @UseGuards(AuthenticatedGuard)
+  async getMyProfile(@Req() req: any) {
+    const userId = req.user.sub;
+    
+    if (req.user.role !== 'EMPLOYER') {
+      throw new BadRequestException('Only employers can access employer profiles');
+    }
+
+    const profile = await this.employerProfileService.getProfileByUserId(userId);
+    return { profile };
+  }
 
   @Post('setup')
   @UseGuards(AuthenticatedGuard)
@@ -38,11 +52,14 @@ export class EmployerProfileController {
     const profileData = {
       companyName: body.companyName,
       industry: body.industry,
-      address: body.location, // mapping location to address
+      address: body.location || body.address, // mapping location or address
+      companyDescription: body.companyDescription,
+      website: body.website,
+      phone: body.phone,
     };
 
-    const logoFile = files.logoFile?.[0];
-    const patentFile = files.patentFile?.[0];
+    const logoFile = files?.logoFile?.[0];
+    const patentFile = files?.patentFile?.[0];
 
     return this.employerProfileService.createOrUpdateProfile(userId, profileData, logoFile, patentFile);
   }

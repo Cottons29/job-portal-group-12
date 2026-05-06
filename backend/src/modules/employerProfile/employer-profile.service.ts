@@ -75,4 +75,17 @@ export class EmployerProfileService {
       throw new InternalServerErrorException('Failed to save employer profile');
     }
   }
+
+  async getProfileByUserId(userId: string) {
+    const profile = await this.profileRepository.findOne({
+      where: { userId },
+      relations: ['user'],
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Employer profile not found');
+    }
+
+    return profile;
+  }
 }
