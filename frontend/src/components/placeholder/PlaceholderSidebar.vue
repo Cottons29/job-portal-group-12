@@ -4,13 +4,6 @@ import {RouterLink} from 'vue-router'
 import {Cog6ToothIcon, MoonIcon, SunIcon} from '@heroicons/vue/24/outline'
 import SidebarLabel from './SidebarLabel.vue'
 import {Bars3Icon} from "@heroicons/vue/24/outline"
-import { useI18n } from 'vue-i18n'
-
-const { locale } = useI18n()
-
-const toggleLocale = () => {
-  locale.value = locale.value === 'en' ? 'km' : 'en'
-}
 
 const props = defineProps({
   items: {
@@ -132,22 +125,6 @@ watch(
         </SidebarLabel>
       </button>
 
-      <!-- Language Toggle Button -->
-      <button
-          :class="[
-          labelsVisible ? 'justify-start gap-3 px-2.5' : 'justify-center gap-0 px-0',
-          'group flex w-full items-center rounded-full py-1.5 text-left transition-colors hover:bg-white/8'
-        ]"
-          type="button"
-          @click="toggleLocale"
-      >
-        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl transition-colors bg-[#8fd99b] text-[#1f6c3b]">
-          <span class="text-sm font-black">{{ locale === 'en' ? 'KM' : 'EN' }}</span>
-        </span>
-        <SidebarLabel :show-labels="labelsVisible" desktop-only>
-          {{ locale === 'en' ? 'ភាសាខ្មែរ' : 'English' }}
-        </SidebarLabel>
-      </button>
     </div>
   </aside>
 </template>
@@ -157,7 +134,7 @@ watch(
   transition: all 0.2s ease-in-out;
   aspect-ratio: 1;
   scale: 1.1;
-  --g: / 21.98% 21.98% radial-gradient(#000 calc(71% - 1px), #0000 71%) no-repeat;
+  --g: /21.98% 21.98% radial-gradient(#000 calc(71% - 1px), #0000 71%) no-repeat;
   mask: 100% 50% var(--g), 92.063% 77.032% var(--g), 70.771% 95.482% var(--g), 42.884% 99.491% var(--g), 17.257% 87.787% var(--g), 2.025% 64.087% var(--g), 2.025% 35.913% var(--g), 17.257% 12.213% var(--g), 42.884% 0.509% var(--g), 70.771% 4.518% var(--g), 92.063% 22.968% var(--g), radial-gradient(100% 100%, #000 37.43%, #0000 calc(37.43% + 1px));
 }
 </style>

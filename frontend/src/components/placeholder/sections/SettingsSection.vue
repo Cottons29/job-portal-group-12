@@ -1,5 +1,5 @@
 <script setup>
-import { ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline'
+import { ArrowRightOnRectangleIcon, CheckCircleIcon, LanguageIcon } from '@heroicons/vue/24/outline'
 
 defineProps({
   settingsMenuItems: {
@@ -20,6 +20,14 @@ defineProps({
   },
   securityRows: {
     type: Array,
+    required: true
+  },
+  languageOptions: {
+    type: Array,
+    required: true
+  },
+  currentLocale: {
+    type: String,
     required: true
   },
   passkeyLoading: {
@@ -54,6 +62,7 @@ defineProps({
 
 defineEmits([
   'update:activeSettingsSection',
+  'update:locale',
   'openPersonalInfoEditor',
   'handleLogout'
 ])
@@ -81,7 +90,7 @@ defineEmits([
 
     <section v-if="activeSettingsSection === 'personal'" class="mx-auto min-w-39/40 max-w-2xl">
       <h2 class="mb-4 text-center font-display text-xl font-black tracking-[-0.04em] text-on-surface sm:text-2xl">
-        Personal info
+        {{ $t('settings.personalInfo') }}
       </h2>
 
       <p v-if="profileLoadError" class="mb-3 rounded-2xl bg-red-500/10 px-4 py-3 text-xs font-bold text-red-300">
@@ -127,7 +136,7 @@ defineEmits([
 
     <section v-else-if="activeSettingsSection === 'security'" class="mx-auto min-w-39/40 max-w-2xl">
       <h2 class="mb-4 text-center font-display text-xl font-black tracking-[-0.04em] text-on-surface sm:text-2xl">
-        Security & sign-in
+        {{ $t('settings.securitySignIn') }}
       </h2>
 
       <div class="overflow-hidden rounded-[1.25rem] bg-surface-container-low ring-1 ring-white/5">
@@ -183,25 +192,78 @@ defineEmits([
 
     <section v-else-if="activeSettingsSection === 'privacy'" class="mx-auto min-w-39/40 max-w-2xl">
       <h2 class="mb-4 text-center font-display text-xl font-black tracking-[-0.04em] text-on-surface sm:text-2xl">
-        Data & privacy
+        {{ $t('settings.dataPrivacy') }}
       </h2>
       <div
           class="rounded-[1.25rem] bg-surface-container-low p-5 text-sm font-bold text-on-surface-variant ring-1 ring-white/5">
-        Manage privacy and account data controls here when they are connected.
+        {{ $t('settings.privacy.placeholder') }}
       </div>
+    </section>
+
+    <section v-else-if="activeSettingsSection === 'languages'" class="mx-auto min-w-39/40 max-w-2xl">
+      <h2 class="mb-2 text-center font-display text-xl font-black tracking-[-0.04em] text-on-surface sm:text-2xl">
+        {{ $t('settings.languageTitle') }}
+      </h2>
+      <p class="mx-auto mb-4 max-w-md text-center text-sm font-bold leading-6 text-on-surface-variant">
+        {{ $t('settings.languageDescription') }}
+      </p>
+
+      <div class="overflow-hidden rounded-[1.25rem] bg-surface-container-low ring-1 ring-white/5">
+        <label
+            v-for="(option, index) in languageOptions"
+            :key="option.value"
+            :class="[
+                index === 0 ? 'rounded-t-[1.25rem]' : '',
+                index === languageOptions.length - 1 ? 'rounded-b-[1.25rem]' : '',
+                currentLocale === option.value ? 'bg-surface-container-high' : 'bg-surface-container-low hover:bg-surface-container-high',
+                'flex cursor-pointer items-center gap-3 border-b border-surface px-3 py-3 transition last:border-b-0 sm:px-4'
+            ]"
+        >
+          <input
+              :checked="currentLocale === option.value"
+              :value="option.value"
+              class="sr-only"
+              name="app-language"
+              type="radio"
+              @change="$emit('update:locale', option.value)"
+          />
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#f5df7e]">
+            <LanguageIcon class="h-5 w-5 text-[#745b00]"/>
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-base font-black tracking-[-0.03em] text-on-surface">{{ option.nativeName }}</span>
+            <span class="mt-0.5 block text-xs font-bold text-on-surface-variant">
+              {{ option.description }}
+            </span>
+          </span>
+          <span
+              :class="[
+                  currentLocale === option.value ? 'border-primary bg-primary text-on-primary' : 'border-outline-variant text-transparent',
+                  'grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition-colors'
+              ]"
+              aria-hidden="true"
+          >
+            <CheckCircleIcon class="h-4 w-4"/>
+          </span>
+        </label>
+      </div>
+
+      <p class="mt-3 rounded-2xl bg-surface-container-low px-4 py-3 text-xs font-bold text-on-surface-variant">
+        {{ $t('settings.currentLanguage') }}: {{ languageOptions.find((option) => option.value === currentLocale)?.nativeName }}
+      </p>
     </section>
 
     <section v-else-if="activeSettingsSection === 'logout'" class="mx-auto min-w-39/40 max-w-2xl">
       <h2 class="mb-4 text-center font-display text-xl font-black tracking-[-0.04em] text-on-surface sm:text-2xl">
-        Logout
+        {{ $t('settings.logout') }}
       </h2>
       <div class="rounded-[1.25rem] bg-surface-container-low p-5 text-center ring-1 ring-white/5">
         <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-500/15">
           <ArrowRightOnRectangleIcon class="h-7 w-7 text-red-300"/>
         </span>
-        <h3 class="mt-4 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">Ready to leave?</h3>
+        <h3 class="mt-4 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">{{ $t('settings.logoutSection.title') }}</h3>
         <p class="mx-auto mt-2 max-w-sm text-sm font-bold text-on-surface-variant">
-          Logout will end your current session and return you to the authentication page.
+          {{ $t('settings.logoutSection.description') }}
         </p>
         <p v-if="logoutError" class="mt-4 rounded-2xl bg-red-500/10 px-4 py-3 text-xs font-bold text-red-300">
           {{ logoutError }}</p>
@@ -211,7 +273,7 @@ defineEmits([
             type="button"
             @click="$emit('handleLogout')"
         >
-          {{ authLoading ? 'Logging out...' : 'Logout' }}
+          {{ authLoading ? $t('settings.logoutSection.loggingOut') : $t('settings.logout') }}
         </button>
       </div>
     </section>
