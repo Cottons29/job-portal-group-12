@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { CameraIcon, CommandLineIcon, SparklesIcon } from '@heroicons/vue/24/outline'
+import { CameraIcon, DocumentIcon, SparklesIcon } from '@heroicons/vue/24/outline'
 import FriendlyEditor from './FriendlyEditor.vue'
 
 defineProps({
@@ -113,7 +113,7 @@ const handleEditorUploadImage = (file, callback) => {
                   isMarkdownMode ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
                 ]"
               >
-                <CommandLineIcon class="h-3 w-3" />
+                <DocumentIcon class="h-3 w-3" />
                 Markdown
               </button>
             </div>

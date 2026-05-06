@@ -60,8 +60,8 @@ defineEmits([
 </script>
 
 <template>
-  <div class="grid gap-4 xl:grid-cols-[15rem_minmax(0,0.78fr)] xl:justify-start">
-    <aside class="space-y-2 xl:sticky xl:top-28 xl:h-fit">
+  <div class="grid gap-10 md:grid-cols-[15rem_minmax(0,1fr)] md:justify-start lg:gap-30 xl:grid-cols-[15rem_minmax(0,0.78fr)]">
+    <aside class="space-y-2 md:sticky md:top-28 md:h-fit">
       <button
           v-for="item in settingsMenuItems"
           :key="item.label"
@@ -151,7 +151,7 @@ defineEmits([
             <p
                 v-for="value in row.values"
                 :key="value"
-                class="mt-0.5 truncate text-xs font-bold text-on-surface-variant"
+                class="mt-0.5 text-xs font-bold text-on-surface-variant"
             >
               {{ value }}
             </p>
