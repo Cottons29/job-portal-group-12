@@ -3,3 +3,6 @@ node_modules
 package-lock.json
 pnpm-lock.yaml
 .junie
+file_service/target
+file_service/Cargo.lock
+/file_service/uploads/Screenshot 2026-05-02 at 15.44.55.png

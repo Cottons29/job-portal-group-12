@@ -2,8 +2,9 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
+import vueDevTools from 'vite-plugin-vue-devtools'
+import Inspector from 'vite-plugin-vue-inspector'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -11,6 +12,9 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     tailwindcss(),
+    Inspector({
+      launchEditor: 'idea'
+    })
   ],
   resolve: {
     alias: {

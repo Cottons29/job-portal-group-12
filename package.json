@@ -1,19 +1,51 @@
 {
-  "name" : "project_ii",
-  "workspaces": ["backend", "frontend"],
+  "name": "project_ii",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
     "backend": "cd backend && npm run start",
-    "frontend": "cd frontend && npm run dev"
+    "backend:dev": "cd backend && npm run start:dev",
+    "frontend": "cd frontend && npm run dev",
+    "book": "cd progress_book && mdbook serve --port 3080",
+    "file:serve": "cd file_service && cargo run",
+    "file:build": "cd file_service && cargo build",
+    "file:build_arm_linux": "cd file_service && cross build --target aarch64-unknown-linux-gnu"
   },
   "dependencies": {
+    "@heroicons/vue": "^2.2.0",
     "@nestjs/common": "^11.0.1",
-    "@nestjs/core": "^11.0.1",
+    "@nestjs/core": "11.1.18",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/platform-socket.io": "^11.1.19",
+    "@nestjs/typeorm": "^11.0.1",
+    "@nestjs/websockets": "^11.1.19",
+    "@sendgrid/mail": "^8.1.6",
+    "@simplewebauthn/browser": "^13.3.0",
+    "@tiptap/extension-image": "^3.22.5",
+    "@tiptap/extension-link": "^3.22.5",
+    "@tiptap/extension-placeholder": "^3.22.5",
+    "@tiptap/starter-kit": "^3.22.5",
+    "@tiptap/vue-3": "^3.22.5",
+    "axios": "^1.15.0",
+    "bcrypt": "^6.0.0",
+    "data_transfer": "file:data_transfer",
+    "dotenv": "^17.4.2",
+    "express-session": "^1.19.0",
+    "marked": "^18.0.3",
+    "nodemailer": "^8.0.5",
+    "pg": "^8.20.0",
+    "pinia": "^3.0.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "vue": "^3.5.29"
+    "socket.io": "^4.8.3",
+    "tiptap-markdown": "^0.9.0",
+    "typeorm": "^0.3.28",
+    "vue": "^3.5.29",
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
-
+    "@tailwindcss/typography": "^0.5.19"
   }
 }
