@@ -21,4 +21,3 @@ const showFooter = computed(() => !isPlaceholderRoute.value)
   <Footer v-if="showFooter"/>
 </template>
 
-
