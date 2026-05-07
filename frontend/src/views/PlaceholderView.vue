@@ -104,20 +104,18 @@
             @upload-image="handleEditorUploadImage"
         />
 
-
-<!--        <section v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">-->
-<!--          <article-->
-<!--              v-for="card in pageContent.cards"-->
-<!--              :key="card.title"-->
-<!--              class="rounded-4xl bg-surface-container-low p-6 shadow-sm ring-1 ring-white/5"-->
-<!--          >-->
-<!--            <span :class="[card.bg, 'grid h-12 w-12 place-items-center rounded-2xl']">-->
-<!--              <component :is="card.icon" :class="[card.color, 'h-6 w-6']"/>-->
-<!--            </span>-->
-<!--            <h2 class="mt-5 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">{{ card.title }}</h2>-->
-<!--            <p class="mt-2 text-sm font-semibold leading-6 text-on-surface-variant">{{ card.description }}</p>-->
-<!--          </article>-->
-<!--        </section>-->
+        <SearchSection
+            v-else-if="activePage === 'search'"
+            :search-query="searchQuery"
+            :search-role-filter="searchRoleFilter"
+            :search-results="searchResults"
+            :is-searching="isSearching"
+            :search-error="searchError"
+            @update:search-query="searchQuery = $event"
+            @update:search-role-filter="searchRoleFilter = $event"
+            @search="searchPosts"
+            @open-post="openPost"
+        />
 
         <Teleport to="body">
           <Transition name="modal">
@@ -175,6 +173,7 @@ import HomeSection from '@/components/placeholder/sections/HomeSection.vue'
 import SettingsSection from '@/components/placeholder/sections/SettingsSection.vue'
 import ProfileSection from '@/components/placeholder/sections/ProfileSection.vue'
 import CreatePostSection from '@/components/placeholder/sections/CreatePostSection.vue'
+import SearchSection from '@/components/placeholder/sections/SearchSection.vue'
 import PersonalInfoEditor from '@/components/placeholder/sections/PersonalInfoEditor.vue'
 import PasswordEditor from '@/components/placeholder/sections/PasswordEditor.vue'
 import PostModal from '@/components/placeholder/sections/PostModal.vue'
@@ -322,6 +321,12 @@ const postsScrollListenerAttached = ref(false)
 const postsPerPage = 10
 const selectedPost = ref(null)
 const mainScrollContainer = ref(null)
+
+const searchQuery = ref('')
+const searchRoleFilter = ref('All')
+const searchResults = ref([])
+const isSearching = ref(false)
+const searchError = ref('')
 
 const canSubmitPost = computed(() => postForm.title.trim() && postForm.content.trim())
 const postPreviewHtml = computed(() => renderMarkdown(postForm.content || 'Start writing your post to see the preview here.'))
@@ -890,6 +895,26 @@ function mapPost(post) {
   }
 }
 
+async function searchPosts() {
+  searchError.value = ''
+  isSearching.value = true
+  
+  try {
+    const params = {
+      limit: 20,
+    }
+    if (searchQuery.value.trim()) params.q = searchQuery.value.trim()
+    if (searchRoleFilter.value !== 'All') params.role = searchRoleFilter.value.toUpperCase()
+    
+    const {data} = await api.get('/posts', { params })
+    searchResults.value = Array.isArray(data.posts) ? data.posts.map(mapPost) : []
+  } catch (error) {
+    searchError.value = getErrorMessage(error, 'Search failed. Please try again.')
+  } finally {
+    isSearching.value = false
+  }
+}
+
 async function loadPosts({page = 1, append = false} = {}) {
   if (append) {
     if (postsLoadingMore.value || postsLoading.value || !postsHasMore.value) return
@@ -1092,6 +1117,10 @@ onMounted(() => {
     })
   }
 
+  if (activePage.value === 'search') {
+    searchPosts()
+  }
+
   if (activePage.value === 'settings' || activePage.value === 'profile') {
     fetchPersonalInfo()
   }
@@ -1108,6 +1137,10 @@ onUnmounted(() => {
 watch(activePage, (page, previousPage) => {
   if ((page === 'home' || page === 'profile') && previousPage !== page) {
     loadPosts()
+  }
+
+  if (page === 'search' && previousPage !== 'search') {
+    searchPosts()
   }
 
   if (page === 'home') {

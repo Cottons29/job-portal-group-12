@@ -10,8 +10,13 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  async findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
-    const result = await this.postsService.findAll({ page, limit });
+  async findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('q') q?: string,
+    @Query('role') role?: string,
+  ) {
+    const result = await this.postsService.findAll({ page, limit, q, role });
     return result;
   }
 
