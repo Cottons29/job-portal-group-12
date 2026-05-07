@@ -26,48 +26,59 @@
     </div>
 
     <div class="space-y-6">
-      <label class="block">
-        <span class="form-label">Job Title</span>
-        <input
-          v-model="form.title"
-          type="text"
-          placeholder="e.g. Senior Creative Lead"
-          class="form-control h-14"
-        />
-      </label>
+      <div class="grid gap-5 md:grid-cols-2">
+        <label class="block">
+          <span class="form-label">Position</span>
+          <input
+            v-model="form.position"
+            type="text"
+            placeholder="e.g. Frontend Developer"
+            class="form-control h-14"
+          />
+        </label>
+
+        <label class="block">
+          <span class="form-label">Job Title</span>
+          <input
+            v-model="form.title"
+            type="text"
+            placeholder="e.g. Senior Creative Lead"
+            class="form-control h-14"
+          />
+        </label>
+      </div>
 
       <div class="grid gap-5 md:grid-cols-2">
         <label class="block">
           <span class="form-label">Hires Needed</span>
-          <div class="relative">
-            <Users class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              v-model.number="form.hiresNeeded"
-              type="number"
-              min="1"
-              class="form-control h-14 pl-11"
-            />
-          </div>
+          <input
+            v-model.number="form.hiresNeeded"
+            type="number"
+            min="1"
+            step="1"
+            placeholder="1"
+            class="form-control h-14 px-4"
+          />
+          <p class="mt-2 text-xs text-slate-400">Number of people to hire for this position.</p>
         </label>
 
         <label class="block">
           <span class="form-label">Application Deadline</span>
-          <div class="relative">
-            <CalendarDays class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              v-model="form.deadline"
-              type="date"
-              class="form-control h-14 pl-11"
-            />
-          </div>
+          <input
+            v-model="form.deadline"
+            type="date"
+            :min="today"
+            class="form-control h-14 px-4"
+          />
+          <p class="mt-2 text-xs text-slate-400">Deadline must be today or later.</p>
         </label>
       </div>
 
-      <fieldset class="rounded-[8px] bg-blue-50 px-5 py-5">
-        <legend class="mb-4 flex items-center gap-2 text-sm font-bold text-slate-900">
+      <div class="rounded-[8px] bg-blue-50 px-5 py-5">
+        <p class="mb-4 flex items-center gap-2 text-sm font-bold text-slate-900">
           <Languages class="h-4 w-4 text-blue-600" />
           Language Required
-        </legend>
+        </p>
 
         <div class="inline-flex rounded-full bg-white p-1 shadow-sm ring-1 ring-blue-100">
           <button
@@ -81,7 +92,7 @@
             {{ language }}
           </button>
         </div>
-      </fieldset>
+      </div>
 
       <label class="block">
         <span class="form-label">Job Description</span>
@@ -164,11 +175,12 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { CalendarDays, Languages, Lightbulb, Send, Users } from 'lucide-vue-next'
+import { Languages, Lightbulb, Send } from 'lucide-vue-next'
 
 const languages = ['Khmer', 'English', 'Bilingual']
 
 const form = reactive({
+  position: '',
   title: '',
   hiresNeeded: 1,
   deadline: '',
@@ -179,6 +191,8 @@ const form = reactive({
   maxPay: '',
   currency: 'USD',
 })
+
+const today = new Date().toISOString().split('T')[0]
 
 const handleSubmit = () => {
   console.log('Create job posting:', { ...form })

@@ -40,12 +40,12 @@
       </div>
     </div>
 
-    <button
-      type="button"
+    <RouterLink
+      :to="{ name: 'job-detail', params: { id: job.id } }"
       class="shrink-0 rounded-full bg-slate-950 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition hover:bg-blue-600"
     >
       Apply Now
-    </button>
+    </RouterLink>
   </article>
 </template>
 
