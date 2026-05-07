@@ -1,5 +1,8 @@
 <script setup>
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 defineProps({
   profileForm: {
@@ -86,7 +89,7 @@ defineEmits(['openPost'])
                   class="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-xs font-black text-on-primary transition hover:opacity-90"
                   to="/settings"
               >
-                Edit profile
+                {{ t('profilePage.editProfile') }}
               </RouterLink>
             </div>
 
@@ -106,7 +109,7 @@ defineEmits(['openPost'])
               <p>{{ profileBio }}</p>
               <p class="text-on-surface-variant">{{ profileEducation }}</p>
               <p v-if="profileForm.jobType" class="text-on-surface-variant">
-                Looking for {{ profileForm.jobType }}
+                {{ t('profilePage.lookingFor', { jobType: profileForm.jobType }) }}
               </p>
               <a class="inline-flex items-center gap-2 font-black text-primary"
                  href="https://firststep.example/profile" rel="noopener noreferrer" target="_blank">
@@ -120,12 +123,12 @@ defineEmits(['openPost'])
                     v-for="avatar in followedByAvatars"
                     :key="avatar"
                     :src="avatar"
-                    alt="Connection avatar"
+                    :alt="t('profilePage.connectionAvatarAlt')"
                     class="h-8 w-8 rounded-full border-2 border-surface-container-low object-cover"
                 />
               </div>
               <p class="text-xs font-black text-on-surface sm:text-sm">
-                Followed by campus recruiters, mentors + classmates
+                {{ t('profilePage.followedBy') }}
               </p>
             </div>
           </div>

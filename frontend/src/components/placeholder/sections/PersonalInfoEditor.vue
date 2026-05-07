@@ -1,4 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 defineProps({
   editingField: {
     type: Object,
@@ -32,7 +36,7 @@ defineEmits(['update:editValue', 'close', 'save'])
     >
       <div class="mb-5 flex items-start justify-between gap-4">
         <div>
-          <p class="text-xs font-black uppercase tracking-[0.18em] text-primary">Edit personal info</p>
+          <p class="text-xs font-black uppercase tracking-[0.18em] text-primary">{{ t('settings.personal.editTitle') }}</p>
           <h2 class="mt-1 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">
             {{ editingField.label }}
           </h2>
@@ -47,7 +51,7 @@ defineEmits(['update:editValue', 'close', 'save'])
       </div>
 
       <label class="space-y-2">
-        <span class="text-sm font-black text-on-surface">Enter your {{ editingField.label }}</span>
+        <span class="text-sm font-black text-on-surface">{{ t('settings.personal.enterField', { field: editingField.label }) }}</span>
         <input
             :value="editValue"
             @input="$emit('update:editValue', $event.target.value)"
@@ -65,14 +69,14 @@ defineEmits(['update:editValue', 'close', 'save'])
             type="button"
             @click="$emit('close')"
         >
-          Cancel
+          {{ t('settings.personal.cancel') }}
         </button>
         <button
             class="rounded-full bg-primary px-5 py-3 text-sm font-black text-on-primary transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="isSavingProfile"
             type="submit"
         >
-          {{ isSavingProfile ? 'Saving...' : 'Save' }}
+          {{ isSavingProfile ? t('settings.personal.saving') : t('settings.personal.save') }}
         </button>
       </div>
     </form>

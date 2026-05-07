@@ -1,7 +1,10 @@
 <script setup>
 import { ref } from 'vue'
-import { CameraIcon, CommandLineIcon, SparklesIcon } from '@heroicons/vue/24/outline'
+import { useI18n } from 'vue-i18n'
+import { CameraIcon, DocumentIcon, SparklesIcon } from '@heroicons/vue/24/outline'
 import FriendlyEditor from './FriendlyEditor.vue'
+
+const { t } = useI18n()
 
 defineProps({
   postForm: {
@@ -63,26 +66,27 @@ const handleEditorUploadImage = (file, callback) => {
           @submit.prevent="$emit('submit')">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p class="text-xs font-black uppercase tracking-[0.18em] text-primary">New post</p>
-          <h2 class="mt-1 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">Share with your
-            network</h2>
+          <p class="text-xs font-black uppercase tracking-[0.18em] text-primary">{{ t('createPost.newPost') }}</p>
+          <h2 class="mt-1 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">
+            {{ t('createPost.shareWithNetwork') }}
+          </h2>
         </div>
         <button
             class="rounded-full bg-primary px-5 py-3 text-sm font-black text-on-primary transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="isPosting || !canSubmitPost"
             type="submit"
         >
-          {{ isPosting ? 'Publishing...' : 'Publish post' }}
+          {{ isPosting ? t('createPost.publishing') : t('createPost.publishPost') }}
         </button>
       </div>
 
       <label class="block space-y-2">
-        <span class="text-sm font-black text-on-surface">Title</span>
+        <span class="text-sm font-black text-on-surface">{{ t('createPost.title') }}</span>
         <input
             v-model="postForm.title"
             class="w-full rounded-2xl bg-surface px-4 py-3 text-sm font-bold text-on-surface outline-none ring-1 ring-outline/30 transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
             maxlength="100"
-            placeholder="What do you want to share?"
+            :placeholder="t('createPost.titlePlaceholder')"
             type="text"
         />
       </label>
@@ -103,7 +107,7 @@ const handleEditorUploadImage = (file, callback) => {
                 ]"
               >
                 <SparklesIcon class="h-3 w-3" />
-                Friendly
+                {{ t('createPost.friendly') }}
               </button>
               <button
                 type="button"
@@ -113,15 +117,15 @@ const handleEditorUploadImage = (file, callback) => {
                   isMarkdownMode ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
                 ]"
               >
-                <CommandLineIcon class="h-3 w-3" />
-                Markdown
+                <DocumentIcon class="h-3 w-3" />
+                {{ t('createPost.markdown') }}
               </button>
             </div>
           </div>
           <label
               v-if="isMarkdownMode"
               class="inline-flex cursor-pointer items-center rounded-full bg-surface-container-high px-4 py-2 text-xs font-black text-on-surface transition hover:bg-surface-container-highest">
-            {{ isUploadingMarkdownImage ? 'Uploading images...' : 'Upload markdown images' }}
+            {{ isUploadingMarkdownImage ? t('createPost.uploadingImages') : t('createPost.uploadMarkdownImages') }}
             <input
                 class="sr-only"
                 accept="image/*"
@@ -137,12 +141,12 @@ const handleEditorUploadImage = (file, callback) => {
             v-if="isMarkdownMode"
             v-model="postForm.content"
             class="min-h-72 w-full resize-y rounded-[1.25rem] bg-surface px-4 py-3 text-sm font-bold leading-6 text-on-surface outline-none ring-1 ring-outline/30 transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
-            placeholder="Write with markdown: **bold**, _italic_, # headings, lists, links, and uploaded images."
+            :placeholder="t('createPost.markdownPlaceholder')"
         />
         <FriendlyEditor
           v-else
           v-model="postForm.content"
-          placeholder="Share a career update or ask your network..."
+          :placeholder="t('createPost.friendlyPlaceholder')"
           @uploadImage="handleEditorUploadImage"
         />
       </div>
@@ -156,10 +160,10 @@ const handleEditorUploadImage = (file, callback) => {
 
     <aside class="space-y-5 xl:sticky xl:top-28 xl:h-fit">
       <article class="rounded-[2rem] bg-surface-container-low p-5 shadow-sm ring-1 ring-white/5">
-        <p class="text-xs font-black uppercase tracking-[0.18em] text-primary">Preview</p>
+        <p class="text-xs font-black uppercase tracking-[0.18em] text-primary">{{ t('createPost.preview') }}</p>
         <h2 class="mt-3 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">
-          {{ postForm.title || 'Your post title' }}</h2>
-        <img v-if="postPhotoPreview" :src="postPhotoPreview" :alt="postPhotoName || 'Post photo preview'"
+          {{ postForm.title || t('createPost.previewTitleFallback') }}</h2>
+        <img v-if="postPhotoPreview" :src="postPhotoPreview" :alt="postPhotoName || t('createPost.postPhotoPreviewAlt')"
              class="mt-4 max-h-64 w-full rounded-[1.25rem] object-cover"/>
         <div
             class="create-post-preview mt-4 text-sm font-semibold leading-6 text-on-surface-variant"
@@ -168,12 +172,12 @@ const handleEditorUploadImage = (file, callback) => {
       </article>
 
       <article class="rounded-[2rem] bg-surface-container-low p-5 shadow-sm ring-1 ring-white/5">
-        <h3 class="font-display text-xl font-black tracking-[-0.04em] text-on-surface">Markdown tips</h3>
+        <h3 class="font-display text-xl font-black tracking-[-0.04em] text-on-surface">{{ t('createPost.markdownTips') }}</h3>
         <ul class="mt-3 space-y-2 text-sm font-bold text-on-surface-variant">
-          <li><span class="text-primary">#</span> Heading</li>
-          <li><span class="text-primary">**bold**</span> and <span class="text-primary">_italic_</span></li>
-          <li><span class="text-primary">-</span> Bullet list item</li>
-          <li><span class="text-primary">[label](https://example.com)</span> Link</li>
+          <li><span class="text-primary">#</span> {{ t('createPost.headingTip') }}</li>
+          <li><span class="text-primary">**bold**</span> {{ t('createPost.emphasisTip') }} <span class="text-primary">_italic_</span></li>
+          <li><span class="text-primary">-</span> {{ t('createPost.bulletTip') }}</li>
+          <li><span class="text-primary">[label](https://example.com)</span> {{ t('createPost.linkTip') }}</li>
         </ul>
       </article>
     </aside>

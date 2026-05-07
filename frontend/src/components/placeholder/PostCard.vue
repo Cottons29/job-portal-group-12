@@ -21,7 +21,10 @@
       ]"
         @click="!full && $emit('open', post)"
     >
-      <h2 class=" font-display text-3xl font-black tracking-[-0.04em] text-on-surface">{{ post.title }}</h2>
+      <p class="text-xs font-black uppercase tracking-[0.2em] text-primary" v-if="post.badge">
+        {{ post.badge === 'Hiring now' ? $t('home.hiringNow') : (post.badge === 'Campus opportunity' ? $t('home.campusOpportunity') : post.badge) }}
+      </p>
+      <h2 class="mt-3 font-display text-3xl font-black tracking-[-0.04em] text-on-surface">{{ post.title }}</h2>
       <div :class="['relative mt-3 max-w-2xl', { 'post-preview': !full }]">
         <div
             class="post-markdown prose prose-sm text-on-surface-variant"
@@ -66,7 +69,7 @@
         </button>
       </div>
       <button class="rounded-full border-2 border-transparent bg-primary px-5 py-2.5 text-sm font-black text-on-primary transition hover:border-primary hover:bg-primary-container hover:text-primary">
-        Apply now
+        {{ $t('home.applyNow') }}
       </button>
     </div>
   </div>

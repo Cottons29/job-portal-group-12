@@ -53,7 +53,7 @@ watch(
         @click="$emit('toggle-labels')"
     >
       <Bars3Icon :class="'h-7 w-7 transition-all duration-300 scale-80'"/>
-      <span v-if="labelsVisible" class="whitespace-nowrap">Hide labels</span>
+      <span v-if="labelsVisible" class="whitespace-nowrap">{{ $t('sidebar.hideLabels') }}</span>
     </button>
 
     <nav class="flex items-center justify-between gap-1 lg:flex-col lg:items-stretch lg:justify-start lg:gap-1.5">
@@ -92,7 +92,7 @@ watch(
         <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#f5df7e]">
           <Cog6ToothIcon class="h-5 w-5 text-[#745b00]"/>
         </span>
-        <SidebarLabel :show-labels="labelsVisible" desktop-only>Settings</SidebarLabel>
+        <SidebarLabel :show-labels="labelsVisible" desktop-only>{{ $t('sidebar.settings') }}</SidebarLabel>
       </RouterLink>
     </div>
 
@@ -121,9 +121,10 @@ watch(
           />
         </span>
         <SidebarLabel :show-labels="labelsVisible" desktop-only>
-          {{ appliedTheme === 'dark' ? 'Light mode' : 'Dark mode' }}
+          {{ appliedTheme === 'dark' ? $t('sidebar.lightMode') : $t('sidebar.darkMode') }}
         </SidebarLabel>
       </button>
+
     </div>
   </aside>
 </template>
@@ -133,7 +134,7 @@ watch(
   transition: all 0.2s ease-in-out;
   aspect-ratio: 1;
   scale: 1.1;
-  --g: / 21.98% 21.98% radial-gradient(#000 calc(71% - 1px), #0000 71%) no-repeat;
+  --g: /21.98% 21.98% radial-gradient(#000 calc(71% - 1px), #0000 71%) no-repeat;
   mask: 100% 50% var(--g), 92.063% 77.032% var(--g), 70.771% 95.482% var(--g), 42.884% 99.491% var(--g), 17.257% 87.787% var(--g), 2.025% 64.087% var(--g), 2.025% 35.913% var(--g), 17.257% 12.213% var(--g), 42.884% 0.509% var(--g), 70.771% 4.518% var(--g), 92.063% 22.968% var(--g), radial-gradient(100% 100%, #000 37.43%, #0000 calc(37.43% + 1px));
 }
 </style>

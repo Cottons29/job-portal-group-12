@@ -22,17 +22,26 @@
       <div id="primary-menu" class="nav-content" :class="{ open: isMenuOpen }">
         <ul class="menu">
           <li>
-            <RouterLink to="/" @click="closeMenu">Browse Jobs</RouterLink>
+            <RouterLink to="/" @click="closeMenu">{{ $t('navbar.browseJobs') }}</RouterLink>
           </li>
           <li>
-            <RouterLink to="/about-us" @click="closeMenu">For Students</RouterLink>
+            <RouterLink to="/about-us" @click="closeMenu">{{ $t('navbar.forStudents') }}</RouterLink>
           </li>
           <li>
-            <RouterLink to="/contact" @click="closeMenu">For Employers</RouterLink>
+            <RouterLink to="/contact" @click="closeMenu">{{ $t('navbar.forEmployers') }}</RouterLink>
           </li>
         </ul>
 
-        <RouterLink class="login-button" to="/auth" @click="closeMenu">Log In</RouterLink>
+        <button
+          class="lang-toggle"
+          type="button"
+          @click="toggleLocale"
+          :aria-label="`Switch to ${locale === 'en' ? 'Khmer' : 'English'}`"
+        >
+          🌐 {{ locale === 'en' ? 'KM' : 'EN' }}
+        </button>
+
+        <RouterLink class="login-button" to="/auth" @click="closeMenu">{{ $t('navbar.logIn') }}</RouterLink>
       </div>
     </nav>
   </header>
@@ -41,11 +50,17 @@
 <script setup>
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
+const { locale } = useI18n()
 const isMenuOpen = ref(false)
 
 const closeMenu = () => {
   isMenuOpen.value = false
+}
+
+const toggleLocale = () => {
+  locale.value = locale.value === 'en' ? 'km' : 'en'
 }
 </script>
 
@@ -150,6 +165,30 @@ const closeMenu = () => {
 .login-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 18px 32px rgba(37, 99, 235, 0.34);
+}
+
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 0 16px;
+  color: var(--fs-on-surface, #0f172a);
+  background: var(--fs-surface-container-low, #f1f5f9);
+  border: 1px solid var(--fs-outline-variant, #e2e8f0);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 800;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.lang-toggle:hover {
+  background: var(--fs-surface-container, #e2e8f0);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 .menu-toggle {

@@ -1,4 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 defineProps({
   passwordForm: {
     type: Object,
@@ -28,9 +32,9 @@ defineEmits(['close', 'submit'])
     >
       <div class="mb-5 flex items-start justify-between gap-4">
         <div>
-          <p class="text-xs font-black uppercase tracking-[0.18em] text-primary">Edit security</p>
+          <p class="text-xs font-black uppercase tracking-[0.18em] text-primary">{{ t('settings.security.editTitle') }}</p>
           <h2 class="mt-1 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">
-            Password
+            {{ t('settings.security.password') }}
           </h2>
         </div>
         <button
@@ -44,31 +48,31 @@ defineEmits(['close', 'submit'])
 
       <div class="space-y-4">
         <label class="space-y-2">
-          <span class="text-sm font-black text-on-surface">Current password</span>
+          <span class="text-sm font-black text-on-surface">{{ t('settings.security.currentPassword') }}</span>
           <input
               v-model="passwordForm.current"
               class="mt-3 mb-3 w-full rounded-2xl bg-surface px-4 py-3 text-sm font-bold text-on-surface outline-none ring-1 ring-outline/30 transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
-              placeholder="Enter current password"
+              :placeholder="t('settings.security.currentPasswordPlaceholder')"
               type="password"
           />
         </label>
 
         <label class="space-y-2">
-          <span class="text-sm font-black text-on-surface">New password</span>
+          <span class="text-sm font-black text-on-surface">{{ t('settings.security.newPassword') }}</span>
           <input
               v-model="passwordForm.next"
               class="mt-3 mb-3 w-full rounded-2xl bg-surface px-4 py-3 text-sm font-bold text-on-surface outline-none ring-1 ring-outline/30 transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
-              placeholder="Create new password"
+              :placeholder="t('settings.security.newPasswordPlaceholder')"
               type="password"
           />
         </label>
 
         <label class="space-y-2">
-          <span class="mt-3 mb-3 text-sm font-black text-on-surface">Confirm password</span>
+          <span class="mt-3 mb-3 text-sm font-black text-on-surface">{{ t('settings.security.confirmPassword') }}</span>
           <input
               v-model="passwordForm.confirm"
               class="w-full mt-4 rounded-2xl bg-surface px-4 py-3 text-sm font-bold text-on-surface outline-none ring-1 ring-outline/30 transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
-              placeholder="Repeat new password"
+              :placeholder="t('settings.security.confirmPasswordPlaceholder')"
               type="password"
           />
         </label>
@@ -76,7 +80,7 @@ defineEmits(['close', 'submit'])
 
       <p v-if="passwordError" class="mt-3 text-xs font-bold text-red-300">{{ passwordError }}</p>
       <p class="mt-3 text-xs font-bold text-on-surface-variant">
-        Minimum 8 characters with a mix of letters, numbers, and symbols is recommended.
+        {{ t('settings.security.passwordRecommendation') }}
       </p>
 
       <div class="mt-6 flex justify-end gap-3">
@@ -85,14 +89,14 @@ defineEmits(['close', 'submit'])
             type="button"
             @click="$emit('close')"
         >
-          Cancel
+          {{ t('settings.security.cancel') }}
         </button>
         <button
             class="rounded-full bg-primary px-5 py-3 text-sm font-black text-on-primary transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="passwordLoading"
             type="submit"
         >
-          {{ passwordLoading ? 'Updating...' : 'Save' }}
+          {{ passwordLoading ? t('settings.security.updating') : t('settings.security.save') }}
         </button>
       </div>
     </form>

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-surface text-on-surface lg:overflow-hidden">
-    <div class="mx-auto flex min-h-screen max-w-360 bg-surface">
+    <div class="mx-auto flex min-h-screen w-full bg-surface">
       <PlaceholderSidebar
           :items="sidebarItems"
           :show-labels="showSidebarLabels"
@@ -28,7 +28,7 @@
                 <MagnifyingGlassIcon class="h-5 w-5 text-primary"/>
                 <input
                     class="w-full bg-transparent outline-none placeholder:text-on-surface-variant/70"
-                    placeholder="Search jobs, people, companies"
+                    :placeholder="t('home.searchPlaceholder')"
                 />
               </label>
             </div>
@@ -63,7 +63,10 @@
             :profile-load-error="profileLoadError"
             :security-rows="securityRows"
             :settings-menu-items="settingsMenuItems"
+            :language-options="languageOptions"
+            :current-locale="locale"
             @update:active-settings-section="activeSettingsSection = $event"
+            @update:locale="locale = $event"
             @open-personal-info-editor="openPersonalInfoEditor"
             @handle-logout="handleLogout"
         />
@@ -102,19 +105,19 @@
         />
 
 
-        <section v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <article
-              v-for="card in pageContent.cards"
-              :key="card.title"
-              class="rounded-[2rem] bg-surface-container-low p-6 shadow-sm ring-1 ring-white/5"
-          >
-            <span :class="[card.bg, 'grid h-12 w-12 place-items-center rounded-2xl']">
-              <component :is="card.icon" :class="[card.color, 'h-6 w-6']"/>
-            </span>
-            <h2 class="mt-5 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">{{ card.title }}</h2>
-            <p class="mt-2 text-sm font-semibold leading-6 text-on-surface-variant">{{ card.description }}</p>
-          </article>
-        </section>
+<!--        <section v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">-->
+<!--          <article-->
+<!--              v-for="card in pageContent.cards"-->
+<!--              :key="card.title"-->
+<!--              class="rounded-4xl bg-surface-container-low p-6 shadow-sm ring-1 ring-white/5"-->
+<!--          >-->
+<!--            <span :class="[card.bg, 'grid h-12 w-12 place-items-center rounded-2xl']">-->
+<!--              <component :is="card.icon" :class="[card.color, 'h-6 w-6']"/>-->
+<!--            </span>-->
+<!--            <h2 class="mt-5 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">{{ card.title }}</h2>-->
+<!--            <p class="mt-2 text-sm font-semibold leading-6 text-on-surface-variant">{{ card.description }}</p>-->
+<!--          </article>-->
+<!--        </section>-->
 
         <Teleport to="body">
           <Transition name="modal">
@@ -164,6 +167,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {isAxiosError} from 'axios'
 import {marked} from 'marked'
 import {startRegistration} from '@simplewebauthn/browser'
+import {useI18n} from 'vue-i18n'
 
 import api from '@/lib/api'
 import PlaceholderSidebar from '@/components/placeholder/PlaceholderSidebar.vue'
@@ -177,6 +181,7 @@ import PostModal from '@/components/placeholder/sections/PostModal.vue'
 import {useThemeMode} from '@/composables/useThemeMode'
 import {useAuthStore} from '@/stores/auth'
 import {
+  AcademicCapIcon,
   ArrowRightOnRectangleIcon,
   BellIcon,
   BriefcaseIcon,
@@ -188,11 +193,13 @@ import {
   HomeIcon,
   IdentificationIcon,
   KeyIcon,
+  LanguageIcon,
   LockClosedIcon,
   MagnifyingGlassIcon,
   PhoneIcon,
   PlusCircleIcon,
   ShieldCheckIcon,
+  SparklesIcon,
   SquaresPlusIcon,
   UserGroupIcon,
   UserCircleIcon,
@@ -202,6 +209,7 @@ import {
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const {t, locale} = useI18n()
 const showSidebarLabels = ref(false)
 const {appliedTheme, setThemePreference} = useThemeMode()
 
@@ -225,6 +233,11 @@ const profileForm = reactive({
   currency: 'USD',
   skills: [],
   availability: null,
+  companyName: '',
+  industry: '',
+  address: '',
+  website: '',
+  companyDescription: '',
 })
 
 const profileLoadError = ref('')
@@ -233,6 +246,45 @@ const isSavingProfile = ref(false)
 const editingField = ref(null)
 const editValue = ref('')
 const activeSettingsSection = ref('personal')
+
+const languageOptions = [
+  {
+    label: 'English',
+    nativeName: 'English',
+    value: 'en',
+    description: 'Use FirstStep in English.',
+  },
+  {
+    label: 'Khmer',
+    nativeName: 'ភាសាខ្មែរ',
+    value: 'km',
+    description: 'ប្រើ FirstStep ជាភាសាខ្មែរ។',
+  },
+  {
+    label: 'Chinese (Simplified)',
+    nativeName: '简体中文',
+    value: 'zh-CN',
+    description: '使用简体中文浏览 FirstStep。',
+  },
+  {
+    label: 'Chinese (Traditional)',
+    nativeName: '繁體中文',
+    value: 'zh-TW',
+    description: '使用繁體中文瀏覽 FirstStep。',
+  },
+  {
+    label: 'Japanese',
+    nativeName: '日本語',
+    value: 'ja',
+    description: 'FirstStep を日本語で使用します。',
+  },
+  {
+    label: 'French',
+    nativeName: 'Français',
+    value: 'fr',
+    description: 'Utiliser FirstStep en français.',
+  },
+]
 
 const passwordForm = reactive({
   current: '',
@@ -350,7 +402,7 @@ function closePost() {
 
 const settingsMenuItems = computed(() => [
   {
-    label: 'Personal info',
+    label: t('settings.personalInfo'),
     section: 'personal',
     icon: IdentificationIcon,
     bg: 'bg-[#8fd99b]',
@@ -358,7 +410,7 @@ const settingsMenuItems = computed(() => [
     active: activeSettingsSection.value === 'personal'
   },
   {
-    label: 'Security & sign-in',
+    label: t('settings.securitySignIn'),
     section: 'security',
     icon: LockClosedIcon,
     bg: 'bg-[#8ccaff]',
@@ -366,7 +418,7 @@ const settingsMenuItems = computed(() => [
     active: activeSettingsSection.value === 'security'
   },
   {
-    label: 'Data & privacy',
+    label: t('settings.dataPrivacy'),
     section: 'privacy',
     icon: ShieldCheckIcon,
     bg: 'bg-[#d7b7ff]',
@@ -374,7 +426,15 @@ const settingsMenuItems = computed(() => [
     active: activeSettingsSection.value === 'privacy'
   },
   {
-    label: 'Logout',
+    label: t('settings.languages'),
+    section: 'languages',
+    icon: LanguageIcon,
+    bg: 'bg-[#f5df7e]',
+    color: 'text-[#745b00]',
+    active: activeSettingsSection.value === 'languages'
+  },
+  {
+    label: t('settings.logout'),
     section: 'logout',
     icon: ArrowRightOnRectangleIcon,
     bg: 'bg-red-500/15',
@@ -387,96 +447,145 @@ const settingsMenuItems = computed(() => [
 
 const securityRows = computed(() => [
   {
-    label: 'Passkey login',
+    label: t('settings.security.passkeyLogin'),
     values: [
       passkeys.value.length
-          ? `${passkeys.value.length} passkey${passkeys.value.length === 1 ? '' : 's'} added`
-          : 'Sign in with Face ID, Touch ID, Windows Hello, or your device screen lock.',
+          ? t(passkeys.value.length === 1 ? 'settings.security.passkeyAdded' : 'settings.security.passkeysAdded', { count: passkeys.value.length })
+          : t('settings.security.passkeyDescription'),
     ],
     icon: KeyIcon,
-    buttonLabel: passkeyLoading.value ? 'Adding...' : 'Add passkey',
+    buttonLabel: passkeyLoading.value ? t('settings.security.addingPasskey') : t('settings.security.addPasskey'),
     action: addPasskey,
   },
   {
-    label: 'Password',
-    values: [passwordMessage.value || 'Minimum 8 characters with a mix of letters, numbers, and symbols is recommended.'],
+    label: t('settings.security.password'),
+    values: [passwordMessage.value || t('settings.security.passwordRecommendation')],
     icon: LockClosedIcon,
     action: openPasswordEditor,
   },
 ])
 
-const personalInfoRows = computed(() => [
-  {
-    label: 'Profile picture',
-    field: 'avatar',
-    values: [],
-    icon: CameraIcon,
-    avatar: profileForm.avatar || defaultAvatar,
-    placeholder: 'Paste profile image URL',
-    inputType: 'url',
-  },
-  {
-    label: 'Name',
-    field: 'name',
-    values: [profileForm.name || 'Your name'],
-    icon: IdentificationIcon,
-    placeholder: 'Enter your full name',
-    inputType: 'text',
-  },
-  {
-    label: 'Username',
-    field: 'user_name',
-    values: [profileForm.user_name || '<Blank>'],
-    icon: UserCircleIcon,
-    placeholder: 'Enter your username',
-    inputType: 'text',
-  },
-  {
-    label: 'Gender',
-    field: 'gender',
-    values: [profileForm.gender || 'Not set'],
-    icon: UserIcon,
-    placeholder: 'Enter your gender',
-    inputType: 'text',
-  },
-  {
-    label: 'Email',
-    field: 'email',
-    values: [profileForm.email || 'No email linked'],
-    icon: EnvelopeIcon,
-    placeholder: 'Enter your email address',
-    inputType: 'email',
-  },
-  {
-    label: 'Phone',
-    field: 'phone',
-    values: [profileForm.phone || 'No phone number'],
-    icon: PhoneIcon,
-    placeholder: 'Enter your phone number',
-    inputType: 'tel',
-  },
-])
+const personalInfoRows = computed(() => {
+  const isEmployer = auth.user?.role === 'employer'
+  const isStudent = auth.user?.role === 'student'
+  
+  const baseRows = [
+    {
+      label: t('settings.personal.profilePicture'),
+      field: 'avatar',
+      values: [],
+      icon: CameraIcon,
+      avatar: profileForm.avatar || defaultAvatar,
+      placeholder: t('settings.personal.profilePicturePlaceholder'),
+      inputType: 'url',
+    },
+    {
+      label: isEmployer ? t('settings.personal.companyName') : t('settings.personal.name'),
+      field: isEmployer ? 'companyName' : 'name',
+      values: [isEmployer ? profileForm.companyName || t('settings.personal.yourCompany') : profileForm.name || t('settings.personal.yourName')],
+      icon: isEmployer ? BuildingStorefrontIcon : IdentificationIcon,
+      placeholder: isEmployer ? t('settings.personal.companyNamePlaceholder') : t('settings.personal.namePlaceholder'),
+      inputType: 'text',
+    },
+    {
+      label: t('settings.personal.username'),
+      field: 'user_name',
+      values: [profileForm.user_name || t('settings.personal.blank')],
+      icon: UserCircleIcon,
+      placeholder: t('settings.personal.usernamePlaceholder'),
+      inputType: 'text',
+    },
+    {
+      label: t('settings.personal.email'),
+      field: 'email',
+      values: [profileForm.email || t('settings.personal.noEmailLinked')],
+      icon: EnvelopeIcon,
+      placeholder: t('settings.personal.emailPlaceholder'),
+      inputType: 'email',
+    },
+    {
+      label: t('settings.personal.phone'),
+      field: 'phone',
+      values: [profileForm.phone || t('settings.personal.noPhoneNumber')],
+      icon: PhoneIcon,
+      placeholder: t('settings.personal.phonePlaceholder'),
+      inputType: 'tel',
+    },
+  ]
 
-const pages = {
+  const studentRows = [
+    {
+      label: t('settings.personal.university'),
+      field: 'university',
+      values: [profileForm.university || t('settings.personal.notSet')],
+      icon: AcademicCapIcon,
+      placeholder: t('settings.personal.universityPlaceholder'),
+      inputType: 'text',
+    },
+    {
+      label: t('settings.personal.major'),
+      field: 'major',
+      values: [profileForm.major || t('settings.personal.notSet')],
+      icon: SparklesIcon,
+      placeholder: t('settings.personal.majorPlaceholder'),
+      inputType: 'text',
+    },
+  ]
+
+  const employerRows = [
+    {
+      label: t('settings.personal.industry'),
+      field: 'industry',
+      values: [profileForm.industry || t('settings.personal.notSet')],
+      icon: BriefcaseIcon,
+      placeholder: t('settings.personal.industryPlaceholder'),
+      inputType: 'text',
+    },
+    {
+      label: t('settings.personal.address'),
+      field: 'address',
+      values: [profileForm.address || t('settings.personal.notSet')],
+      icon: HomeIcon,
+      placeholder: t('settings.personal.addressPlaceholder'),
+      inputType: 'text',
+    },
+    {
+      label: t('settings.personal.website'),
+      field: 'website',
+      values: [profileForm.website || t('settings.personal.noWebsite')],
+      icon: SparklesIcon,
+      placeholder: t('settings.personal.websitePlaceholder'),
+      inputType: 'url',
+    },
+  ]
+
+  if (isEmployer) {
+    return [...baseRows, ...employerRows]
+  }
+
+  return [...baseRows, ...studentRows]
+})
+
+const pages = computed(() => ({
   home: {
-    eyebrow: 'Home feed',
-    title: `Welcome back, ${profileForm.user_name || 'Guest'}`,
+    eyebrow: t('home.eyebrow'),
+    title: t('home.welcomeBack'),
   },
   search: {
-    eyebrow: 'Search',
-    title: 'Find jobs, people, and companies.',
-    description: 'Use this area to discover opportunities without leaving the dashboard layout.',
+    eyebrow: t('dashboardPages.search.eyebrow'),
+    title: t('dashboardPages.search.title'),
+    description: t('dashboardPages.search.description'),
     cards: [
       {
-        title: 'Job search',
-        description: 'Search part-time work, internships, and campus opportunities matched to your skills.',
+        title: t('dashboardPages.search.cards.0.title'),
+        description: t('dashboardPages.search.cards.0.description'),
         icon: MagnifyingGlassIcon,
         bg: 'bg-[#8fd99b]',
         color: 'text-[#1f6c3b]'
       },
       {
-        title: 'Company discovery',
-        description: 'Browse employers, saved companies, and new hiring teams in one place.',
+        title: t('dashboardPages.search.cards.1.title'),
+        description: t('dashboardPages.search.cards.1.description'),
         icon: BuildingStorefrontIcon,
         bg: 'bg-[#ffc28e]',
         color: 'text-[#83460e]'
@@ -484,20 +593,20 @@ const pages = {
     ],
   },
   messages: {
-    eyebrow: 'Message',
-    title: 'Keep conversations organized.',
-    description: 'Messages from recruiters, classmates, and mentors can live inside this shared dashboard shell.',
+    eyebrow: t('dashboardPages.messages.eyebrow'),
+    title: t('dashboardPages.messages.title'),
+    description: t('dashboardPages.messages.description'),
     cards: [
       {
-        title: 'Recruiter inbox',
-        description: 'Review employer follow-ups and interview requests as soon as messaging is connected.',
+        title: t('dashboardPages.messages.cards.0.title'),
+        description: t('dashboardPages.messages.cards.0.description'),
         icon: ChatBubbleOvalLeftEllipsisIcon,
         bg: 'bg-[#8ccaff]',
         color: 'text-[#235d84]'
       },
       {
-        title: 'Saved contacts',
-        description: 'Keep important contacts ready for future application updates.',
+        title: t('dashboardPages.messages.cards.1.title'),
+        description: t('dashboardPages.messages.cards.1.description'),
         icon: UserCircleIcon,
         bg: 'bg-[#ffc28e]',
         color: 'text-[#83460e]'
@@ -505,20 +614,20 @@ const pages = {
     ],
   },
   notifications: {
-    eyebrow: 'Notification',
-    title: 'See important updates.',
-    description: 'Application alerts, account reminders, and platform news are shown in the same dashboard experience.',
+    eyebrow: t('dashboardPages.notifications.eyebrow'),
+    title: t('dashboardPages.notifications.title'),
+    description: t('dashboardPages.notifications.description'),
     cards: [
       {
-        title: 'Application alerts',
-        description: 'Track status changes, deadlines, and employer activity from one place.',
+        title: t('dashboardPages.notifications.cards.0.title'),
+        description: t('dashboardPages.notifications.cards.0.description'),
         icon: BellIcon,
         bg: 'bg-[#d7b7ff]',
         color: 'text-[#5b36a8]'
       },
       {
-        title: 'Job reminders',
-        description: 'Get notified when saved jobs are closing or matching roles are posted.',
+        title: t('dashboardPages.notifications.cards.1.title'),
+        description: t('dashboardPages.notifications.cards.1.description'),
         icon: BriefcaseIcon,
         bg: 'bg-[#8fd99b]',
         color: 'text-[#1f6c3b]'
@@ -526,20 +635,20 @@ const pages = {
     ],
   },
   create: {
-    eyebrow: 'Create',
-    title: 'Create something new.',
-    description: 'Start posts, job alerts, or profile updates from inside the placeholder layout.',
+    eyebrow: t('dashboardPages.create.eyebrow'),
+    title: t('dashboardPages.create.title'),
+    description: t('dashboardPages.create.description'),
     cards: [
       {
-        title: 'Create post',
-        description: 'Share updates, questions, or availability with your student job network.',
+        title: t('dashboardPages.create.cards.0.title'),
+        description: t('dashboardPages.create.cards.0.description'),
         icon: PlusCircleIcon,
         bg: 'bg-[#f8a9dc]',
         color: 'text-[#9b1f70]'
       },
       {
-        title: 'Job alert',
-        description: 'Prepare saved alerts for roles that fit your schedule and interests.',
+        title: t('dashboardPages.create.cards.1.title'),
+        description: t('dashboardPages.create.cards.1.description'),
         icon: BriefcaseIcon,
         bg: 'bg-[#8fd99b]',
         color: 'text-[#1f6c3b]'
@@ -547,20 +656,20 @@ const pages = {
     ],
   },
   profile: {
-    eyebrow: 'Profile',
-    title: 'Build your student profile.',
-    description: 'Showcase your skills, availability, and application progress in the same navigation shell.',
+    eyebrow: t('dashboardPages.profile.eyebrow'),
+    title: t('dashboardPages.profile.title'),
+    description: t('dashboardPages.profile.description'),
     cards: [
       {
-        title: 'Student summary',
-        description: 'Add your headline, study program, experience, and preferred job types.',
+        title: t('dashboardPages.profile.cards.0.title'),
+        description: t('dashboardPages.profile.cards.0.description'),
         icon: UserCircleIcon,
         bg: 'bg-[#ffc28e]',
         color: 'text-[#83460e]'
       },
       {
-        title: 'Profile strength',
-        description: 'Complete key sections to improve employer matching and visibility.',
+        title: t('dashboardPages.profile.cards.1.title'),
+        description: t('dashboardPages.profile.cards.1.description'),
         icon: BriefcaseIcon,
         bg: 'bg-[#a8c0ff]',
         color: 'text-[#243c78]'
@@ -568,13 +677,13 @@ const pages = {
     ],
   },
   settings: {
-    eyebrow: 'Account settings',
-    title: 'Manage your profile.',
-    description: 'Update your name, email address, and password to keep your student account accurate and secure.',
+    eyebrow: t('dashboardPages.settings.eyebrow'),
+    title: t('dashboardPages.settings.title'),
+    description: t('dashboardPages.settings.description'),
   },
-}
+}))
 
-const pageContent = computed(() => pages[activePage.value] || pages.home)
+const pageContent = computed(() => pages.value[activePage.value] || pages.value.home)
 
 function getErrorMessage(error, fallback) {
   if (isAxiosError(error)) {
@@ -866,8 +975,11 @@ function applyProfileData(profile, user) {
   if (profile?.gender) profileForm.gender = profile.gender
   if (profile?.phone || user?.phone) profileForm.phone = profile?.phone || user.phone
   if (profile?.profileImageUrl) profileForm.avatar = profile.profileImageUrl
+  if (profile?.logoUrl) profileForm.avatar = profile.logoUrl
+  
   profileForm.user_name = user?.user_name || ''
   if (user?.email) profileForm.email = user.email
+  
   if (profile?.university) profileForm.university = profile.university
   if (profile?.major) profileForm.major = profile.major
   if (profile?.yearLevel) profileForm.yearLevel = profile.yearLevel
@@ -877,14 +989,23 @@ function applyProfileData(profile, user) {
   if (profile?.currency) profileForm.currency = profile.currency
   if (Array.isArray(profile?.skills)) profileForm.skills = profile.skills
   if (profile?.availability) profileForm.availability = profile.availability
+  
+  if (profile?.companyName) profileForm.companyName = profile.companyName
+  if (profile?.industry) profileForm.industry = profile.industry
+  if (profile?.address) profileForm.address = profile.address
+  if (profile?.website) profileForm.website = profile.website
+  if (profile?.companyDescription) profileForm.companyDescription = profile.companyDescription
 }
 
 async function fetchPersonalInfo() {
   profileLoadError.value = ''
 
   try {
+    const isEmployer = auth.user?.role === 'employer'
+    const endpoint = isEmployer ? '/employer-profile/me' : '/student-profile/me'
+    
     const [{data: profileData}, accountUser] = await Promise.all([
-      api.get('/student-profile/me'),
+      api.get(endpoint),
       auth.refreshUser(),
     ])
 
@@ -908,21 +1029,32 @@ function closePersonalInfoEditor() {
 
 function buildProfileFormData() {
   const formData = new FormData()
-  formData.append('fullName', profileForm.name || 'Student User')
+  const isEmployer = auth.user?.role === 'employer'
+  
   formData.append('user_name', profileForm.user_name || '')
   formData.append('email', profileForm.email || '')
-  formData.append('gender', profileForm.gender || '')
   formData.append('phone', profileForm.phone || '')
-  formData.append('profileImageUrl', profileForm.avatar || '')
-  formData.append('university', profileForm.university || 'Not set')
-  formData.append('major', profileForm.major || 'Not set')
-  formData.append('yearLevel', profileForm.yearLevel || '')
-  formData.append('bio', profileForm.bio || '')
-  formData.append('jobType', profileForm.jobType || '')
-  formData.append('expectedSalary', profileForm.expectedSalary || '')
-  formData.append('currency', profileForm.currency || 'USD')
-  formData.append('skills', JSON.stringify(profileForm.skills || []))
-  formData.append('availability', JSON.stringify(profileForm.availability || null))
+  
+  if (isEmployer) {
+    formData.append('companyName', profileForm.companyName || '')
+    formData.append('industry', profileForm.industry || '')
+    formData.append('address', profileForm.address || '')
+    formData.append('website', profileForm.website || '')
+    formData.append('companyDescription', profileForm.companyDescription || '')
+  } else {
+    formData.append('fullName', profileForm.name || 'Student User')
+    formData.append('gender', profileForm.gender || '')
+    formData.append('profileImageUrl', profileForm.avatar || '')
+    formData.append('university', profileForm.university || 'Not set')
+    formData.append('major', profileForm.major || 'Not set')
+    formData.append('yearLevel', profileForm.yearLevel || '')
+    formData.append('bio', profileForm.bio || '')
+    formData.append('jobType', profileForm.jobType || '')
+    formData.append('expectedSalary', profileForm.expectedSalary || '')
+    formData.append('currency', profileForm.currency || 'USD')
+    formData.append('skills', JSON.stringify(profileForm.skills || []))
+    formData.append('availability', JSON.stringify(profileForm.availability || null))
+  }
   return formData
 }
 
@@ -935,8 +1067,11 @@ async function savePersonalInfoEdit() {
 
   try {
     profileForm[field] = editValue.value.trim()
-    const {data} = await api.post('/student-profile', buildProfileFormData())
-    applyProfileData(data.profile, null)
+    const isEmployer = auth.user?.role === 'employer'
+    const endpoint = isEmployer ? '/employer-profile/setup' : '/student-profile'
+    
+    const {data} = await api.post(endpoint, buildProfileFormData())
+    applyProfileData(isEmployer ? data : data.profile, null)
     closePersonalInfoEditor()
   } catch (error) {
     profileSaveError.value = getErrorMessage(error, 'Failed to save your personal info.')
@@ -1088,10 +1223,10 @@ async function updatePassword() {
   }
 }
 
-const navigationItems = [
-  {label: 'Home', page: 'home', icon: HomeIcon, bg: 'bg-[#a8c0ff]', color: 'text-[#243c78]', to: '/home'},
+const navigationItems = computed(() => [
+  {label: t('sidebar.home'), page: 'home', icon: HomeIcon, bg: 'bg-[#a8c0ff]', color: 'text-[#243c78]', to: '/home'},
   {
-    label: 'Search',
+    label: t('sidebar.search'),
     page: 'search',
     icon: MagnifyingGlassIcon,
     bg: 'bg-[#8fd99b]',
@@ -1099,7 +1234,7 @@ const navigationItems = [
     to: '/search'
   },
   {
-    label: 'Message',
+    label: t('sidebar.messages'),
     page: 'messages',
     icon: ChatBubbleOvalLeftEllipsisIcon,
     bg: 'bg-[#8ccaff]',
@@ -1107,25 +1242,25 @@ const navigationItems = [
     to: '/messages'
   },
   {
-    label: 'Notification',
+    label: t('sidebar.notifications'),
     page: 'notifications',
     icon: BellIcon,
     bg: 'bg-[#d7b7ff]',
     color: 'text-[#5b36a8]',
     to: '/notifications'
   },
-  {label: 'Create', page: 'create', icon: PlusCircleIcon, bg: 'bg-[#f8a9dc]', color: 'text-[#9b1f70]', to: '/create'},
+  {label: t('sidebar.create'), page: 'create', icon: PlusCircleIcon, bg: 'bg-[#f8a9dc]', color: 'text-[#9b1f70]', to: '/create'},
   {
-    label: 'Profile',
+    label: t('sidebar.profile'),
     page: 'profile',
     icon: UserCircleIcon,
     bg: 'bg-[#ffc28e]',
     color: 'text-[#83460e]',
     to: '/profile'
   },
-]
+])
 
-const sidebarItems = computed(() => navigationItems.map((item) => ({
+const sidebarItems = computed(() => navigationItems.value.map((item) => ({
   ...item,
   active: item.page === activePage.value,
 })))
@@ -1139,17 +1274,17 @@ const stories = [
   {name: 'Pi Pay', ring: 'bg-[#f8a9dc]'},
 ]
 
-const composeActions = [
-  {label: 'Post', icon: PlusCircleIcon, color: 'text-[#1a4fa3]'},
-  {label: 'Job alert', icon: BriefcaseIcon, color: 'text-[#246b36]'},
-  {label: 'Company', icon: BuildingStorefrontIcon, color: 'text-[#8a4a11]'},
-]
+const composeActions = computed(() => [
+  {label: t('home.post'), icon: PlusCircleIcon, color: 'text-[#1a4fa3]'},
+  {label: t('home.jobAlert'), icon: BriefcaseIcon, color: 'text-[#246b36]'},
+  {label: t('home.company'), icon: BuildingStorefrontIcon, color: 'text-[#8a4a11]'},
+])
 
-const focusCards = [
-  {label: 'Saved jobs', value: '8', desc: 'Three saved roles close in the next 48 hours.'},
-  {label: 'Applications', value: '5', desc: 'Two employers viewed your student profile today.'},
-  {label: 'Profile strength', value: '86%', desc: 'Add availability to improve match ranking.'},
-]
+const focusCards = computed(() => [
+  {label: t('home.savedJobs'), value: '8', desc: 'Three saved roles close in the next 48 hours.'},
+  {label: t('home.applications'), value: '5', desc: 'Two employers viewed your student profile today.'},
+  {label: t('home.profileStrength'), value: '86%', desc: 'Add availability to improve match ranking.'},
+])
 
 const suggestions = [
   {name: 'Sokha Recruiter', role: 'Hospitality roles near BKK1', bg: 'bg-[#8fd99b]', text: 'text-[#246b36]'},

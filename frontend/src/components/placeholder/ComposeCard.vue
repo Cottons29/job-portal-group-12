@@ -5,7 +5,7 @@
         ST
       </div>
       <button class="flex-1 rounded-full bg-surface-container-low px-5 py-3 text-left text-sm font-bold text-on-surface-variant transition hover:bg-surface-container">
-        Share a career update or ask your network...
+        {{ $t('home.sharePlaceholder') }}
       </button>
     </div>
     <div class="mt-4 grid gap-3 sm:grid-cols-3">

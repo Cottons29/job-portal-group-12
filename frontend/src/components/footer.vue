@@ -5,10 +5,7 @@
       <!-- Brand -->
       <div class="footer-brand">
         <h2>FirstStep</h2>
-        <p>
-          Empowering the next generation of Cambodian talent with opportunities,
-          skills, and innovation.
-        </p>
+        <p>{{ $t('footer.brandDescription') }}</p>
 
         <!-- Social Icons -->
         <div class="socials">
@@ -20,34 +17,54 @@
 
       <!-- Links -->
       <div class="footer-links">
-        <h3>Explore</h3>
-        <a href="#">Browse Jobs</a>
-        <a href="#">For Students</a>
-        <a href="#">For Employers</a>
+        <h3>{{ $t('footer.explore') }}</h3>
+        <a href="#">{{ $t('navbar.browseJobs') }}</a>
+        <a href="#">{{ $t('navbar.forStudents') }}</a>
+        <a href="#">{{ $t('navbar.forEmployers') }}</a>
       </div>
 
       <!-- Support -->
       <div class="footer-links">
-        <h3>Support</h3>
-        <RouterLink to="/about-us">About Us</RouterLink>
-        <RouterLink to="/privacy-policy">Privacy Policy</RouterLink>
-        <RouterLink to="/terms-of-service">Terms of Service</RouterLink>
-        <RouterLink to="/contact">Contact</RouterLink>
+        <h3>{{ $t('footer.support') }}</h3>
+        <RouterLink to="/about-us">{{ $t('footer.aboutUs') }}</RouterLink>
+        <RouterLink to="/privacy-policy">{{ $t('auth.privacyPolicy') }}</RouterLink>
+        <RouterLink to="/terms-of-service">{{ $t('auth.termsOfService') }}</RouterLink>
+        <RouterLink to="/contact">{{ $t('footer.contact') }}</RouterLink>
+      </div>
+
+      <!-- Language Switcher -->
+      <div class="footer-links">
+        <h3>🌐 {{ locale === 'en' ? 'Language' : 'ភាសា' }}</h3>
+        <button
+          class="lang-btn"
+          :class="{ active: locale === 'en' }"
+          @click="locale = 'en'"
+        >
+          🇺🇸 English
+        </button>
+        <button
+          class="lang-btn"
+          :class="{ active: locale === 'km' }"
+          @click="locale = 'km'"
+        >
+          🇰🇭 ខ្មែរ
+        </button>
       </div>
 
     </div>
 
     <!-- Bottom -->
     <div class="footer-bottom">
-      © 2024 FirstStep Editorial. All rights reserved.
+      {{ $t('footer.copyright') }}
     </div>
   </footer>
 </template>
 
-<script>
-export default {
-  name: "Footer",
-};
+<script setup>
+import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+
+const { locale } = useI18n()
 </script>
 
 <style scoped>
@@ -133,5 +150,30 @@ export default {
   .footer-container {
     flex-direction: column;
   }
+}
+
+/* Language toggle */
+.lang-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 6px;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.lang-btn:hover {
+  color: #38bdf8;
+  border-color: #38bdf8;
+}
+
+.lang-btn.active {
+  color: #fff;
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
 }
 </style>

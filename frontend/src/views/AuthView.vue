@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import {
   LockClosedIcon,
@@ -11,6 +12,7 @@ import {
   BuildingOfficeIcon,
 } from '@heroicons/vue/24/outline'
 
+const { t } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 
@@ -46,10 +48,10 @@ function handleSubmit() {
 
         <!-- Editorial heading -->
         <h2 class="font-display text-[1.85rem] font-bold text-on-surface text-center tracking-tight leading-tight">
-          {{ isSignUp ? 'Create your account' : 'Login or SignUp' }}
+          {{ isSignUp ? t('auth.signupTitle') : t('auth.loginTitle') }}
         </h2>
         <p class="mt-2 text-on-surface-variant text-[0.95rem]" style="line-height: 1.6">
-          {{ isSignUp ? 'Start your career journey today.' : 'Join thousands of students building their future.' }}
+          {{ isSignUp ? t('auth.signupSubtitle') : t('auth.loginSubtitle') }}
         </p>
 
         <!-- Login / Sign Up Tabs — tonal layering, no borders -->
@@ -65,7 +67,7 @@ function handleSubmit() {
             ]"
             :style="auth.mode === 'login' ? 'box-shadow: 0 1px 6px rgba(0, 0, 0, 0.28)' : ''"
           >
-            Log In
+            {{ t('auth.logIn') }}
           </button>
           <button
             id="tab-signup"
@@ -78,7 +80,7 @@ function handleSubmit() {
             ]"
             :style="auth.mode === 'signup' ? 'box-shadow: 0 1px 6px rgba(0, 0, 0, 0.28)' : ''"
           >
-            Sign Up
+            {{ t('auth.signUp') }}
           </button>
         </div>
 
@@ -96,7 +98,7 @@ function handleSubmit() {
             :style="auth.role === 'student' ? 'box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28)' : ''"
           >
             <AcademicCapIcon class="w-4 h-4" />
-            Student
+            {{ t('auth.student') }}
           </button>
           <button
             id="role-employer"
@@ -110,7 +112,7 @@ function handleSubmit() {
             :style="auth.role === 'employer' ? 'box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28)' : ''"
           >
             <BuildingOfficeIcon class="w-4 h-4" />
-            Employer
+            {{ t('auth.employer') }}
           </button>
         </div>
 
@@ -136,7 +138,7 @@ function handleSubmit() {
           <!-- Phone Number -->
           <div>
             <label for="phone-input" class="block text-sm font-semibold text-on-surface mb-2">
-              Phone Number
+              {{ t('auth.phoneNumber') }}
             </label>
             <div class="field-shell"
             >
@@ -157,7 +159,7 @@ function handleSubmit() {
           <!-- Password -->
           <div>
             <label for="password-input" class="block text-sm font-semibold text-on-surface mb-2">
-              Password
+              {{ t('auth.password') }}
             </label>
             <div class="field-shell"
             >
@@ -194,7 +196,7 @@ function handleSubmit() {
           >
             <div v-if="isSignUp">
               <label for="confirm-password-input" class="block text-sm font-semibold text-on-surface mb-2">
-                Confirm Password
+                {{ t('auth.confirmPassword') }}
               </label>
               <div class="flex items-center rounded-full bg-surface-container focus-within:bg-surface-container-low transition-all duration-200 border border-outline-variant/30"
                    :style="'box-shadow: none'"
@@ -227,7 +229,7 @@ function handleSubmit() {
           <!-- Forgot Password (login only) -->
           <div v-if="!isSignUp" class="flex justify-end">
             <button type="button" class="text-xs font-semibold text-primary-container hover:text-primary transition-colors cursor-pointer">
-              Forgot password?
+              {{ t('auth.forgotPassword') }}
             </button>
           </div>
 
@@ -247,14 +249,14 @@ function handleSubmit() {
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
-            {{ auth.isLoading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Continue') }}
+            {{ auth.isLoading ? t('auth.pleaseWait') : (isSignUp ? t('auth.createAccount') : t('auth.continue')) }}
           </button>
         </form>
 
         <!-- Divider -->
         <div class="my-6 flex items-center gap-4">
           <div class="flex-1 h-px bg-surface-container"></div>
-          <span class="text-[11px] font-semibold text-on-surface-variant tracking-widest uppercase">or continue with</span>
+          <span class="text-[11px] font-semibold text-on-surface-variant tracking-widest uppercase">{{ t('auth.orContinueWith') }}</span>
           <div class="flex-1 h-px bg-surface-container"></div>
         </div>
 
@@ -270,7 +272,7 @@ function handleSubmit() {
             style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20)"
             aria-label="Continue with passkey"
           >
-            Use passkey
+            {{ t('auth.usePasskey') }}
           </button>
           <button
             id="btn-google"
@@ -301,10 +303,10 @@ function handleSubmit() {
 
         <!-- Terms -->
         <p class="mt-8 text-center text-xs text-on-surface-variant leading-relaxed">
-          By continuing, you agree to FirstStep's
-          <a href="#" class="text-primary-container hover:text-primary font-medium underline underline-offset-2 transition-colors">Terms of Service</a>
+          {{ t('auth.termsText') }}
+          <a href="#" class="text-primary-container hover:text-primary font-medium underline underline-offset-2 transition-colors">{{ t('auth.termsOfService') }}</a>
           and
-          <a href="#" class="text-primary-container hover:text-primary font-medium underline underline-offset-2 transition-colors">Privacy Policy</a>.
+          <a href="#" class="text-primary-container hover:text-primary font-medium underline underline-offset-2 transition-colors">{{ t('auth.privacyPolicy') }}</a>.
         </p>
       </div>
     </div>
@@ -317,5 +319,10 @@ input::placeholder {
 }
 input:focus::placeholder {
   color: transparent;
+}
+
+:global(html[data-theme='dark'] .dark-theme-logo) {
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
 }
 </style>
