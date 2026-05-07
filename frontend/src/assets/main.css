@@ -47,10 +47,10 @@
   --fs-on-secondary-container: #20145f;
   --fs-tertiary: #64748b;
   --fs-tertiary-fixed: #e2e8f0;
-  --fs-surface: #eeeaea;
+  --fs-surface: #e5e5e5;
   --fs-surface-container-lowest: #ffffff;
   --fs-surface-container-low: #f3f9ff;
-  --fs-surface-container: #e2e8f0;
+  --fs-surface-container: #e5e9ee;
   --fs-surface-container-high: #cbd5e1;
   --fs-on-surface: #0f172a;
   --fs-on-surface-variant: #475569;
@@ -99,7 +99,7 @@ body {
   margin: 0;
   background: var(--fs-surface);
   color: var(--fs-on-surface);
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), serif;
 }
 
 /* Khmer locale — use Google Sans across the app */
@@ -109,7 +109,7 @@ html[lang='km'] input,
 html[lang='km'] button,
 html[lang='km'] textarea,
 html[lang='km'] select {
-  font-family: var(--font-khmer);
+  font-family: var(--font-khmer), serif;
 }
 
 button,
@@ -414,7 +414,7 @@ select option {
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 26.25rem;
+    max-width: 34.25rem;
   }
 
   .auth-page__input {

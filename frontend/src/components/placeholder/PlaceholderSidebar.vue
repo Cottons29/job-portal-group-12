@@ -44,7 +44,7 @@ watch(
   >
     <RouterLink to="/home" class="mb-4 hidden justify-center lg:flex">
       <span class="grid h-8 w-8 place-items-center rounded-lg bg-[#a8c0ff] text-sm font-black text-[#25386b]">FS</span>
-      <span v-if="labelsVisible" class="whitespace-nowrap">FirstStep</span>
+<!--      <span v-if="labelsVisible" class="whitespace-nowrap">FirstStep</span>-->
     </RouterLink>
 
     <button

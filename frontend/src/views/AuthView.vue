@@ -36,7 +36,7 @@ function handleSubmit() {
       <div class="auth-page__top-line"></div>
       <div class="auth-page__soft-circle"></div>
 
-      <div class="auth-page__form-content">
+      <div class="auth-page__form-content bg-surface-container-low p-8 rounded-3xl">
         <!-- Logo -->
         <div class="mb-8">
           <img
