@@ -46,7 +46,12 @@
             :posts-loading-more="postsLoadingMore"
             :stories="stories"
             :suggestions="suggestions"
+            :user-role="auth.user?.role"
+            :user-id="auth.user?.id"
+            :applied-post-ids="appliedPostIds"
             @open-post="openPost"
+            @apply="openApplyModal"
+            @view-applicants="openApplicantsModal"
         />
 
         <SettingsSection
@@ -104,20 +109,23 @@
             @upload-image="handleEditorUploadImage"
         />
 
-
-<!--        <section v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">-->
-<!--          <article-->
-<!--              v-for="card in pageContent.cards"-->
-<!--              :key="card.title"-->
-<!--              class="rounded-4xl bg-surface-container-low p-6 shadow-sm ring-1 ring-white/5"-->
-<!--          >-->
-<!--            <span :class="[card.bg, 'grid h-12 w-12 place-items-center rounded-2xl']">-->
-<!--              <component :is="card.icon" :class="[card.color, 'h-6 w-6']"/>-->
-<!--            </span>-->
-<!--            <h2 class="mt-5 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">{{ card.title }}</h2>-->
-<!--            <p class="mt-2 text-sm font-semibold leading-6 text-on-surface-variant">{{ card.description }}</p>-->
-<!--          </article>-->
-<!--        </section>-->
+        <SearchSection
+            v-else-if="activePage === 'search'"
+            :search-query="searchQuery"
+            :search-role-filter="searchRoleFilter"
+            :search-results="searchResults"
+            :is-searching="isSearching"
+            :search-error="searchError"
+            :user-role="auth.user?.role"
+            :user-id="auth.user?.id"
+            :applied-post-ids="appliedPostIds"
+            @update:search-query="searchQuery = $event"
+            @update:search-role-filter="searchRoleFilter = $event"
+            @search="searchPosts"
+            @open-post="openPost"
+            @apply="openApplyModal"
+            @view-applicants="openApplicantsModal"
+        />
 
         <Teleport to="body">
           <Transition name="modal">
@@ -152,7 +160,39 @@
             <PostModal
                 v-if="selectedPost"
                 :post="selectedPost"
+                :user-role="auth.user?.role"
+                :user-id="auth.user?.id"
+                :applied-post-ids="appliedPostIds"
                 @close="closePost"
+                @apply="openApplyModal"
+                @view-applicants="openApplicantsModal"
+            />
+          </Transition>
+        </Teleport>
+
+        <Teleport to="body">
+          <Transition name="modal">
+            <ApplyModal
+              v-if="applyingToPost"
+              :post="applyingToPost"
+              :is-submitting="isSubmittingApplication"
+              :submit-error="applicationSubmitError"
+              @close="closeApplyModal"
+              @submit="submitApplication"
+            />
+          </Transition>
+        </Teleport>
+
+        <Teleport to="body">
+          <Transition name="modal">
+            <ApplicantsModal
+              v-if="viewingApplicantsForPost"
+              :post="viewingApplicantsForPost"
+              :applicants="postApplicants"
+              :is-loading="isLoadingApplicants"
+              :load-error="loadApplicantsError"
+              @close="closeApplicantsModal"
+              @update-status="updateApplicationStatus"
             />
           </Transition>
         </Teleport>
@@ -178,6 +218,8 @@ import CreatePostSection from '@/components/placeholder/sections/CreatePostSecti
 import PersonalInfoEditor from '@/components/placeholder/sections/PersonalInfoEditor.vue'
 import PasswordEditor from '@/components/placeholder/sections/PasswordEditor.vue'
 import PostModal from '@/components/placeholder/sections/PostModal.vue'
+import ApplyModal from '@/components/placeholder/sections/ApplyModal.vue'
+import ApplicantsModal from '@/components/placeholder/sections/ApplicantsModal.vue'
 import {useThemeMode} from '@/composables/useThemeMode'
 import {useAuthStore} from '@/stores/auth'
 import {
@@ -323,6 +365,21 @@ const postsPerPage = 10
 const selectedPost = ref(null)
 const mainScrollContainer = ref(null)
 
+const searchQuery = ref('')
+const searchRoleFilter = ref('All')
+const searchResults = ref([])
+const isSearching = ref(false)
+const searchError = ref('')
+
+const appliedPostIds = ref(new Set())
+const applyingToPost = ref(null)
+const isSubmittingApplication = ref(false)
+const applicationSubmitError = ref('')
+
+const viewingApplicantsForPost = ref(null)
+const postApplicants = ref([])
+const isLoadingApplicants = ref(false)
+const loadApplicantsError = ref('')
 const canSubmitPost = computed(() => postForm.title.trim() && postForm.content.trim())
 const postPreviewHtml = computed(() => renderMarkdown(postForm.content || 'Start writing your post to see the preview here.'))
 
@@ -873,12 +930,16 @@ async function submitPost() {
 function mapPost(post) {
   const authorName = post.author?.user_name || '<Blank>'
   const createdAt = post.createdAt ? new Date(post.createdAt) : null
+  
+  const authorRole = post.author?.role || 'employer'
 
   return {
     id: post.id,
+    authorId: post.author?.id || null,
+    authorRole,
     company: authorName,
     meta: createdAt ? createdAt.toLocaleString() : 'Just now',
-    badge: 'Community post',
+    badge: authorRole?.toLowerCase() === 'employer' ? 'Hiring now' : 'Community post',
     title: post.title,
     desc: post.content,
     descHtml: renderMarkdown(post.content || ''),
@@ -886,10 +947,98 @@ function mapPost(post) {
     tags: [],
     logoBg: 'bg-[#aecbfa]',
     logoText: 'text-[#1a4fa3]',
-    // heroBg: 'bg-[#aecbfa]/35',
   }
 }
 
+async function searchPosts() {
+  searchError.value = ''
+  isSearching.value = true
+  
+  try {
+    const params = {
+      limit: 20,
+    }
+    if (searchQuery.value.trim()) params.q = searchQuery.value.trim()
+    if (searchRoleFilter.value !== 'All') params.role = searchRoleFilter.value.toUpperCase()
+    
+    const {data} = await api.get('/posts', { params })
+    searchResults.value = Array.isArray(data.posts) ? data.posts.map(mapPost) : []
+  } catch (error) {
+    searchError.value = getErrorMessage(error, 'Search failed. Please try again.')
+  } finally {
+    isSearching.value = false
+  }
+}
+
+async function fetchAppliedPosts() {
+  if (auth.user?.role !== 'student') return
+  try {
+    const {data} = await api.get('/applications/me')
+    const appliedIds = data.applications.map(app => app.post.id)
+    appliedPostIds.value = new Set(appliedIds)
+  } catch (error) {
+    console.error('Failed to fetch applied posts:', error)
+  }
+}
+
+function openApplyModal(post) {
+  applyingToPost.value = post
+  applicationSubmitError.value = ''
+}
+
+function closeApplyModal() {
+  applyingToPost.value = null
+  isSubmittingApplication.value = false
+}
+
+async function submitApplication({ postId, coverLetter }) {
+  applicationSubmitError.value = ''
+  isSubmittingApplication.value = true
+  
+  try {
+    await api.post('/applications', { postId, coverLetter })
+    appliedPostIds.value.add(postId)
+    closeApplyModal()
+  } catch (error) {
+    applicationSubmitError.value = getErrorMessage(error, 'Failed to submit application. Please try again.')
+  } finally {
+    isSubmittingApplication.value = false
+  }
+}
+
+async function openApplicantsModal(post) {
+  viewingApplicantsForPost.value = post
+  isLoadingApplicants.value = true
+  loadApplicantsError.value = ''
+  postApplicants.value = []
+  
+  try {
+    const {data} = await api.get(`/applications/post/${post.id}`)
+    postApplicants.value = data.applications
+  } catch (error) {
+    loadApplicantsError.value = getErrorMessage(error, 'Failed to load applicants.')
+  } finally {
+    isLoadingApplicants.value = false
+  }
+}
+
+function closeApplicantsModal() {
+  viewingApplicantsForPost.value = null
+}
+
+async function updateApplicationStatus({ applicationId, status }) {
+  try {
+    await api.patch(`/applications/${applicationId}/status`, { status })
+    // Update local state
+    const appIndex = postApplicants.value.findIndex(a => a.id === applicationId)
+    if (appIndex !== -1) {
+      postApplicants.value[appIndex].status = status
+    }
+  } catch (error) {
+    console.error('Failed to update status:', error)
+    alert('Failed to update application status.')
+  }
+}
 async function loadPosts({page = 1, append = false} = {}) {
   if (append) {
     if (postsLoadingMore.value || postsLoading.value || !postsHasMore.value) return
@@ -1081,6 +1230,8 @@ async function savePersonalInfoEdit() {
 }
 
 onMounted(() => {
+  fetchAppliedPosts()
+
   if (activePage.value === 'home' || activePage.value === 'profile') {
     loadPosts()
   }

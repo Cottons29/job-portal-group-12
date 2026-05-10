@@ -5,10 +5,22 @@ defineProps({
   post: {
     type: Object,
     required: true
+  },
+  userRole: {
+    type: String,
+    default: null
+  },
+  userId: {
+    type: String,
+    default: null
+  },
+  appliedPostIds: {
+    type: Set,
+    default: () => new Set()
   }
 })
 
-defineEmits(['close'])
+defineEmits(['close', 'apply', 'view-applicants'])
 </script>
 
 <template>
@@ -27,7 +39,15 @@ defineEmits(['close'])
           ×
         </button>
       </div>
-      <PostCard :post="post" full />
+      <PostCard 
+        :post="post" 
+        full 
+        :user-role="userRole"
+        :user-id="userId"
+        :applied-post-ids="appliedPostIds"
+        @apply="$emit('apply', $event)"
+        @view-applicants="$emit('view-applicants', $event)"
+      />
     </div>
   </div>
 </template>

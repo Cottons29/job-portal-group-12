@@ -68,8 +68,21 @@
           <component :is="action.icon" class="h-5 w-5" />
         </button>
       </div>
-      <button class="rounded-full border-2 border-transparent bg-primary px-5 py-2.5 text-sm font-black text-on-primary transition hover:border-primary hover:bg-primary-container hover:text-primary">
+      <button class="rounded-full border-2 border-transparent bg-primary px-5 py-2.5 text-sm font-black text-on-primary transition hover:border-primary hover:bg-primary-container hover:text-primary"
+              @click.stop="$emit('apply', post)"
+              v-if="userRole === 'student' && !appliedPostIds.has(post.id)">
         {{ $t('home.applyNow') }}
+      </button>
+      <button class="flex items-center gap-2 rounded-full border-2 border-transparent bg-[#8fd99b]/20 px-5 py-2.5 text-sm font-black text-[#1f6c3b] cursor-default"
+              v-else-if="userRole === 'student' && appliedPostIds.has(post.id)">
+        <CheckCircleIcon class="h-4 w-4" />
+        Applied
+      </button>
+      <button class="flex items-center gap-2 rounded-full border-2 border-transparent bg-primary px-5 py-2.5 text-sm font-black text-on-primary transition hover:border-primary hover:bg-primary-container hover:text-primary"
+              @click.stop="$emit('view-applicants', post)"
+              v-else-if="userRole === 'employer' && userId === post.authorId">
+        <UserGroupIcon class="h-4 w-4" />
+        View applicants
       </button>
     </div>
   </div>
@@ -78,9 +91,11 @@
 <script setup>
 import {
   ChatBubbleOvalLeftEllipsisIcon,
+  CheckCircleIcon,
   EllipsisHorizontalIcon,
   HeartIcon,
   PaperAirplaneIcon,
+  UserGroupIcon,
 } from '@heroicons/vue/24/outline'
 
 defineProps({
@@ -91,10 +106,22 @@ defineProps({
   full: {
     type: Boolean,
     default: false
+  },
+  userRole: {
+    type: String,
+    default: null
+  },
+  userId: {
+    type: String,
+    default: null
+  },
+  appliedPostIds: {
+    type: Set,
+    default: () => new Set()
   }
 })
 
-defineEmits(['open'])
+defineEmits(['open', 'apply', 'view-applicants'])
 
 const actions = [
   { label: 'Like post', icon: HeartIcon },

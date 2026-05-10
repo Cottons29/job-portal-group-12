@@ -9,6 +9,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { StudentProfileModule } from './modules/studentProfile/student-profile.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { EmployerProfileModule } from './modules/employerProfile/employer-profile.module';
+import { ApplicationsModule } from './modules/applications/applications.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { EmployerProfileModule } from './modules/employerProfile/employer-profil
     StudentProfileModule,
     PostsModule,
     EmployerProfileModule,
+    ApplicationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
