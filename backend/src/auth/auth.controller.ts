@@ -13,21 +13,32 @@ import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simp
 import type {Request} from 'express';
 import {AuthService} from './auth.service';
 import {AuthenticatedGuard} from './authenticated.guard';
+import {PayloadEncryptionService} from './payload-encryption.service';
+import type {EncryptedPayloadDto} from './encrypted-payload.dto';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) {
+    constructor(
+        private readonly authService: AuthService,
+        private readonly payloadEncryptionService: PayloadEncryptionService,
+    ) {
     }
 
     private getAuthenticatedUserId(req: Request) {
         return (req as Request & { user?: { sub?: string } }).user?.sub || req.session.userId;
     }
 
+    @Get('encryption-key')
+    getEncryptionKey() {
+        return {publicKey: this.payloadEncryptionService.getPublicKey()};
+    }
+
     @Post('register')
     async register(
-        @Body() body: { phone: string; password: string; role: string },
+        @Body() encryptedBody: EncryptedPayloadDto,
         @Req() req: Request,
     ) {
+        const body = await this.payloadEncryptionService.decrypt<{ phone: string; password: string; role: string }>(encryptedBody);
         const {user, token} = await this.authService.register(
             body.phone,
             body.password,
@@ -39,7 +50,8 @@ export class AuthController {
 
     @Post('login')
     @HttpCode(HttpStatus.OK)
-    async login(@Body() body: { phone: string; password: string }, @Req() req: Request) {
+    async login(@Body() encryptedBody: EncryptedPayloadDto, @Req() req: Request) {
+        const body = await this.payloadEncryptionService.decrypt<{ phone: string; password: string }>(encryptedBody);
         const {user, token} = await this.authService.validateUser(body.phone, body.password);
         req.session.userId = user.id;
         return {message: 'Login successful', user, token};
@@ -98,7 +110,7 @@ export class AuthController {
     @Post('password')
     @HttpCode(HttpStatus.OK)
     async changePassword(
-        @Body() body: { currentPassword: string; newPassword: string },
+        @Body() encryptedBody: EncryptedPayloadDto,
         @Req() req: Request,
     ) {
         const userId = this.getAuthenticatedUserId(req);
@@ -106,13 +118,15 @@ export class AuthController {
             throw new UnauthorizedException('Not authenticated');
         }
 
+        const body = await this.payloadEncryptionService.decrypt<{ currentPassword: string; newPassword: string }>(encryptedBody);
         await this.authService.changePassword(userId, body.currentPassword, body.newPassword);
         return {message: 'Password updated successfully'};
     }
 
     @Post('send-otp')
     @HttpCode(HttpStatus.OK)
-    async sendOtp(@Body() body: { email: string }) {
+    async sendOtp(@Body() encryptedBody: EncryptedPayloadDto) {
+        const body = await this.payloadEncryptionService.decrypt<{ email: string }>(encryptedBody);
         await this.authService.sendOtp(body.email);
         return {message: 'Verification code sent to email.'};
     }
@@ -121,9 +135,10 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthenticatedGuard)
     async verifyOtp(
-        @Body() body: { email: string; code: string; userId?: string },
+        @Body() encryptedBody: EncryptedPayloadDto,
         @Req() req: Request,
     ) {
+        const body = await this.payloadEncryptionService.decrypt<{ email: string; code: string; userId?: string }>(encryptedBody);
         // Extract userId from the decoded JWT payload added by AuthenticatedGuard
         const userId = this.getAuthenticatedUserId(req) || body.userId;
         if (!userId) {

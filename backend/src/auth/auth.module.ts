@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { User } from '../modules/user/user.entity';
 import { PasskeyCredential } from './passkey-credential.entity';
+import { PayloadEncryptionService } from './payload-encryption.service';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { PasskeyCredential } from './passkey-credential.entity';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, PayloadEncryptionService],
   exports: [AuthService],
 })
 export class AuthModule {}
