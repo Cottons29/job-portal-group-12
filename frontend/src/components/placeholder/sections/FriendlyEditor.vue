@@ -104,7 +104,7 @@ const setLink = () => {
 </script>
 
 <template>
-  <div v-if="editor" class="overflow-hidden rounded-[1.25rem] bg-surface ring-1 ring-outline/30 transition-all focus-within:ring-2 focus-within:ring-primary">
+  <div v-if="editor" class="overflow-hidden rounded-[1.25rem] bg-surface transition-all focus-within:ring-2 focus-within:ring-primary">
     <div class="flex flex-wrap items-center gap-1 border-b border-outline/20 bg-surface-container-low p-2">
       <button
         type="button"

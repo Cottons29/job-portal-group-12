@@ -62,7 +62,7 @@ const handleEditorUploadImage = (file, callback) => {
 
 <template>
   <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
-    <form class="space-y-5 rounded-[2rem] bg-surface-container-low p-5 shadow-sm ring-1 ring-white/5 sm:p-6"
+    <form class="space-y-5 rounded-[2rem] bg-surface-container-lowest p-5 shadow-sm ring-1 ring-white/5 sm:p-6"
           @submit.prevent="$emit('submit')">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -84,7 +84,7 @@ const handleEditorUploadImage = (file, callback) => {
         <span class="text-sm font-black text-on-surface">{{ t('createPost.title') }}</span>
         <input
             v-model="postForm.title"
-            class="w-full rounded-2xl bg-surface px-4 py-3 text-sm font-bold text-on-surface outline-none ring-1 ring-outline/30 transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
+            class="w-full rounded-2xl bg-surface px-4 py-3 text-sm font-bold text-on-surface outline-none transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
             maxlength="100"
             :placeholder="t('createPost.titlePlaceholder')"
             type="text"

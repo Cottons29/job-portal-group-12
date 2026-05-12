@@ -32,12 +32,12 @@ defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-po
     <section class="min-w-0 space-y-6">
       
       <!-- Search Bar & Filters -->
-      <div class="rounded-4xl bg-surface-container-low p-5 shadow-sm ring-1 ring-white/5 sm:p-6">
+      <div class="rounded-4xl bg-surface-container-lowest p-5 shadow-sm ring-1 ring-white/5 sm:p-6">
         <form @submit.prevent="$emit('search')" class="flex flex-col gap-4 sm:flex-row sm:items-center">
           <input
             :value="searchQuery"
             @input="$emit('update:searchQuery', $event.target.value)"
-            class="flex-1 rounded-full bg-surface px-5 py-3 text-sm font-bold text-on-surface outline-none ring-1 ring-outline/30 transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
+            class="flex-1 rounded-full bg-surface-container-low px-5 py-3 text-sm font-bold text-on-surface outline-none  transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
             placeholder="Search jobs, skills, or keywords..."
             type="text"
           />
