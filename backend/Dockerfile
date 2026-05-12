@@ -6,7 +6,7 @@ COPY package*.json ./
 COPY backend/package*.json ./backend/
 COPY frontend/package*.json ./frontend/
 COPY data_transfer ./data_transfer
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+RUN npm install
 
 COPY backend ./backend
 RUN npm run build --workspace backend
