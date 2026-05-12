@@ -4,6 +4,7 @@ import type {Router} from 'vue-router'
 import {isAxiosError} from 'axios'
 import {startAuthentication} from '@simplewebauthn/browser'
 import api from '@/lib/api'
+import {encryptPayload} from '@/lib/payloadEncryption'
 
 type AuthMode = 'login' | 'signup'
 type UserRole = 'student' | 'employer'
@@ -140,11 +141,11 @@ export const useAuthStore = defineStore('auth', () => {
 
         isLoading.value = true
         try {
-            const {data} = await api.post<AuthResponse>('/auth/login', {
+            const {data} = await api.post<AuthResponse>('/auth/login', await encryptPayload({
                 phone: `+855${phone.value.replace(/\s/g, '')}`,
                 password: password.value,
                 role: role.value,
-            })
+            }))
 
             token.value = data.token
             setUser(data.user)
@@ -217,11 +218,11 @@ export const useAuthStore = defineStore('auth', () => {
 
         isLoading.value = true
         try {
-            const {data} = await api.post<AuthResponse>('/auth/register', {
+            const {data} = await api.post<AuthResponse>('/auth/register', await encryptPayload({
                 phone: `+855${phone.value.replace(/\s/g, '')}`,
                 password: password.value,
                 role: role.value,
-            })
+            }))
 
             token.value = data.token
             setUser(data.user)

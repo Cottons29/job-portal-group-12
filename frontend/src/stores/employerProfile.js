@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+    import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useEmployerProfileStore = defineStore('employerProfile', () => {
@@ -19,7 +19,7 @@ export const useEmployerProfileStore = defineStore('employerProfile', () => {
 
   // ── Validation ──
   const step1Valid = computed(() => {
-    return companyName.value.trim() !== '' &&
+    return companyName.value.toString().trim() !== '' &&
            industry.value !== '' &&
            location.value !== '' &&
            logoFile.value !== null &&
