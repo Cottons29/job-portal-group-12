@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Bitcount+Grid+Single+Ink:wght@100..900&family=Edu+AU+VIC+WA+NT+Guides:wght@400..700&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Jersey+10&family=Taprom&display=swap');
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
+/*@plugin "@tailwindcss/typography";*/
 
 /* ── FirstStep Design System Tokens ── */
 /* Source: centralized normalist theme tokens with light, dark, and system support */
