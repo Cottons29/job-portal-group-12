@@ -24,13 +24,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Prepare image repository name
+        run: echo "IMAGE_REPOSITORY=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
       - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./backend/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/backend:latest
+          tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}/backend:latest
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
@@ -40,7 +43,7 @@ jobs:
           push: true
           build-args: |
             VITE_API_URL=${{ secrets.FRONTEND_API_URL }}
-          tags: ghcr.io/${{ github.repository }}/frontend:latest
+          tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}/frontend:latest
 
       - name: Deploy to server with SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -58,6 +61,6 @@ jobs:
             podman-compose up -d
             podman image prune -f
         env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REPOSITORY: ${{ env.IMAGE_REPOSITORY }}
           GITHUB_ACTOR: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
