@@ -7,8 +7,13 @@ import { JobApplication } from './job-application.entity';
 import { ApplicationsController } from './applications.controller';
 import { ApplicationsService } from './applications.service';
 
+import { NotificationsModule } from '../../notifications/notifications.module';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([JobApplication, PostEntity, User])],
+  imports: [
+    TypeOrmModule.forFeature([JobApplication, PostEntity, User]),
+    NotificationsModule,
+  ],
   controllers: [ApplicationsController],
   providers: [ApplicationsService],
 })

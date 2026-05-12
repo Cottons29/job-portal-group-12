@@ -127,6 +127,14 @@
             @view-applicants="openApplicantsModal"
         />
 
+        <NotificationsSection
+            v-else-if="activePage === 'notifications'"
+            :notifications="userNotifications"
+            :is-loading="isLoadingNotifications"
+            :load-error="loadNotificationsError"
+            @mark-read="markNotificationAsRead"
+        />
+
         <Teleport to="body">
           <Transition name="modal">
             <PersonalInfoEditor
@@ -215,6 +223,8 @@ import HomeSection from '@/components/placeholder/sections/HomeSection.vue'
 import SettingsSection from '@/components/placeholder/sections/SettingsSection.vue'
 import ProfileSection from '@/components/placeholder/sections/ProfileSection.vue'
 import CreatePostSection from '@/components/placeholder/sections/CreatePostSection.vue'
+import SearchSection from '@/components/placeholder/sections/SearchSection.vue'
+import NotificationsSection from '@/components/placeholder/sections/NotificationsSection.vue'
 import PersonalInfoEditor from '@/components/placeholder/sections/PersonalInfoEditor.vue'
 import PasswordEditor from '@/components/placeholder/sections/PasswordEditor.vue'
 import PostModal from '@/components/placeholder/sections/PostModal.vue'
@@ -380,6 +390,33 @@ const viewingApplicantsForPost = ref(null)
 const postApplicants = ref([])
 const isLoadingApplicants = ref(false)
 const loadApplicantsError = ref('')
+const userNotifications = ref([])
+const isLoadingNotifications = ref(false)
+const loadNotificationsError = ref('')
+
+async function fetchNotifications() {
+  if (!auth.isAuthenticated) return
+  isLoadingNotifications.value = true
+  loadNotificationsError.value = ''
+  try {
+    const { data } = await api.get('/notifications')
+    userNotifications.value = data.notifications || []
+  } catch (error) {
+    loadNotificationsError.value = getErrorMessage(error, 'Failed to load notifications.')
+  } finally {
+    isLoadingNotifications.value = false
+  }
+}
+
+async function markNotificationAsRead(id) {
+  try {
+    await api.patch(`/notifications/${id}/read`)
+    const target = userNotifications.value.find(n => n.id === id)
+    if (target) target.isRead = true
+  } catch (error) {
+    console.error('Failed to mark notification read:', error)
+  }
+}
 const canSubmitPost = computed(() => postForm.title.trim() && postForm.content.trim())
 const postPreviewHtml = computed(() => renderMarkdown(postForm.content || 'Start writing your post to see the preview here.'))
 
@@ -931,6 +968,8 @@ function mapPost(post) {
   const authorName = post.author?.user_name || '<Blank>'
   const createdAt = post.createdAt ? new Date(post.createdAt) : null
   
+  // If author.role isn't joined/returned, fallback to checking if it's not the logged-in student's post
+  // so that students can test applying to feed posts.
   const authorRole = post.author?.role || 'employer'
 
   return {
@@ -971,7 +1010,7 @@ async function searchPosts() {
 }
 
 async function fetchAppliedPosts() {
-  if (auth.user?.role !== 'student') return
+  if (auth.user?.role?.toLowerCase() !== 'student') return
   try {
     const {data} = await api.get('/applications/me')
     const appliedIds = data.applications.map(app => app.post.id)
@@ -1250,6 +1289,10 @@ onMounted(() => {
   if (activePage.value === 'settings') {
     loadPasskeys()
   }
+
+  if (activePage.value === 'notifications') {
+    fetchNotifications()
+  }
 })
 
 onUnmounted(() => {
@@ -1261,6 +1304,13 @@ watch(activePage, (page, previousPage) => {
     loadPosts()
   }
 
+  if (page === 'search' && previousPage !== 'search') {
+    searchPosts()
+  }
+
+  if (page === 'notifications' && previousPage !== 'notifications') {
+    fetchNotifications()
+  }
   if (page === 'home') {
     nextTick(() => {
       addHomeScrollListener()

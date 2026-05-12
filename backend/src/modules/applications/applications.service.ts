@@ -12,6 +12,8 @@ import { User } from '../user/user.entity';
 import { PostEntity } from '../posts/post.entity';
 import { ApplicationStatus, JobApplication } from './job-application.entity';
 
+import { NotificationsService } from '../../notifications/notifications.service';
+
 @Injectable()
 export class ApplicationsService {
   constructor(
@@ -21,6 +23,7 @@ export class ApplicationsService {
     private readonly postsRepo: Repository<PostEntity>,
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async apply(studentId: string, postId: string, coverLetter?: string) {
@@ -53,7 +56,17 @@ export class ApplicationsService {
       coverLetter: coverLetter?.trim() || undefined,
     });
 
-    return this.appRepo.save(application);
+    const savedApp = await this.appRepo.save(application);
+
+    // Notify the employer who authored the post
+    if (post.author?.id) {
+      await this.notificationsService.createNotification(
+        post.author.id,
+        `New job application received from ${student.user_name || 'a student'} for your post: "${post.title}"`,
+      );
+    }
+
+    return savedApp;
   }
 
   async getApplicationsForStudent(studentId: string) {
@@ -81,16 +94,29 @@ export class ApplicationsService {
   }
 
   async updateStatus(employerId: string, applicationId: string, status: ApplicationStatus) {
-    const application = await this.appRepo.findOne({ where: { id: applicationId } });
+    const application = await this.appRepo.findOne({
+      where: { id: applicationId },
+      relations: ['post', 'post.author', 'applicant'],
+    });
     if (!application) {
       throw new NotFoundException('Application not found.');
     }
 
-    if (application.post.author.id !== employerId) {
+    if (application.post?.author?.id !== employerId) {
       throw new ForbiddenException('You are not the author of this post.');
     }
 
     application.status = status;
-    return this.appRepo.save(application);
+    const savedApp = await this.appRepo.save(application);
+
+    // Notify the student applicant about the status update
+    if (application.applicant?.id) {
+      await this.notificationsService.createNotification(
+        application.applicant.id,
+        `Your job application status for "${application.post.title}" has been updated to: ${status}`,
+      );
+    }
+
+    return savedApp;
   }
 }

@@ -21,7 +21,7 @@ import { ApplicationsModule } from './modules/applications/applications.module';
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME || 'firststep_db',
       autoLoadEntities: true,
-      synchronize: false,
+      synchronize: true,
     }),
     AuthModule,
     UploadModule,
