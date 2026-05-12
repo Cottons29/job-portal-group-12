@@ -2,7 +2,8 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import axios from 'axios'
+import api from '@/lib/api'
+import { encryptPayload } from '@/lib/payloadEncryption'
 import { EnvelopeIcon, ShieldCheckIcon, KeyIcon } from '@heroicons/vue/24/outline'
 
 const step = ref('EMAIL') // 'EMAIL' or 'OTP'
@@ -13,7 +14,6 @@ const errorMsg = ref('')
 
 const router = useRouter()
 const authStore = useAuthStore()
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 // Step 1: Send OTP to the given email
 const handleSendOtp = async () => {
@@ -22,9 +22,7 @@ const handleSendOtp = async () => {
   errorMsg.value = ''
   
   try {
-    await axios.post(`${API_BASE}/auth/send-otp`, { email: email.value }, {
-      headers: { Authorization: `Bearer ${authStore.token}` }
-    })
+    await api.post('/auth/send-otp', await encryptPayload({ email: email.value }))
     step.value = 'OTP' // Transition UI to OTP input
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Failed to send verification code.'
@@ -44,15 +42,12 @@ const handleVerifyOtp = async () => {
   errorMsg.value = ''
   
   try {
-    const { data } = await axios.post(`${API_BASE}/auth/verify-otp`, 
-      { 
+    const { data } = await api.post('/auth/verify-otp',
+      await encryptPayload({
         email: email.value, 
         code: otp.value,
         userId: authStore.user?.id 
-      }, 
-      {
-        headers: { Authorization: `Bearer ${authStore.token}` }
-      }
+      })
     )
     
     // Update local user state

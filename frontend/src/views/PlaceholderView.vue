@@ -24,7 +24,7 @@
             </div>
             <div v-if="activePage === 'home'" class="hidden flex-1 justify-end md:flex">
               <label
-                  class="flex w-full max-w-sm items-center gap-3 rounded-full bg-surface-container-low px-5 py-3 text-sm font-bold text-on-surface-variant">
+                  class="flex w-full max-w-sm items-center gap-3 rounded-full bg-surface-container-low px-5 py-3 text-sm font-bold text-on-surface-variant transition-all focus-within:ring-2 focus-within:ring-primary">
                 <MagnifyingGlassIcon class="h-5 w-5 text-primary"/>
                 <input
                     v-model="searchQuery"
@@ -181,6 +181,7 @@ import PasswordEditor from '@/components/placeholder/sections/PasswordEditor.vue
 import PostModal from '@/components/placeholder/sections/PostModal.vue'
 import {useThemeMode} from '@/composables/useThemeMode'
 import {useAuthStore} from '@/stores/auth'
+import {encryptPayload} from '@/lib/payloadEncryption'
 import {
   AcademicCapIcon,
   ArrowRightOnRectangleIcon,
@@ -447,7 +448,7 @@ const settingsMenuItems = computed(() => [
     section: 'logout',
     icon: ArrowRightOnRectangleIcon,
     bg: 'bg-red-500/15',
-    color: 'text-red-300',
+    color: 'text-red-800',
     active: activeSettingsSection.value === 'logout'
   },
   // {label: 'People & sharing', icon: UserGroupIcon, bg: 'bg-[#f8a9dc]', color: 'text-[#9b1f70]', to: '/settings'},
@@ -872,6 +873,11 @@ async function submitPost() {
     postForm.title = ''
     postForm.content = ''
     removePostPhoto()
+
+    // Redirect to home page after successful upload
+    setTimeout(() => {
+      router.push('/home')
+    }, 1500)
   } catch (error) {
     postError.value = getErrorMessage(error, 'Could not publish your post. Please try again.')
   } finally {
@@ -1247,10 +1253,10 @@ async function updatePassword() {
 
   passwordLoading.value = true
   try {
-    await api.post('/auth/password', {
+    await api.post('/auth/password', await encryptPayload({
       currentPassword: passwordForm.current,
       newPassword: passwordForm.next,
-    })
+    }))
     passwordMessage.value = 'Password updated successfully.'
     closePasswordEditor()
   } catch (error) {
