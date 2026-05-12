@@ -22,7 +22,6 @@ ENV PORT=3080
 
 COPY --from=build /app/backend/package*.json ./
 COPY --from=build /app/node_modules /app/node_modules
-COPY --from=build /app/backend/node_modules ./node_modules
 COPY --from=build /app/backend/dist ./dist
 
 EXPOSE 3080
