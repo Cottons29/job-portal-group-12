@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 
 import { User } from '../user/user.entity';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -9,6 +9,8 @@ import { PostEntity } from './post.entity';
 interface FindAllPostsOptions {
   page?: string;
   limit?: string;
+  q?: string;
+  role?: string;
 }
 
 @Injectable()
@@ -23,11 +25,32 @@ export class PostsService {
   async findAll(options: FindAllPostsOptions = {}) {
     const page = Math.max(Number.parseInt(options.page || '1', 10) || 1, 1);
     const limit = Math.min(Math.max(Number.parseInt(options.limit || '10', 10) || 10, 1), 50);
-    const [posts, total] = await this.postsRepository.findAndCount({
+    
+    const whereCondition: any = [];
+
+    if (options.q) {
+      const q = `%${options.q}%`;
+      const roleFilter = options.role && options.role.toLowerCase() !== 'all' ? { author: { role: options.role.toUpperCase() } } : {};
+      
+      whereCondition.push(
+        { title: ILike(q), ...roleFilter },
+        { content: ILike(q), ...roleFilter }
+      );
+    } else if (options.role && options.role.toLowerCase() !== 'all') {
+      whereCondition.push({ author: { role: options.role.toUpperCase() } });
+    }
+
+    const findOptions: any = {
       order: { createdAt: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
-    });
+    };
+
+    if (whereCondition.length > 0) {
+      findOptions.where = whereCondition;
+    }
+
+    const [posts, total] = await this.postsRepository.findAndCount(findOptions);
 
     return {
       posts,
