@@ -94,7 +94,7 @@ const zh_tw: AppLanguage = {
       companyNamePlaceholder: '輸入公司名稱',
       namePlaceholder: '輸入你的全名',
       username: '使用者名稱',
-      blank: '<空白>',
+      blank: '(空白)',
       usernamePlaceholder: '輸入你的使用者名稱',
       email: '電子郵件',
       noEmailLinked: '未連結電子郵件',

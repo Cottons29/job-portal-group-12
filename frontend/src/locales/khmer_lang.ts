@@ -94,7 +94,7 @@ const khmer_lang: AppLanguage = {
             companyNamePlaceholder: 'បញ្ចូលឈ្មោះក្រុមហ៊ុន',
             namePlaceholder: 'បញ្ចូលឈ្មោះពេញរបស់អ្នក',
             username: 'ឈ្មោះអ្នកប្រើ',
-            blank: '<ទទេ>',
+            blank: '(ទទេ)',
             usernamePlaceholder: 'បញ្ចូលឈ្មោះអ្នកប្រើរបស់អ្នក',
             email: 'អ៊ីមែល',
             noEmailLinked: 'មិនមានអ៊ីមែលភ្ជាប់',

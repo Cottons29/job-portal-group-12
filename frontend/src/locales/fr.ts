@@ -94,7 +94,7 @@ const fr: AppLanguage = {
       companyNamePlaceholder: 'Saisissez le nom de l’entreprise',
       namePlaceholder: 'Saisissez votre nom complet',
       username: 'Nom d’utilisateur',
-      blank: '<Vide>',
+      blank: '(Blank)',
       usernamePlaceholder: 'Saisissez votre nom d’utilisateur',
       email: 'E-mail',
       noEmailLinked: 'Aucun e-mail associé',

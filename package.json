@@ -7,7 +7,7 @@
   "scripts": {
     "backend": "cd backend && npm run start",
     "backend:dev": "cd backend && npm run start:dev",
-    "frontend": "cd frontend && npm run dev",
+    "frontend": "VITE_API_URL=http://localhost:2000 cd frontend && npm run dev",
     "book": "cd progress_book && mdbook serve --port 3080",
     "file:serve": "cd file_service && cargo run",
     "file:build": "cd file_service && cargo build",

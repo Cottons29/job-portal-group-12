@@ -17,8 +17,18 @@ declare module 'express-session' {
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
     app.setGlobalPrefix('api');
+    const corsOrigins = [
+        process.env.FRONTEND_URL || "http://127.0.0.1:3081",
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:3081',
+        'http://127.0.0.1:3081',
+    ];
+    if (process.env.FRONTEND_URL) {
+        corsOrigins.push(process.env.FRONTEND_URL);
+    }
     app.enableCors({
-        origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+        origin: corsOrigins,
         credentials: true,
     });
 

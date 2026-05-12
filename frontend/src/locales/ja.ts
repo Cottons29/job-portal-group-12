@@ -94,7 +94,7 @@ const ja: AppLanguage = {
       companyNamePlaceholder: '会社名を入力',
       namePlaceholder: '氏名を入力',
       username: 'ユーザー名',
-      blank: '<空白>',
+      blank: '(空白)',
       usernamePlaceholder: 'ユーザー名を入力',
       email: 'メール',
       noEmailLinked: 'メール未連携',

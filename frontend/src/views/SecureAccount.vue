@@ -15,6 +15,10 @@ const errorMsg = ref('')
 const router = useRouter()
 const authStore = useAuthStore()
 
+const handleBackToLogin = async () => {
+  await authStore.logout(router)
+}
+
 // Step 1: Send OTP to the given email
 const handleSendOtp = async () => {
   if (!email.value) return
@@ -50,14 +54,15 @@ const handleVerifyOtp = async () => {
       })
     )
     
-    // Update local user state
-    if (authStore.user && data.user) {
-      authStore.user.email = data.user.email
+    if (data.user) {
+      authStore.setUser(data.user)
+    } else if (authStore.user) {
+      await authStore.refreshUser()
     }
     
     // Route completion correctly
     if (authStore.needsOnboarding) {
-      router.push('/onboarding')
+      router.push(authStore.user?.role === 'employer' ? '/onboarding/employer' : '/onboarding/student')
     } else {
       router.push('/home')
     }
@@ -146,6 +151,12 @@ const handleVerifyOtp = async () => {
                 </svg>
                 {{ isLoading ? 'Sending...' : 'Send Verification Code' }}
               </button>
+
+              <div class="mt-4 text-center">
+                <button type="button" @click="handleBackToLogin" class="text-sm font-semibold text-primary-container hover:text-primary transition-colors cursor-pointer">
+                  Back to login
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -211,6 +222,12 @@ const handleVerifyOtp = async () => {
               <div class="mt-4 text-center">
                 <button type="button" @click="step = 'EMAIL'" class="text-sm font-semibold text-primary-container hover:text-primary transition-colors cursor-pointer">
                   Change email address
+                </button>
+              </div>
+
+              <div class="mt-3 text-center">
+                <button type="button" @click="handleBackToLogin" class="text-sm font-semibold text-primary-container hover:text-primary transition-colors cursor-pointer">
+                  Back to login
                 </button>
               </div>
             </div>

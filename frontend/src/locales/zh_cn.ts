@@ -94,7 +94,7 @@ const zh_cn: AppLanguage = {
       companyNamePlaceholder: '输入公司名称',
       namePlaceholder: '输入你的全名',
       username: '用户名',
-      blank: '<空白>',
+      blank: '(空白)',
       usernamePlaceholder: '输入你的用户名',
       email: '邮箱',
       noEmailLinked: '未关联邮箱',

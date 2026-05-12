@@ -94,7 +94,7 @@ const english_lang: AppLanguage = {
       companyNamePlaceholder: 'Enter company name',
       namePlaceholder: 'Enter your full name',
       username: 'Username',
-      blank: '<Blank>',
+      blank: '(Blank)',
       usernamePlaceholder: 'Enter your username',
       email: 'Email',
       noEmailLinked: 'No email linked',
