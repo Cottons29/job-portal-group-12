@@ -61,7 +61,6 @@ jobs:
             set -e
             cd ${{ secrets.SERVER_PATH }}
             git pull origin deploy
-#            podman login ghcr.io -u "$GITHUB_ACTOR" -p "$GHCR_TOKEN"
             podman-compose pull backend frontend
             podman-compose up -d
             podman image prune -f
