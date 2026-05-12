@@ -26,4 +26,5 @@ export class PostsController {
     const post = await this.postsService.create(req.user.sub, dto);
     return { message: 'Post created', post };
   }
+
 }

@@ -24,13 +24,11 @@
             </div>
             <div v-if="activePage === 'home'" class="hidden flex-1 justify-end md:flex">
               <label
-                  class="flex w-full max-w-sm items-center gap-3 rounded-full bg-surface-container-low px-5 py-3 text-sm font-bold text-on-surface-variant transition-all focus-within:ring-2 focus-within:ring-primary">
+                  class="flex w-full max-w-sm items-center gap-3 rounded-full bg-surface-container-low px-5 py-3 text-sm font-bold text-on-surface-variant">
                 <MagnifyingGlassIcon class="h-5 w-5 text-primary"/>
                 <input
-                    v-model="searchQuery"
                     class="w-full bg-transparent outline-none placeholder:text-on-surface-variant/70"
                     :placeholder="t('home.searchPlaceholder')"
-                    @keydown.enter="handleHomeSearch"
                 />
               </label>
             </div>
@@ -106,18 +104,20 @@
             @upload-image="handleEditorUploadImage"
         />
 
-        <SearchSection
-            v-else-if="activePage === 'search'"
-            :search-query="searchQuery"
-            :search-role-filter="searchRoleFilter"
-            :search-results="searchResults"
-            :is-searching="isSearching"
-            :search-error="searchError"
-            @update:search-query="searchQuery = $event"
-            @update:search-role-filter="searchRoleFilter = $event"
-            @search="searchPosts"
-            @open-post="openPost"
-        />
+
+<!--        <section v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">-->
+<!--          <article-->
+<!--              v-for="card in pageContent.cards"-->
+<!--              :key="card.title"-->
+<!--              class="rounded-4xl bg-surface-container-low p-6 shadow-sm ring-1 ring-white/5"-->
+<!--          >-->
+<!--            <span :class="[card.bg, 'grid h-12 w-12 place-items-center rounded-2xl']">-->
+<!--              <component :is="card.icon" :class="[card.color, 'h-6 w-6']"/>-->
+<!--            </span>-->
+<!--            <h2 class="mt-5 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">{{ card.title }}</h2>-->
+<!--            <p class="mt-2 text-sm font-semibold leading-6 text-on-surface-variant">{{ card.description }}</p>-->
+<!--          </article>-->
+<!--        </section>-->
 
         <Teleport to="body">
           <Transition name="modal">
@@ -175,13 +175,11 @@ import HomeSection from '@/components/placeholder/sections/HomeSection.vue'
 import SettingsSection from '@/components/placeholder/sections/SettingsSection.vue'
 import ProfileSection from '@/components/placeholder/sections/ProfileSection.vue'
 import CreatePostSection from '@/components/placeholder/sections/CreatePostSection.vue'
-import SearchSection from '@/components/placeholder/sections/SearchSection.vue'
 import PersonalInfoEditor from '@/components/placeholder/sections/PersonalInfoEditor.vue'
 import PasswordEditor from '@/components/placeholder/sections/PasswordEditor.vue'
 import PostModal from '@/components/placeholder/sections/PostModal.vue'
 import {useThemeMode} from '@/composables/useThemeMode'
 import {useAuthStore} from '@/stores/auth'
-import {encryptPayload} from '@/lib/payloadEncryption'
 import {
   AcademicCapIcon,
   ArrowRightOnRectangleIcon,
@@ -325,18 +323,11 @@ const postsPerPage = 10
 const selectedPost = ref(null)
 const mainScrollContainer = ref(null)
 
-const searchQuery = ref('')
-const searchRoleFilter = ref('All')
-const searchResults = ref([])
-const isSearching = ref(false)
-const searchError = ref('')
-
 const canSubmitPost = computed(() => postForm.title.trim() && postForm.content.trim())
 const postPreviewHtml = computed(() => renderMarkdown(postForm.content || 'Start writing your post to see the preview here.'))
 
 const initials = computed(() => {
   const letters = profileForm.name
-      .toString()
       .split(' ')
       .filter(Boolean)
       .map((part) => part[0])
@@ -349,7 +340,6 @@ const initials = computed(() => {
 
 const profileHandle = computed(() => {
   const fallback = profileForm.name
-      .toString()
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '.')
       .replace(/^\.|\.$/g, '')
@@ -448,7 +438,7 @@ const settingsMenuItems = computed(() => [
     section: 'logout',
     icon: ArrowRightOnRectangleIcon,
     bg: 'bg-red-500/15',
-    color: 'text-red-800',
+    color: 'text-red-300',
     active: activeSettingsSection.value === 'logout'
   },
   // {label: 'People & sharing', icon: UserGroupIcon, bg: 'bg-[#f8a9dc]', color: 'text-[#9b1f70]', to: '/settings'},
@@ -478,7 +468,7 @@ const securityRows = computed(() => [
 const personalInfoRows = computed(() => {
   const isEmployer = auth.user?.role === 'employer'
   const isStudent = auth.user?.role === 'student'
-
+  
   const baseRows = [
     {
       label: t('settings.personal.profilePicture'),
@@ -873,11 +863,6 @@ async function submitPost() {
     postForm.title = ''
     postForm.content = ''
     removePostPhoto()
-
-    // Redirect to home page after successful upload
-    setTimeout(() => {
-      router.push('/home')
-    }, 1500)
   } catch (error) {
     postError.value = getErrorMessage(error, 'Could not publish your post. Please try again.')
   } finally {
@@ -902,26 +887,6 @@ function mapPost(post) {
     logoBg: 'bg-[#aecbfa]',
     logoText: 'text-[#1a4fa3]',
     // heroBg: 'bg-[#aecbfa]/35',
-  }
-}
-
-async function searchPosts() {
-  searchError.value = ''
-  isSearching.value = true
-
-  try {
-    const params = {
-      limit: 20,
-    }
-    if (searchQuery.value.trim()) params.q = searchQuery.value.trim()
-    if (searchRoleFilter.value !== 'All') params.role = searchRoleFilter.value.toUpperCase()
-
-    const {data} = await api.get('/posts', { params })
-    searchResults.value = Array.isArray(data.posts) ? data.posts.map(mapPost) : []
-  } catch (error) {
-    searchError.value = getErrorMessage(error, 'Search failed. Please try again.')
-  } finally {
-    isSearching.value = false
   }
 }
 
@@ -1011,10 +976,10 @@ function applyProfileData(profile, user) {
   if (profile?.phone || user?.phone) profileForm.phone = profile?.phone || user.phone
   if (profile?.profileImageUrl) profileForm.avatar = profile.profileImageUrl
   if (profile?.logoUrl) profileForm.avatar = profile.logoUrl
-
+  
   profileForm.user_name = user?.user_name || ''
   if (user?.email) profileForm.email = user.email
-
+  
   if (profile?.university) profileForm.university = profile.university
   if (profile?.major) profileForm.major = profile.major
   if (profile?.yearLevel) profileForm.yearLevel = profile.yearLevel
@@ -1024,7 +989,7 @@ function applyProfileData(profile, user) {
   if (profile?.currency) profileForm.currency = profile.currency
   if (Array.isArray(profile?.skills)) profileForm.skills = profile.skills
   if (profile?.availability) profileForm.availability = profile.availability
-
+  
   if (profile?.companyName) profileForm.companyName = profile.companyName
   if (profile?.industry) profileForm.industry = profile.industry
   if (profile?.address) profileForm.address = profile.address
@@ -1038,7 +1003,7 @@ async function fetchPersonalInfo() {
   try {
     const isEmployer = auth.user?.role === 'employer'
     const endpoint = isEmployer ? '/employer-profile/me' : '/student-profile/me'
-
+    
     const [{data: profileData}, accountUser] = await Promise.all([
       api.get(endpoint),
       auth.refreshUser(),
@@ -1065,11 +1030,11 @@ function closePersonalInfoEditor() {
 function buildProfileFormData() {
   const formData = new FormData()
   const isEmployer = auth.user?.role === 'employer'
-
+  
   formData.append('user_name', profileForm.user_name || '')
   formData.append('email', profileForm.email || '')
   formData.append('phone', profileForm.phone || '')
-
+  
   if (isEmployer) {
     formData.append('companyName', profileForm.companyName || '')
     formData.append('industry', profileForm.industry || '')
@@ -1104,7 +1069,7 @@ async function savePersonalInfoEdit() {
     profileForm[field] = editValue.value.trim()
     const isEmployer = auth.user?.role === 'employer'
     const endpoint = isEmployer ? '/employer-profile/setup' : '/student-profile'
-
+    
     const {data} = await api.post(endpoint, buildProfileFormData())
     applyProfileData(isEmployer ? data : data.profile, null)
     closePersonalInfoEditor()
@@ -1127,10 +1092,6 @@ onMounted(() => {
     })
   }
 
-  if (activePage.value === 'search') {
-    searchPosts()
-  }
-
   if (activePage.value === 'settings' || activePage.value === 'profile') {
     fetchPersonalInfo()
   }
@@ -1147,10 +1108,6 @@ onUnmounted(() => {
 watch(activePage, (page, previousPage) => {
   if ((page === 'home' || page === 'profile') && previousPage !== page) {
     loadPosts()
-  }
-
-  if (page === 'search' && previousPage !== 'search') {
-    searchPosts()
   }
 
   if (page === 'home') {
@@ -1253,10 +1210,10 @@ async function updatePassword() {
 
   passwordLoading.value = true
   try {
-    await api.post('/auth/password', await encryptPayload({
+    await api.post('/auth/password', {
       currentPassword: passwordForm.current,
       newPassword: passwordForm.next,
-    }))
+    })
     passwordMessage.value = 'Password updated successfully.'
     closePasswordEditor()
   } catch (error) {
@@ -1264,11 +1221,6 @@ async function updatePassword() {
   } finally {
     passwordLoading.value = false
   }
-}
-
-function handleHomeSearch() {
-  if (!searchQuery.value.trim()) return
-  router.push('/search')
 }
 
 const navigationItems = computed(() => [

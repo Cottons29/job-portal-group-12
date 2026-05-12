@@ -41,10 +41,22 @@ defineProps({
   suggestions: {
     type: Array,
     required: true
+  },
+  userRole: {
+    type: String,
+    default: null
+  },
+  userId: {
+    type: String,
+    default: null
+  },
+  appliedPostIds: {
+    type: Set,
+    default: () => new Set()
   }
 })
 
-defineEmits(['open-post'])
+defineEmits(['open-post', 'apply', 'view-applicants'])
 </script>
 
 <template>
@@ -56,7 +68,17 @@ defineEmits(['open-post'])
         {{ postsError }}
       </p>
       <TransitionGroup name="post-fade" appear>
-        <PostCard v-for="post in posts" :key="post.id" :post="post" @open="$emit('open-post', $event)"/>
+        <PostCard 
+          v-for="post in posts" 
+          :key="post.id" 
+          :post="post" 
+          :user-role="userRole"
+          :user-id="userId"
+          :applied-post-ids="appliedPostIds"
+          @open="$emit('open-post', $event)"
+          @apply="$emit('apply', $event)"
+          @view-applicants="$emit('view-applicants', $event)"
+        />
       </TransitionGroup>
       <p v-if="postsLoadingMore"
          class="rounded-2xl bg-surface-container-low px-4 py-3 text-sm font-bold text-on-surface-variant">

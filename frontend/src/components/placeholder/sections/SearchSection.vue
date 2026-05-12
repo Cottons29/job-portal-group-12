@@ -21,10 +21,22 @@ defineProps({
   searchError: {
     type: String,
     default: ''
+  },
+  userRole: {
+    type: String,
+    default: null
+  },
+  userId: {
+    type: String,
+    default: null
+  },
+  appliedPostIds: {
+    type: Set,
+    default: () => new Set()
   }
 })
 
-defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-post'])
+defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-post', 'apply', 'view-applicants'])
 </script>
 
 <template>
@@ -79,7 +91,17 @@ defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-po
       </div>
 
       <TransitionGroup name="post-fade" appear>
-        <PostCard v-for="post in searchResults" :key="post.id" :post="post" @open="$emit('open-post', $event)"/>
+        <PostCard 
+          v-for="post in searchResults" 
+          :key="post.id" 
+          :post="post" 
+          :user-role="userRole"
+          :user-id="userId"
+          :applied-post-ids="appliedPostIds"
+          @open="$emit('open-post', $event)"
+          @apply="$emit('apply', $event)"
+          @view-applicants="$emit('view-applicants', $event)"
+        />
       </TransitionGroup>
       
     </section>
