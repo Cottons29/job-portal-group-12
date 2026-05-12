@@ -32,7 +32,7 @@ defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-po
     <section class="min-w-0 space-y-6">
       
       <!-- Search Bar & Filters -->
-      <div class="rounded-[2rem] bg-surface-container-low p-5 shadow-sm ring-1 ring-white/5 sm:p-6">
+      <div class="rounded-4xl bg-surface-container-low p-5 shadow-sm ring-1 ring-white/5 sm:p-6">
         <form @submit.prevent="$emit('search')" class="flex flex-col gap-4 sm:flex-row sm:items-center">
           <input
             :value="searchQuery"
