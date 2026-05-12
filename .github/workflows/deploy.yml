@@ -3,7 +3,7 @@ name: Build and Deploy with Podman
 on:
   push:
     branches:
-      - main
+      - deploy
 
 jobs:
   build-and-deploy:
