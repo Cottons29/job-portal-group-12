@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY backend/package*.json ./backend/
+COPY frontend/package*.json ./frontend/
 COPY data_transfer ./data_transfer
 RUN npm ci
 
