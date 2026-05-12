@@ -32,7 +32,7 @@
   --color-outline-variant: var(--fs-outline-variant);
 
   /* Fonts */
-  --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Google Sans', var(--font-sans);
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-khmer: 'Google Sans', var(--font-sans);
 }
