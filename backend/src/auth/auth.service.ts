@@ -206,7 +206,7 @@ export class AuthService {
       },
     });
 
-    this.registrationChallenges.set(options.challenge, {
+    this.registrationChallenges.set(userId, {
       challenge: options.challenge,
       userId,
       expiresAt: Date.now() + 5 * 60 * 1000,
@@ -218,9 +218,7 @@ export class AuthService {
   async finishPasskeyRegistration(userId: string, response: RegistrationResponseJSON) {
     this.pruneChallenges();
 
-    const challengeRecord = [...this.registrationChallenges.values()].find(
-      (record) => record.userId === userId,
-    );
+    const challengeRecord = this.registrationChallenges.get(userId);
     if (!challengeRecord) {
       throw new BadRequestException('Passkey registration challenge expired');
     }
@@ -233,7 +231,7 @@ export class AuthService {
       requireUserVerification: false,
     });
 
-    this.registrationChallenges.delete(challengeRecord.challenge);
+    this.registrationChallenges.delete(userId);
 
     if (!verification.verified) {
       throw new BadRequestException('Passkey registration failed');
@@ -286,8 +284,10 @@ export class AuthService {
   async finishPasskeyAuthentication(response: AuthenticationResponseJSON) {
     this.pruneChallenges();
 
-    const challengeRecord = this.authenticationChallenges.get(response.response.clientDataJSON)
-      || [...this.authenticationChallenges.values()][0];
+    const clientData = JSON.parse(
+      Buffer.from(response.response.clientDataJSON, 'base64').toString('utf8'),
+    );
+    const challengeRecord = this.authenticationChallenges.get(clientData.challenge);
     if (!challengeRecord) {
       throw new BadRequestException('Passkey login challenge expired');
     }
