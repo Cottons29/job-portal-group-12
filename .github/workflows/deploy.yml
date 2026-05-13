@@ -62,6 +62,6 @@ jobs:
             podman-compose pull
             podman-compose up -d
         env:
-          GITHUB_REPOSITORY: ${{ env.IMAGE_REPOSITORY }}
+          GITHUB_REPOSITORY: ${{ secrets.IMAGE_REPOSITORY }}
           GITHUB_ACTOR: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
