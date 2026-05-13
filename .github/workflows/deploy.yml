@@ -59,6 +59,7 @@ jobs:
           envs: GITHUB_REPOSITORY,GITHUB_ACTOR,GHCR_TOKEN
           script: |
             cd ${{ secrets.SERVER_PATH }}
+            ls
             podman compose up -d
         env:
           GITHUB_REPOSITORY: ${{ env.IMAGE_REPOSITORY }}
