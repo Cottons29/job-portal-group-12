@@ -28,7 +28,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare image repository name
-        run: echo "cottons29/job-portal-group-12" >> "$GITHUB_ENV"
+        run: echo "IMAGE_REPOSITORY=cottons29/job-portal-group-12" >> "$GITHUB_ENV"
 
       - name: Build and push backend image
         uses: docker/build-push-action@v6
