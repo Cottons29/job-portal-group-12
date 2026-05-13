@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: macos-latest
+    runs-on: ubuntu-24.04-arm
 
     permissions:
       contents: read
@@ -28,7 +28,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare image repository name
-        run: echo "IMAGE_REPOSITORY=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+        run: echo "IMAGE_REPOSITORY=$(printf '%s' "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
       - name: Build and push backend image
         uses: docker/build-push-action@v6
