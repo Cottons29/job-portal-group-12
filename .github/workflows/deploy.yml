@@ -48,7 +48,7 @@ jobs:
           platforms: linux/arm64
           build-args: |
             VITE_API_URL=${{ secrets.FRONTEND_API_URL }}
-          tags: ghcr.io/${{ secrets.IMAGE_REPOSITORY }}/frontend:latest
+          tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}/frontend:latest
 
       - name: Deploy to server with SSH
         uses: appleboy/ssh-action@v1.2.5
@@ -62,6 +62,6 @@ jobs:
             podman-compose pull
             podman-compose up -d
         env:
-          GITHUB_REPOSITORY: ${{ secrets.IMAGE_REPOSITORY }}
+          GITHUB_REPOSITORY: ${{ env.IMAGE_REPOSITORY }}
           GITHUB_ACTOR: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
