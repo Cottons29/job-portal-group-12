@@ -124,6 +124,6 @@ export class StudentProfileService {
     }
 
     async findByUser(userId: string): Promise<StudentProfile | null> {
-        return this.profileRepository.findOne({where: {userId}});
+        return await this.profileRepository.findOne({where: {userId}});
     }
 }

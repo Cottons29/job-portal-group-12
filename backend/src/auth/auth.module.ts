@@ -6,10 +6,11 @@ import { AuthService } from './auth.service';
 import { User } from '../modules/user/user.entity';
 import { PasskeyCredential } from './passkey-credential.entity';
 import { PayloadEncryptionService } from './payload-encryption.service';
+import { SessionEntity } from './session.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, PasskeyCredential]),
+    TypeOrmModule.forFeature([User, PasskeyCredential, SessionEntity]),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET || 'fallback_secret',

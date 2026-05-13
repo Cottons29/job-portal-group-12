@@ -7,6 +7,9 @@ import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
 import session from 'express-session';
 import {NestExpressApplication} from '@nestjs/platform-express';
+import {TypeormStore} from 'connect-typeorm';
+import {DataSource} from 'typeorm';
+import {SessionEntity} from './auth/session.entity';
 
 declare module 'express-session' {
     interface SessionData {
@@ -33,10 +36,18 @@ async function bootstrap() {
     });
 
 
-    console.log(`Process : ${process.env.SESSION_SECRET}`);
+    // console.log(`Process : ${process.env.SESSION_SECRET}`);
+
+    const dataSource = app.get(DataSource);
+    const sessionRepository = dataSource.getRepository(SessionEntity);
 
     app.use(
         session({
+            store: new TypeormStore({
+                cleanupLimit: 2,
+                limitSubquery: false, // For postgres
+                ttl: 86400,
+            }).connect(sessionRepository),
             secret: process.env.SESSION_SECRET || 'my-secret-key',
             resave: false,
             saveUninitialized: false,

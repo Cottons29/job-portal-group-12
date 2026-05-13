@@ -173,7 +173,7 @@ export class AuthService {
   }
 
   async listPasskeys(userId: string) {
-    return this.passkeyRepository.find({
+    return await this.passkeyRepository.find({
       where: { userId },
       select: ['id', 'createdAt', 'updatedAt'],
       order: { createdAt: 'DESC' },

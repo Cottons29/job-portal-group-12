@@ -14,7 +14,7 @@ export class AdminService {
   ) {}
 
   async getPendingEmployers(): Promise<EmployerProfile[]> {
-    return this.employerProfileRepo.find({
+    return await this.employerProfileRepo.find({
       where: { isVerified: false },
       order: { createdAt: 'DESC' },
     });

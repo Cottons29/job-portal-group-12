@@ -70,7 +70,7 @@ export class ApplicationsService {
   }
 
   async getApplicationsForStudent(studentId: string) {
-    return this.appRepo.find({
+    return await this.appRepo.find({
       where: { applicant: { id: studentId } },
       order: { createdAt: 'DESC' },
     });
@@ -87,7 +87,7 @@ export class ApplicationsService {
       throw new ForbiddenException('You are not the author of this post.');
     }
 
-    return this.appRepo.find({
+    return await this.appRepo.find({
       where: { post: { id: postId } },
       order: { createdAt: 'DESC' },
     });

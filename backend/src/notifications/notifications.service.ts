@@ -30,7 +30,7 @@ export class NotificationsService {
     return savedNotification;
   }
   async getNotificationsForUser(userId: string): Promise<Notification[]> {
-    return this.notificationRepository.find({
+    return await this.notificationRepository.find({
       where: { userId },
       order: { createdAt: 'DESC' },
     });
@@ -44,6 +44,6 @@ export class NotificationsService {
       throw new Error('Notification not found');
     }
     notification.isRead = true;
-    return this.notificationRepository.save(notification);
+    return await this.notificationRepository.save(notification);
   }
 }

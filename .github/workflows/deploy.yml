@@ -58,9 +58,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           envs: GITHUB_REPOSITORY,GITHUB_ACTOR,GHCR_TOKEN
           script: |
-            set -e
             cd ${{ secrets.SERVER_PATH }}
-            podman-compose pull backend frontend
             podman-compose up -d
             podman image prune -f
         env:

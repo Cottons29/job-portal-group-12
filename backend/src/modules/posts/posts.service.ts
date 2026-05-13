@@ -85,6 +85,6 @@ export class PostsService {
       author,
     });
 
-    return this.postsRepository.save(post);
+    return await this.postsRepository.save(post);
   }
 }

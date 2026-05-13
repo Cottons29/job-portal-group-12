@@ -13,7 +13,7 @@ RUN npm run build --workspace backend
 
 RUN npm prune --omit=dev
 
-FROM node:22-alpine
+FROM node:26-alpine
 
 WORKDIR /app/backend
 
