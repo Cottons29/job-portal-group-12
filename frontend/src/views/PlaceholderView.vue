@@ -48,7 +48,13 @@
             :posts-loading-more="postsLoadingMore"
             :stories="stories"
             :suggestions="suggestions"
+            :user-role="auth.user?.role"
+            :user-id="auth.user?.id"
+            :applied-post-ids="appliedPostIds"
             @open-post="openPost"
+            @engagement-change="mergeEngagement"
+            @apply="handlePostApply"
+            @view-applicants="handleViewApplicants"
         />
 
         <SettingsSection
@@ -113,10 +119,24 @@
             :search-results="searchResults"
             :is-searching="isSearching"
             :search-error="searchError"
+            :user-role="auth.user?.role"
+            :user-id="auth.user?.id"
+            :applied-post-ids="appliedPostIds"
             @update:search-query="searchQuery = $event"
             @update:search-role-filter="searchRoleFilter = $event"
             @search="searchPosts"
             @open-post="openPost"
+            @engagement-change="mergeEngagement"
+            @apply="handlePostApply"
+            @view-applicants="handleViewApplicants"
+        />
+
+        <NotificationsSection
+            v-else-if="activePage === 'notifications'"
+            :notifications="userNotifications"
+            :is-loading="isLoadingNotifications"
+            :load-error="loadNotificationsError"
+            @mark-read="markNotificationAsRead"
         />
 
         <Teleport to="body">
@@ -152,7 +172,13 @@
             <PostModal
                 v-if="selectedPost"
                 :post="selectedPost"
+                :user-role="auth.user?.role"
+                :user-id="auth.user?.id"
+                :applied-post-ids="appliedPostIds"
                 @close="closePost"
+                @engagement-change="mergeEngagement"
+                @apply="handlePostApply"
+                @view-applicants="handleViewApplicants"
             />
           </Transition>
         </Teleport>
@@ -176,6 +202,8 @@ import SettingsSection from '@/components/placeholder/sections/SettingsSection.v
 import ProfileSection from '@/components/placeholder/sections/ProfileSection.vue'
 import CreatePostSection from '@/components/placeholder/sections/CreatePostSection.vue'
 import SearchSection from '@/components/placeholder/sections/SearchSection.vue'
+import NotificationsSection from '@/components/placeholder/sections/NotificationsSection.vue'
+import { io } from 'socket.io-client'
 import PersonalInfoEditor from '@/components/placeholder/sections/PersonalInfoEditor.vue'
 import PasswordEditor from '@/components/placeholder/sections/PasswordEditor.vue'
 import PostModal from '@/components/placeholder/sections/PostModal.vue'
@@ -321,6 +349,7 @@ const postsPage = ref(1)
 const postsHasMore = ref(true)
 const postsScrollListenerAttached = ref(false)
 const postsPerPage = 10
+const appliedPostIds = ref(new Set())
 const selectedPost = ref(null)
 const mainScrollContainer = ref(null)
 
@@ -329,6 +358,52 @@ const searchRoleFilter = ref('All')
 const searchResults = ref([])
 const isSearching = ref(false)
 const searchError = ref('')
+
+const userNotifications = ref([])
+const isLoadingNotifications = ref(false)
+const loadNotificationsError = ref('')
+
+let socket = null
+
+async function fetchNotifications() {
+  if (!auth.isAuthenticated) return
+  isLoadingNotifications.value = true
+  loadNotificationsError.value = ''
+  try {
+    const { data } = await api.get('/notifications')
+    userNotifications.value = data.notifications || []
+  } catch (error) {
+    loadNotificationsError.value = getErrorMessage(error, 'Failed to load notifications.')
+  } finally {
+    isLoadingNotifications.value = false
+  }
+}
+
+async function markNotificationAsRead(id) {
+  try {
+    await api.patch(`/notifications/${id}/read`)
+    const target = userNotifications.value.find(n => n.id === id)
+    if (target) target.isRead = true
+  } catch (error) {
+    console.error('Failed to mark notification read:', error)
+  }
+}
+
+function initializeSocketConnection() {
+  if (socket) return
+  const userId = auth.user?.id
+  if (!userId) return
+
+  // Connect to the base backend WebSocket Gateway URL
+  socket = io(import.meta.env.VITE_API_URL || 'http://localhost:3000', {
+    query: { userId },
+  })
+
+  socket.on('notification.created', payload => {
+    // Dynamically insert incoming server push notifications directly into our view array
+    userNotifications.value.unshift(payload)
+  })
+}
 
 const canSubmitPost = computed(() => postForm.title.trim() && postForm.content.trim())
 const postPreviewHtml = computed(() => renderMarkdown(postForm.content || 'Start writing your post to see the preview here.'))
@@ -400,6 +475,74 @@ const profileGallery = computed(() => posts.value.map((post) => ({
   post,
 })))
 
+function mergeEngagement(payload) {
+  if (!payload?.id) return
+  const {id, ...patch} = payload
+
+  const patchList = (listRef) => {
+    const list = listRef.value
+    const idx = list.findIndex((p) => p.id === id)
+    if (idx >= 0) {
+      Object.assign(list[idx], patch)
+    }
+  }
+
+  patchList(posts)
+  patchList(searchResults)
+  if (selectedPost.value?.id === id) {
+    Object.assign(selectedPost.value, patch)
+  }
+}
+
+async function refreshAppliedPosts() {
+  if (!auth.isAuthenticated || auth.user?.role !== 'student') {
+    appliedPostIds.value = new Set()
+    return
+  }
+  try {
+    const {data} = await api.get('/applications/me')
+    const ids = new Set(
+        (data.applications || []).map((a) => a.post?.id).filter(Boolean),
+    )
+    appliedPostIds.value = ids
+  } catch {
+    appliedPostIds.value = new Set()
+  }
+}
+
+async function handlePostApply(post) {
+  if (!post?.id) return
+  try {
+    await api.post('/applications', {postId: post.id})
+    const next = new Set(appliedPostIds.value)
+    next.add(post.id)
+    appliedPostIds.value = next
+  } catch (error) {
+    window.alert(getErrorMessage(error, 'Could not submit application.'))
+  }
+}
+
+async function handleViewApplicants(post) {
+  if (!post?.id) return
+  try {
+    const {data} = await api.get(`/applications/post/${post.id}`)
+    const n = data.applications?.length ?? 0
+    window.alert(`${n} applicant(s) for this post.`)
+  } catch (error) {
+    window.alert(getErrorMessage(error, 'Could not load applicants.'))
+  }
+}
+
+function checkOpenPostQuery() {
+  const raw = route.query.post
+  const pid = Array.isArray(raw) ? raw[0] : raw
+  if (!pid || typeof pid !== 'string') return
+  const found = posts.value.find((p) => p.id === pid)
+  if (found) {
+    openPost(found)
+  }
+}
+
 function openPost(post) {
   if (!post) return
   selectedPost.value = post
@@ -407,6 +550,11 @@ function openPost(post) {
 
 function closePost() {
   selectedPost.value = null
+  if (route.query.post) {
+    const q = {...route.query}
+    delete q.post
+    router.replace({query: q})
+  }
 }
 
 const settingsMenuItems = computed(() => [
@@ -880,11 +1028,12 @@ async function submitPost() {
 }
 
 function mapPost(post) {
-  const authorName = post.author?.user_name || '<Blank>'
+  const authorName = post.author?.user_name || post.author?.phone || '<Blank>'
   const createdAt = post.createdAt ? new Date(post.createdAt) : null
 
   return {
     id: post.id,
+    authorId: post.author?.id,
     company: authorName,
     meta: createdAt ? createdAt.toLocaleString() : 'Just now',
     badge: 'Community post',
@@ -895,7 +1044,12 @@ function mapPost(post) {
     tags: [],
     logoBg: 'bg-[#aecbfa]',
     logoText: 'text-[#1a4fa3]',
-    // heroBg: 'bg-[#aecbfa]/35',
+    likeCount: post.likeCount ?? 0,
+    commentCount: post.commentCount ?? 0,
+    shareCount: post.shareCount ?? 0,
+    bookmarkCount: post.bookmarkCount ?? 0,
+    likedByMe: Boolean(post.likedByMe),
+    bookmarkedByMe: Boolean(post.bookmarkedByMe),
   }
 }
 
@@ -916,6 +1070,7 @@ async function searchPosts() {
     searchError.value = getErrorMessage(error, 'Search failed. Please try again.')
   } finally {
     isSearching.value = false
+    nextTick(() => checkOpenPostQuery())
   }
 }
 
@@ -957,6 +1112,7 @@ async function loadPosts({page = 1, append = false} = {}) {
   } finally {
     postsLoading.value = false
     postsLoadingMore.value = false
+    nextTick(() => checkOpenPostQuery())
   }
 }
 
@@ -1110,14 +1266,17 @@ async function savePersonalInfoEdit() {
 }
 
 onMounted(() => {
+  initializeSocketConnection()
+  refreshAppliedPosts()
+
   if (activePage.value === 'home' || activePage.value === 'profile') {
     loadPosts()
   }
 
   if (activePage.value === 'home') {
     nextTick(() => {
-      addHomeScrollListener()
-      handleHomeScroll()
+       addHomeScrollListener()
+       handleHomeScroll()
     })
   }
 
@@ -1132,10 +1291,18 @@ onMounted(() => {
   if (activePage.value === 'settings') {
     loadPasskeys()
   }
+
+  if (activePage.value === 'notifications') {
+    fetchNotifications()
+  }
 })
 
 onUnmounted(() => {
   removeHomeScrollListener()
+  if (socket) {
+    socket.disconnect()
+    socket = null
+  }
 })
 
 watch(activePage, (page, previousPage) => {
@@ -1147,6 +1314,10 @@ watch(activePage, (page, previousPage) => {
     searchPosts()
   }
 
+  if (page === 'notifications' && previousPage !== 'notifications') {
+    fetchNotifications()
+  }
+
   if (page === 'home') {
     nextTick(() => {
       addHomeScrollListener()
@@ -1155,7 +1326,25 @@ watch(activePage, (page, previousPage) => {
   } else {
     removeHomeScrollListener()
   }
+
+  if (page === 'home' || page === 'profile') {
+    refreshAppliedPosts()
+  }
 })
+
+watch(
+  () => route.query.post,
+  () => {
+    nextTick(() => checkOpenPostQuery())
+  },
+)
+
+watch(
+  () => auth.isAuthenticated,
+  () => {
+    refreshAppliedPosts()
+  },
+)
 
 function toggleThemeMode() {
   setThemePreference(appliedTheme.value === 'dark' ? 'light' : 'dark')

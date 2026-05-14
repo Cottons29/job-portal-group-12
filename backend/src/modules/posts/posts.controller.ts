@@ -1,4 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 
 import { AuthenticatedGuard } from '../../auth/authenticated.guard';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -9,15 +21,59 @@ import { PostsService } from './posts.service';
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
+  @Post(':postId/like')
+  @HttpCode(HttpStatus.OK)
+  async toggleLike(@Req() req: any, @Param('postId') postId: string) {
+    return this.postsService.toggleLike(postId, req.user.sub);
+  }
+
+  @Post(':postId/bookmark')
+  @HttpCode(HttpStatus.OK)
+  async toggleBookmark(@Req() req: any, @Param('postId') postId: string) {
+    return this.postsService.toggleBookmark(postId, req.user.sub);
+  }
+
+  @Post(':postId/share')
+  @HttpCode(HttpStatus.CREATED)
+  async share(@Req() req: any, @Param('postId') postId: string) {
+    return this.postsService.recordShare(postId, req.user.sub);
+  }
+
+  @Get(':postId/comments')
+  async listComments(@Param('postId') postId: string) {
+    const comments = await this.postsService.listComments(postId);
+    return { comments };
+  }
+
+  @Post(':postId/comments')
+  @HttpCode(HttpStatus.CREATED)
+  async addComment(
+    @Req() req: any,
+    @Param('postId') postId: string,
+    @Body() body: { content?: string },
+  ) {
+    return this.postsService.addComment(postId, req.user.sub, body.content || '');
+  }
+
+  @Delete(':postId/comments/:commentId')
+  @HttpCode(HttpStatus.OK)
+  async deleteComment(
+    @Req() req: any,
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string,
+  ) {
+    return this.postsService.deleteComment(postId, commentId, req.user.sub);
+  }
+
   @Get()
   async findAll(
+    @Req() req: any,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('q') q?: string,
     @Query('role') role?: string,
   ) {
-    const result = await this.postsService.findAll({ page, limit, q, role });
-    return result;
+    return this.postsService.findAll({ page, limit, q, role }, req.user.sub);
   }
 
   @Post()
@@ -26,5 +82,4 @@ export class PostsController {
     const post = await this.postsService.create(req.user.sub, dto);
     return { message: 'Post created', post };
   }
-
 }
