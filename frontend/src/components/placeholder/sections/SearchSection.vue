@@ -36,7 +36,7 @@ defineProps({
   }
 })
 
-defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-post', 'apply', 'view-applicants'])
+defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-post', 'apply', 'view-applicants', 'engagement-change'])
 </script>
 
 <template>
@@ -101,6 +101,7 @@ defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-po
           @open="$emit('open-post', $event)"
           @apply="$emit('apply', $event)"
           @view-applicants="$emit('view-applicants', $event)"
+          @engagement-change="$emit('engagement-change', $event)"
         />
       </TransitionGroup>
       
