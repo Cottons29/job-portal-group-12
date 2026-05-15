@@ -1,40 +1,23 @@
 services:
   backend:
-    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
+    image: ghcr.io/cottons29/job-portal-group-12/backend:latest
     container_name: job_portal_backend
     restart: always
     env_file:
       - .env
     environment:
       PORT: 3080
-      DB_HOST: db
     ports:
       - "3080:3080"
-    depends_on:
-      - db
 
   frontend:
-    image: ghcr.io/${GITHUB_REPOSITORY}/frontend:latest
+    image: ghcr.io/cottons29/job-portal-group-12/frontend:latest
     container_name: job_portal_frontend
     restart: always
     ports:
       - "3081:80"
     depends_on:
       - backend
-
-  db:
-    image: postgres:15-alpine
-    container_name: nestjs_postgres
-    restart: always
-    environment:
-      POSTGRES_USER: ${USERNAME}
-      POSTGRES_PASSWORD: ${PASSWORD}
-      POSTGRES_DB: ${DATABASE}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./db-init:/docker-entrypoint-initdb.d
 
 volumes:
   postgres_data:
