@@ -15,7 +15,7 @@
 
     <div
       :class="[
-        post.heroBg || 'bg-surface-container-high/40',
+
         'rounded-[1.25rem] p-5',
         { 'cursor-pointer transition-opacity hover:opacity-90': !full },
       ]"
