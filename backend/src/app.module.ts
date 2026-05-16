@@ -6,9 +6,8 @@ import { AuthModule } from './auth/auth.module';
 import { UploadModule } from './upload/upload.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AdminModule } from './modules/admin/admin.module';
-import { StudentProfileModule } from './modules/studentProfile/student-profile.module';
+import { UserModule } from './modules/user/user.module';
 import { PostsModule } from './modules/posts/posts.module';
-import { EmployerProfileModule } from './modules/employerProfile/employer-profile.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
 
 @Module({
@@ -27,9 +26,8 @@ import { ApplicationsModule } from './modules/applications/applications.module';
     UploadModule,
     NotificationsModule,
     AdminModule,
-    StudentProfileModule,
+    UserModule,
     PostsModule,
-    EmployerProfileModule,
     ApplicationsModule,
   ],
   controllers: [AppController],

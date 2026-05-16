@@ -4,17 +4,14 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToOne,
   OneToMany,
 } from 'typeorm';
 
 import { UserRole } from '../../common/enums/user-role.enum';
 import { AccountStatus } from '../../common/enums/account-status.enum';
-import { StudentProfile } from '../studentProfile/student-profile.entity';
-import { EmployerProfile } from '../employerProfile/company-profile.entity';
 import { PasskeyCredential } from '../../auth/passkey-credential.entity';
 
-@Entity('users') // table name
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -47,11 +44,76 @@ export class User {
   @Column({ default: false })
   profileCompleted: boolean;
 
-  @OneToOne(() => StudentProfile, (profile) => profile.user)
-  studentProfile: StudentProfile;
+  // --- Student Specific Fields ---
+  @Column({ nullable: true })
+  fullName: string;
 
-  @OneToOne(() => EmployerProfile, (profile) => profile.user)
-  employerProfile: EmployerProfile;
+  @Column({ nullable: true })
+  gender?: string;
+
+  @Column({ type: 'date', nullable: true })
+  dateOfBirth?: Date;
+
+  @Column({ nullable: true })
+  university: string;
+
+  @Column({ nullable: true })
+  major: string;
+
+  @Column({ type: 'int', nullable: true })
+  yearOfStudy?: number | null;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  yearLevel?: string;
+
+  @Column({ type: 'text', nullable: true })
+  bio?: string;
+
+  @Column({ nullable: true })
+  cvUrl?: string;
+
+  @Column({ nullable: true })
+  profileImageUrl?: string;
+
+  @Column('text', { array: true, default: () => 'ARRAY[]::text[]', nullable: true })
+  skills: string[];
+
+  @Column({ nullable: true })
+  jobType?: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  availability?: Record<string, Record<string, boolean>> | null;
+
+  @Column({ type: 'numeric', precision: 14, scale: 2, nullable: true })
+  expectedSalary?: string | null;
+
+  @Column({ length: 3, nullable: true })
+  currency?: string;
+
+  // --- Employer Specific Fields ---
+  @Column({ nullable: true })
+  companyName: string;
+
+  @Column({ nullable: true })
+  patentUrl: string;
+
+  @Column({ default: false })
+  isVerified: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  companyDescription: string;
+
+  @Column({ nullable: true })
+  industry: string;
+
+  @Column({ nullable: true })
+  address: string;
+
+  @Column({ nullable: true })
+  website?: string;
+
+  @Column({ nullable: true })
+  logoUrl: string;
 
   @OneToMany(() => PasskeyCredential, (credential) => credential.user)
   passkeyCredentials: PasskeyCredential[];
