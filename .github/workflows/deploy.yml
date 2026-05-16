@@ -49,7 +49,6 @@ jobs:
           build-args: |
             VITE_API_URL=${{ secrets.FRONTEND_API_URL }}
           tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}/frontend:latest
-
       - name: Deploy to server with SSH
         uses: appleboy/ssh-action@v1.2.5
         with:
