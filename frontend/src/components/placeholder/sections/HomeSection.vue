@@ -56,7 +56,7 @@ defineProps({
   }
 })
 
-defineEmits(['open-post', 'apply', 'view-applicants', 'engagement-change'])
+defineEmits(['open-post', 'apply', 'view-applicants', 'engagement-change', 'show-profile'])
 </script>
 
 <template>
@@ -79,6 +79,7 @@ defineEmits(['open-post', 'apply', 'view-applicants', 'engagement-change'])
           @apply="$emit('apply', $event)"
           @view-applicants="$emit('view-applicants', $event)"
           @engagement-change="$emit('engagement-change', $event)"
+          @show-profile="$emit('show-profile', $event)"
         />
       </TransitionGroup>
       <p v-if="postsLoadingMore"

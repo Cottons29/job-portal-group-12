@@ -52,7 +52,7 @@ defineEmits(['openPost'])
 
 <template>
   <section class="mx-auto w-full max-w-5xl space-y-4">
-    <article class="overflow-hidden rounded-[1.5rem] bg-surface-container-low shadow-sm ring-1 ring-white/5">
+    <article class="overflow-hidden rounded-3xl bg-surface-container-low shadow-sm ring-1 ring-white/5">
       <div
           class="h-24 bg-[radial-gradient(circle_at_20%_20%,var(--fs-primary-container),transparent_32%),linear-gradient(135deg,var(--fs-surface-container-high),var(--fs-surface-container-low))] sm:h-32"></div>
 
@@ -78,7 +78,7 @@ defineEmits(['openPost'])
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div class="flex flex-wrap items-center gap-2">
-                  <h2 class="font-display text-2xl font-black tracking-[-0.05em] text-on-surface sm:text-3xl">
+                  <h2 class="font-display text-2xl font-black tracking-tighter text-on-surface sm:text-3xl">
                     {{ profileHandle }}
                   </h2>
                 </div>
@@ -156,7 +156,7 @@ defineEmits(['openPost'])
           v-for="item in profileGallery"
           :key="item.post?.id || item.title"
           class="group relative aspect-square overflow-hidden rounded-[1.25rem] bg-surface-container-low ring-1 ring-white/5 transition hover:ring-primary/40 focus:outline-none focus:ring-2 focus:ring-primary"
-          role="button"
+          role="region"
           tabindex="0"
           @click="$emit('openPost', item.post)"
           @keydown.enter.prevent="$emit('openPost', item.post)"

@@ -4,7 +4,7 @@
       <div class="grid h-12 w-12 place-items-center rounded-full bg-[#d7b7ff] text-sm font-black text-[#6a39b8]">
         ST
       </div>
-      <button class="flex-1 rounded-full bg-surface-container-low px-5 py-3 text-left text-sm font-bold text-on-surface-variant transition hover:bg-surface-container">
+      <button class="flex-1 rounded-full bg-surface-container px-5 py-3 text-left text-sm font-bold text-on-surface-variant transition hover:bg-surface-container">
         {{ $t('home.sharePlaceholder') }}
       </button>
     </div>

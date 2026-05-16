@@ -1,5 +1,5 @@
 <template>
-  <div class="no-scrollbar flex gap-4 overflow-x-auto rounded-[1.5rem] bg-surface-container-low p-4">
+  <div class="no-scrollbar flex gap-4 overflow-x-auto rounded-3xl bg-surface-container-lowest p-4">
     <article v-for="story in stories" :key="story.name" class="min-w-[5.5rem] text-center">
       <div :class="[story.ring, 'mx-auto rounded-full p-1']">
         <div class="grid h-16 w-16 place-items-center rounded-full bg-surface-container-lowest text-lg font-black text-primary">

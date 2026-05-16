@@ -1,5 +1,7 @@
 import type { AppLanguage } from '../types/i18n'
 
+// @ts-ignore
+// @ts-ignore
 const english_lang: AppLanguage = {
   lang: 'en',
   version: 1,
@@ -171,6 +173,11 @@ const english_lang: AppLanguage = {
     lookingFor: 'Looking for {jobType}',
     connectionAvatarAlt: 'Connection avatar',
     followedBy: 'Followed by campus recruiters, mentors + classmates',
+    //@ts-ignore
+    posts: 'Posts',
+    followers: 'Followers',
+    following: 'Following',
+    noBio: 'No bio provided',
   },
   dashboardPages: {
     search: {

@@ -62,7 +62,7 @@ const handleVerifyOtp = async () => {
     
     // Route completion correctly
     if (authStore.needsOnboarding) {
-      router.push(authStore.user?.role === 'employer' ? '/onboarding/employer' : '/onboarding/student')
+      router.push(authStore.user?.role?.toLowerCase() === 'employer' ? '/onboarding/employer' : '/onboarding/student')
     } else {
       router.push('/home')
     }

@@ -76,7 +76,7 @@
             <div class="absolute -right-4 top-10 hidden h-28 w-28 rounded-[1rem] bg-tertiary-fixed md:block"></div>
             <div class="absolute -left-4 bottom-8 hidden h-20 w-20 rounded-[0.75rem] bg-primary/10 md:block"></div>
 
-            <div class="relative rounded-[1.5rem] bg-surface-container p-4 shadow-[0_30px_90px_rgba(11,28,48,0.12)]">
+            <div class="relative rounded-[1.5rem] ">
               <div class="rounded-[1.25rem] bg-surface-container-lowest p-6">
                 <div class="mb-6 flex items-start justify-between gap-4">
                   <div>
@@ -88,7 +88,7 @@
                       class="rounded-full bg-tertiary-fixed px-3 py-1 text-xs font-black text-on-surface">$18.50/hr</span>
                 </div>
 
-                <div class="mb-6 rounded-[1rem] bg-primary p-6 text-on-primary">
+                <div class="mb-6 rounded-2xl bg-primary p-6 text-on-primary">
                   <div class="flex items-center gap-4">
                     <div
                         class="grid h-14 w-14 place-items-center rounded-lg bg-gray-100/99 text-lg font-black backdrop-blur">

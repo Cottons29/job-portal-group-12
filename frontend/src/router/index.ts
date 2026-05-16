@@ -179,7 +179,7 @@ router.beforeEach(async (to) => {
         if (authStore.needsOnboarding) {
             // Must allow them into the onboarding flow, otherwise redirect
             if (!to.path.startsWith('/onboarding')) {
-                return authStore.user?.role === 'employer' 
+                return authStore.user?.role?.toLowerCase() === 'employer' 
                     ? '/onboarding/employer' 
                     : '/onboarding/student'
             }

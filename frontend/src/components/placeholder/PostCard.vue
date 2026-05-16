@@ -2,11 +2,18 @@
   <div class="rounded-[1.25rem] bg-surface-container-lowest p-5">
     <div class="mb-5 flex items-start justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div :class="[post.logoBg, post.logoText, 'grid h-12 w-12 place-items-center rounded-full text-sm font-black']">
+        <div
+          :class="[
+            post.logoBg,
+            post.logoText,
+            'grid h-12 w-12 cursor-pointer place-items-center rounded-full text-sm font-black transition hover:opacity-80',
+          ]"
+          @click.stop="$emit('show-profile', post.authorId)"
+        >
           {{ post.company.charAt(0) }}
         </div>
-        <div>
-          <p class="font-black text-on-surface">{{ post.company }}</p>
+        <div class="cursor-pointer" @click.stop="$emit('show-profile', post.authorId)">
+          <p class="font-black text-on-surface hover:underline">{{ post.company }}</p>
           <p class="text-xs font-bold text-on-surface-variant">{{ post.meta }}</p>
         </div>
       </div>
@@ -232,7 +239,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['open', 'apply', 'view-applicants', 'engagement-change'])
+const emit = defineEmits(['open', 'apply', 'view-applicants', 'engagement-change', 'show-profile'])
 
 const socialBusy = ref(false)
 const socialError = ref('')

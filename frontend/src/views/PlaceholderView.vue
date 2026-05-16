@@ -55,11 +55,11 @@
             @engagement-change="mergeEngagement"
             @apply="handlePostApply"
             @view-applicants="handleViewApplicants"
+            @show-profile="showUserProfile"
         />
 
         <SettingsSection
             v-else-if="activePage === 'settings'"
-            :active-settings-section="activeSettingsSection"
             :auth-loading="auth.isLoading"
             :logout-error="logoutError"
             :passkey-error="passkeyError"
@@ -67,13 +67,9 @@
             :passkey-message="passkeyMessage"
             :password-error="passwordError"
             :password-message="passwordMessage"
-            :personal-info-rows="personalInfoRows"
             :profile-load-error="profileLoadError"
             :security-rows="securityRows"
-            :settings-menu-items="settingsMenuItems"
-            :language-options="languageOptions"
             :current-locale="locale"
-            @update:active-settings-section="activeSettingsSection = $event"
             @update:locale="locale = $event"
             @open-personal-info-editor="openPersonalInfoEditor"
             @handle-logout="handleLogout"
@@ -182,6 +178,16 @@
             />
           </Transition>
         </Teleport>
+
+        <Teleport to="body">
+          <Transition name="modal">
+            <ProfileModal
+                v-if="isProfileModalOpen"
+                :user="selectedUserProfile || { name: isProfileLoading ? 'Loading...' : 'User' }"
+                @close="closeProfileModal"
+            />
+          </Transition>
+        </Teleport>
       </main>
     </div>
   </div>
@@ -203,10 +209,11 @@ import ProfileSection from '@/components/placeholder/sections/ProfileSection.vue
 import CreatePostSection from '@/components/placeholder/sections/CreatePostSection.vue'
 import SearchSection from '@/components/placeholder/sections/SearchSection.vue'
 import NotificationsSection from '@/components/placeholder/sections/NotificationsSection.vue'
-import { io } from 'socket.io-client'
+import {io} from 'socket.io-client'
 import PersonalInfoEditor from '@/components/placeholder/sections/PersonalInfoEditor.vue'
 import PasswordEditor from '@/components/placeholder/sections/PasswordEditor.vue'
 import PostModal from '@/components/placeholder/sections/PostModal.vue'
+import ProfileModal from '@/components/placeholder/sections/ProfileModal.vue'
 import {useThemeMode} from '@/composables/useThemeMode'
 import {useAuthStore} from '@/stores/auth'
 import {
@@ -217,22 +224,17 @@ import {
   BuildingStorefrontIcon,
   CameraIcon,
   ChatBubbleOvalLeftEllipsisIcon,
-  CreditCardIcon,
   EnvelopeIcon,
   HomeIcon,
   IdentificationIcon,
   KeyIcon,
-  LanguageIcon,
   LockClosedIcon,
   MagnifyingGlassIcon,
   PhoneIcon,
   PlusCircleIcon,
-  ShieldCheckIcon,
   SparklesIcon,
   SquaresPlusIcon,
-  UserGroupIcon,
   UserCircleIcon,
-  UserIcon,
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
@@ -276,45 +278,6 @@ const editingField = ref(null)
 const editValue = ref('')
 const activeSettingsSection = ref('personal')
 
-const languageOptions = [
-  {
-    label: 'English',
-    nativeName: 'English',
-    value: 'en',
-    description: 'Use FirstStep in English.',
-  },
-  {
-    label: 'Khmer',
-    nativeName: 'ភាសាខ្មែរ',
-    value: 'km',
-    description: 'ប្រើ FirstStep ជាភាសាខ្មែរ។',
-  },
-  {
-    label: 'Chinese (Simplified)',
-    nativeName: '简体中文',
-    value: 'zh-CN',
-    description: '使用简体中文浏览 FirstStep。',
-  },
-  {
-    label: 'Chinese (Traditional)',
-    nativeName: '繁體中文',
-    value: 'zh-TW',
-    description: '使用繁體中文瀏覽 FirstStep。',
-  },
-  {
-    label: 'Japanese',
-    nativeName: '日本語',
-    value: 'ja',
-    description: 'FirstStep を日本語で使用します。',
-  },
-  {
-    label: 'French',
-    nativeName: 'Français',
-    value: 'fr',
-    description: 'Utiliser FirstStep en français.',
-  },
-]
-
 const passwordForm = reactive({
   current: '',
   next: '',
@@ -334,6 +297,7 @@ const postForm = reactive({
   title: '',
   content: '',
 })
+
 const postPhotoFile = ref(null)
 const postPhotoPreview = ref('')
 const postPhotoName = ref('')
@@ -351,6 +315,9 @@ const postsScrollListenerAttached = ref(false)
 const postsPerPage = 10
 const appliedPostIds = ref(new Set())
 const selectedPost = ref(null)
+const selectedUserProfile = ref(null)
+const isProfileModalOpen = ref(false)
+const isProfileLoading = ref(false)
 const mainScrollContainer = ref(null)
 
 const searchQuery = ref('')
@@ -495,16 +462,15 @@ function mergeEngagement(payload) {
 }
 
 async function refreshAppliedPosts() {
-  if (!auth.isAuthenticated || auth.user?.role !== 'student') {
+  if (!auth.isAuthenticated || auth.user?.role?.toLowerCase() !== 'student') {
     appliedPostIds.value = new Set()
     return
   }
   try {
     const {data} = await api.get('/applications/me')
-    const ids = new Set(
+    appliedPostIds.value = new Set(
         (data.applications || []).map((a) => a.post?.id).filter(Boolean),
     )
-    appliedPostIds.value = ids
   } catch {
     appliedPostIds.value = new Set()
   }
@@ -557,51 +523,6 @@ function closePost() {
   }
 }
 
-const settingsMenuItems = computed(() => [
-  {
-    label: t('settings.personalInfo'),
-    section: 'personal',
-    icon: IdentificationIcon,
-    bg: 'bg-[#8fd99b]',
-    color: 'text-[#1f6c3b]',
-    active: activeSettingsSection.value === 'personal'
-  },
-  {
-    label: t('settings.securitySignIn'),
-    section: 'security',
-    icon: LockClosedIcon,
-    bg: 'bg-[#8ccaff]',
-    color: 'text-[#235d84]',
-    active: activeSettingsSection.value === 'security'
-  },
-  {
-    label: t('settings.dataPrivacy'),
-    section: 'privacy',
-    icon: ShieldCheckIcon,
-    bg: 'bg-[#d7b7ff]',
-    color: 'text-[#5b36a8]',
-    active: activeSettingsSection.value === 'privacy'
-  },
-  {
-    label: t('settings.languages'),
-    section: 'languages',
-    icon: LanguageIcon,
-    bg: 'bg-[#f5df7e]',
-    color: 'text-[#745b00]',
-    active: activeSettingsSection.value === 'languages'
-  },
-  {
-    label: t('settings.logout'),
-    section: 'logout',
-    icon: ArrowRightOnRectangleIcon,
-    bg: 'bg-red-500/15',
-    color: 'text-red-300',
-    active: activeSettingsSection.value === 'logout'
-  },
-  // {label: 'People & sharing', icon: UserGroupIcon, bg: 'bg-[#f8a9dc]', color: 'text-[#9b1f70]', to: '/settings'},
-  // {label: 'Wallet & subscriptions', icon: CreditCardIcon, bg: 'bg-[#ffc28e]', color: 'text-[#83460e]', to: '/settings'},
-])
-
 const securityRows = computed(() => [
   {
     label: t('settings.security.passkeyLogin'),
@@ -622,106 +543,6 @@ const securityRows = computed(() => [
   },
 ])
 
-const personalInfoRows = computed(() => {
-  const isEmployer = auth.user?.role === 'employer'
-  const isStudent = auth.user?.role === 'student'
-
-  const baseRows = [
-    {
-      label: t('settings.personal.profilePicture'),
-      field: 'avatar',
-      values: [],
-      icon: CameraIcon,
-      avatar: profileForm.avatar || defaultAvatar,
-      placeholder: t('settings.personal.profilePicturePlaceholder'),
-      inputType: 'url',
-    },
-    {
-      label: isEmployer ? t('settings.personal.companyName') : t('settings.personal.name'),
-      field: isEmployer ? 'companyName' : 'name',
-      values: [isEmployer ? profileForm.companyName || t('settings.personal.yourCompany') : profileForm.name || t('settings.personal.yourName')],
-      icon: isEmployer ? BuildingStorefrontIcon : IdentificationIcon,
-      placeholder: isEmployer ? t('settings.personal.companyNamePlaceholder') : t('settings.personal.namePlaceholder'),
-      inputType: 'text',
-    },
-    {
-      label: t('settings.personal.username'),
-      field: 'user_name',
-      values: [profileForm.user_name || t('settings.personal.blank')],
-      icon: UserCircleIcon,
-      placeholder: t('settings.personal.usernamePlaceholder'),
-      inputType: 'text',
-    },
-    {
-      label: t('settings.personal.email'),
-      field: 'email',
-      values: [profileForm.email || t('settings.personal.noEmailLinked')],
-      icon: EnvelopeIcon,
-      placeholder: t('settings.personal.emailPlaceholder'),
-      inputType: 'email',
-    },
-    {
-      label: t('settings.personal.phone'),
-      field: 'phone',
-      values: [profileForm.phone || t('settings.personal.noPhoneNumber')],
-      icon: PhoneIcon,
-      placeholder: t('settings.personal.phonePlaceholder'),
-      inputType: 'tel',
-    },
-  ]
-
-  const studentRows = [
-    {
-      label: t('settings.personal.university'),
-      field: 'university',
-      values: [profileForm.university || t('settings.personal.notSet')],
-      icon: AcademicCapIcon,
-      placeholder: t('settings.personal.universityPlaceholder'),
-      inputType: 'text',
-    },
-    {
-      label: t('settings.personal.major'),
-      field: 'major',
-      values: [profileForm.major || t('settings.personal.notSet')],
-      icon: SparklesIcon,
-      placeholder: t('settings.personal.majorPlaceholder'),
-      inputType: 'text',
-    },
-  ]
-
-  const employerRows = [
-    {
-      label: t('settings.personal.industry'),
-      field: 'industry',
-      values: [profileForm.industry || t('settings.personal.notSet')],
-      icon: BriefcaseIcon,
-      placeholder: t('settings.personal.industryPlaceholder'),
-      inputType: 'text',
-    },
-    {
-      label: t('settings.personal.address'),
-      field: 'address',
-      values: [profileForm.address || t('settings.personal.notSet')],
-      icon: HomeIcon,
-      placeholder: t('settings.personal.addressPlaceholder'),
-      inputType: 'text',
-    },
-    {
-      label: t('settings.personal.website'),
-      field: 'website',
-      values: [profileForm.website || t('settings.personal.noWebsite')],
-      icon: SparklesIcon,
-      placeholder: t('settings.personal.websitePlaceholder'),
-      inputType: 'url',
-    },
-  ]
-
-  if (isEmployer) {
-    return [...baseRows, ...employerRows]
-  }
-
-  return [...baseRows, ...studentRows]
-})
 
 const pages = computed(() => ({
   home: {
@@ -1186,7 +1007,7 @@ async function fetchPersonalInfo() {
   profileLoadError.value = ''
 
   try {
-    const isEmployer = auth.user?.role === 'employer'
+    const isEmployer = auth.user?.role?.toLowerCase() === 'employer'
     const endpoint = isEmployer ? '/employer-profile/me' : '/student-profile/me'
 
     const [{data: profileData}, accountUser] = await Promise.all([
@@ -1214,7 +1035,7 @@ function closePersonalInfoEditor() {
 
 function buildProfileFormData() {
   const formData = new FormData()
-  const isEmployer = auth.user?.role === 'employer'
+  const isEmployer = auth.user?.role?.toLowerCase() === 'employer'
 
   formData.append('user_name', profileForm.user_name || '')
   formData.append('email', profileForm.email || '')
@@ -1252,7 +1073,7 @@ async function savePersonalInfoEdit() {
 
   try {
     profileForm[field] = editValue.value.trim()
-    const isEmployer = auth.user?.role === 'employer'
+    const isEmployer = auth.user?.role?.toLowerCase() === 'employer'
     const endpoint = isEmployer ? '/employer-profile/setup' : '/student-profile'
 
     const {data} = await api.post(endpoint, buildProfileFormData())
@@ -1349,15 +1170,6 @@ watch(
 function toggleThemeMode() {
   setThemePreference(appliedTheme.value === 'dark' ? 'light' : 'dark')
 }
-
-function saveProfile() {
-  // TODO: Connect this form to the profile update API when the endpoint is ready.
-}
-
-function formatDate(value) {
-  return new Date(value).toLocaleDateString()
-}
-
 async function loadPasskeys() {
   passkeyError.value = ''
 
@@ -1403,6 +1215,47 @@ async function addPasskey() {
   } finally {
     passkeyLoading.value = false
   }
+}
+
+async function showUserProfile(userId) {
+  if (!userId) return
+  isProfileLoading.value = true
+  isProfileModalOpen.value = true
+  selectedUserProfile.value = null
+
+  try {
+    let profile;
+    try {
+      const {data} = await api.get(`/student-profile/${userId}`)
+      profile = data.profile
+    } catch (e) {
+      const {data} = await api.get(`/employer-profile/${userId}`)
+      profile = data.profile
+    }
+
+    if (profile) {
+      selectedUserProfile.value = {
+        name: profile.fullName || profile.companyName || 'User',
+        user_name: profile.user?.user_name,
+        avatar: profile.profileImageUrl || profile.logoUrl,
+        bio: profile.bio || profile.companyDescription,
+        education: profile.university ? `${profile.university} - ${profile.major}` : profile.industry,
+        category: profile.yearLevel ? `Year ${profile.yearLevel}` : profile.address,
+        postCount: 0 // Could be fetched separately
+      }
+    } else {
+      selectedUserProfile.value = { name: 'User not found' }
+    }
+  } catch (error) {
+    selectedUserProfile.value = { name: 'Error loading profile' }
+  } finally {
+    isProfileLoading.value = false
+  }
+}
+
+function closeProfileModal() {
+  isProfileModalOpen.value = false
+  selectedUserProfile.value = null
 }
 
 async function handleLogout() {

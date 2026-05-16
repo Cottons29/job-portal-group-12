@@ -1,8 +1,132 @@
 <script setup lang="ts">
-defineProps<{
-  profileLoadError?: string
-  personalInfoRows: any[]
-}>()
+import {computed, ref} from "vue";
+import api from "@/lib/api";
+import {useI18n} from "vue-i18n";
+import {
+  AcademicCapIcon,
+  BriefcaseIcon,
+  BuildingStorefrontIcon,
+  CameraIcon,
+  EnvelopeIcon,
+  HomeIcon,
+  IdentificationIcon,
+  PhoneIcon,
+  SparklesIcon,
+  UserCircleIcon,
+} from '@heroicons/vue/24/outline'
+
+const {t} = useI18n()
+
+const userProfile = ref()
+
+async function loadProfile() {
+  try {
+    const response = await api.get("/student-profile/me")
+    userProfile.value = response.data
+  } catch (error) {
+    console.log('Error loading user profile:', error)
+  }
+}
+
+loadProfile()
+
+const personalInfoRows = computed(() => {
+  if (!userProfile.value || !userProfile.value.profile) return []
+  const profile = userProfile.value.profile
+  const isEmployer = profile.role?.toLowerCase() === 'employer'
+
+  const baseRows = [
+    {
+      label: t('settings.personal.profilePicture'),
+      field: 'avatar',
+      values: [],
+      icon: CameraIcon,
+      avatar: profile.profileImageUrl || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
+      placeholder: t('settings.personal.profilePicturePlaceholder'),
+      inputType: 'url',
+    },
+    // {
+    //   label: isEmployer ? t('settings.personal.companyName') : t('settings.personal.name'),
+    //   field: isEmployer ? 'companyName' : 'fullName',
+    //   values: [isEmployer ? profile.companyName || t('settings.personal.yourCompany') : profile.fullName || t('settings.personal.yourName')],
+    //   icon: isEmployer ? BuildingStorefrontIcon : IdentificationIcon,
+    //   placeholder: isEmployer ? t('settings.personal.companyNamePlaceholder') : t('settings.personal.namePlaceholder'),
+    //   inputType: 'text',
+    // },
+    {
+      label: t('settings.personal.username'),
+      field: 'user_name',
+      values: [profile.user_name || t('settings.personal.blank')],
+      icon: UserCircleIcon,
+      placeholder: t('settings.personal.usernamePlaceholder'),
+      inputType: 'text',
+    },
+    {
+      label: t('settings.personal.email'),
+      field: 'email',
+      values: [profile.email || t('settings.personal.noEmailLinked')],
+      icon: EnvelopeIcon,
+      placeholder: t('settings.personal.emailPlaceholder'),
+      inputType: 'email',
+    },
+    {
+      label: t('settings.personal.phone'),
+      field: 'phone',
+      values: [profile.phone || t('settings.personal.noPhoneNumber')],
+      icon: PhoneIcon,
+      placeholder: t('settings.personal.phonePlaceholder'),
+      inputType: 'tel',
+    },
+  ]
+
+  const studentRows = [
+    {
+      label: t('settings.personal.university'),
+      field: 'university',
+      values: [profile.university || t('settings.personal.notSet')],
+      icon: AcademicCapIcon,
+      placeholder: t('settings.personal.universityPlaceholder'),
+      inputType: 'text',
+    },
+    {
+      label: t('settings.personal.major'),
+      field: 'major',
+      values: [profile.major || t('settings.personal.notSet')],
+      icon: SparklesIcon,
+      placeholder: t('settings.personal.majorPlaceholder'),
+      inputType: 'text',
+    },
+  ]
+
+  const employerRows = [
+    {
+      label: t('settings.personal.industry'),
+      field: 'industry',
+      values: [profile.industry || t('settings.personal.notSet')],
+      icon: BriefcaseIcon,
+      placeholder: t('settings.personal.industryPlaceholder'),
+      inputType: 'text',
+    },
+    {
+      label: t('settings.personal.address'),
+      field: 'address',
+      values: [profile.address || t('settings.personal.notSet')],
+      icon: HomeIcon,
+      placeholder: t('settings.personal.addressPlaceholder'),
+      inputType: 'text',
+    },
+    {
+      label: t('settings.personal.website'),
+      field: 'website',
+      values: [profile.website || t('settings.personal.noWebsite')],
+      icon: SparklesIcon,
+      placeholder: t('settings.personal.websitePlaceholder'),
+      inputType: 'url',
+    },
+  ]
+
+  return isEmployer ? [...baseRows, ...employerRows] : [...baseRows, ...studentRows]
+})
 
 defineEmits<{
   (e: 'openPersonalInfoEditor', row: any): void
@@ -15,11 +139,7 @@ defineEmits<{
       {{ $t('settings.personalInfo') }}
     </h2>
 
-    <p v-if="profileLoadError" class="mb-3 rounded-2xl bg-red-500/10 px-4 py-3 text-xs font-bold text-red-300">
-      {{ profileLoadError }}
-    </p>
-
-    <div class="overflow-hidden rounded-[1.25rem] bg-surface-container-low ring-1 ring-white/5">
+    <div v-if="userProfile" class="overflow-hidden rounded-[1.25rem] bg-surface-container-low ring-1 ring-white/5">
       <article
           v-for="(row, index) in personalInfoRows"
           :key="row.label"
@@ -28,7 +148,7 @@ defineEmits<{
               index === personalInfoRows.length - 1 ? 'rounded-b-[1.25rem]' : '',
               'flex cursor-pointer items-center gap-3 border-b border-surface last:border-b-0 bg-surface-container-low px-3 py-3 transition hover:bg-surface-container-high sm:px-4'
           ]"
-          role="button"
+          role="region"
           tabindex="0"
           @click="$emit('openPersonalInfoEditor', row)"
           @keydown.enter.prevent="$emit('openPersonalInfoEditor', row)"
@@ -46,6 +166,7 @@ defineEmits<{
           </p>
         </div>
         <img
+
             v-if="row.avatar"
             :alt="row.label"
             class="h-10 w-10 rounded-full object-cover ring-2 ring-surface-container-low"
