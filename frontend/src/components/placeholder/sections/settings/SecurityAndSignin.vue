@@ -1,12 +1,113 @@
 <script setup lang="ts">
-defineProps<{
-  securityRows: any[]
-  passkeyLoading: boolean
-  passkeyMessage?: string
-  passkeyError?: string
-  passwordError?: string
-  passwordMessage?: string
-}>()
+import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { LockClosedIcon, KeyIcon } from '@heroicons/vue/24/outline'
+import api from '@/lib/api'
+import { startRegistration } from '@simplewebauthn/browser'
+
+const { t } = useI18n()
+
+const passkeyLoading = ref(false)
+const passkeyMessage = ref('')
+const passkeyError = ref('')
+const passwordLoading = ref(false)
+const passwordError = ref('')
+const passwordMessage = ref('')
+const passkeys = ref([])
+
+const passwordForm = reactive({
+  current: '',
+  next: '',
+  confirm: ''
+})
+
+const securityRows = [
+  {
+    label: t('settings.security.password'),
+    values: ['Last changed 3 months ago'],
+    icon: LockClosedIcon,
+    action: () => { /* open password editor - could be a local ref if needed */ }
+  },
+  {
+    label: t('settings.security.passkey'),
+    values: ['Use your fingerprint or face to sign in'],
+    icon: KeyIcon,
+    buttonLabel: t('settings.security.addPasskey'),
+    action: addPasskey
+  }
+]
+
+async function loadPasskeys() {
+  try {
+    const { data } = await api.get('/auth/passkey/list')
+    passkeys.value = data.passkeys
+  } catch (error) {
+    console.error('Failed to load passkeys:', error)
+  }
+}
+
+async function addPasskey() {
+  passkeyError.value = ''
+  passkeyMessage.value = ''
+
+  if (!window.PublicKeyCredential) {
+    passkeyError.value = 'Passkeys are not supported in this browser.'
+    return
+  }
+
+  passkeyLoading.value = true
+  try {
+    const { data: options } = await api.post('/auth/passkey/register/options')
+    const response = await startRegistration({ optionsJSON: options })
+    const { data } = await api.post('/auth/passkey/register/verify', { response })
+    passkeys.value = data.passkeys
+    passkeyMessage.value = 'Passkey added successfully.'
+  } catch (error) {
+    passkeyError.value = 'Could not add passkey. Please try again.'
+  } finally {
+    passkeyLoading.value = false
+  }
+}
+
+async function updatePassword() {
+  passwordError.value = ''
+  passwordMessage.value = ''
+
+  if (!passwordForm.current || !passwordForm.next || !passwordForm.confirm) {
+    passwordError.value = 'Please fill in all password fields.'
+    return
+  }
+
+  if (passwordForm.next.length < 8) {
+    passwordError.value = 'New password must be at least 8 characters.'
+    return
+  }
+
+  if (passwordForm.next !== passwordForm.confirm) {
+    passwordError.value = 'New passwords do not match.'
+    return
+  }
+
+  passwordLoading.value = true
+  try {
+    await api.post('/auth/password', {
+      currentPassword: passwordForm.current,
+      newPassword: passwordForm.next,
+    })
+    passwordMessage.value = 'Password updated successfully.'
+    passwordForm.current = ''
+    passwordForm.next = ''
+    passwordForm.confirm = ''
+  } catch (error) {
+    passwordError.value = 'Could not update password. Check your current password and try again.'
+  } finally {
+    passwordLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadPasskeys()
+})
 </script>
 
 <template>

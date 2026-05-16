@@ -1,58 +1,62 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
-import api from "@/lib/api";
-import {useI18n} from "vue-i18n";
+import { computed, onMounted, ref, type Component } from "vue"
+import { useI18n } from "vue-i18n"
+import { useProfileStore } from "@/stores/profile"
+import { useAuthStore } from "@/stores/auth"
+import api from "@/lib/api"
 import {
   AcademicCapIcon,
   BriefcaseIcon,
-  BuildingStorefrontIcon,
   CameraIcon,
   EnvelopeIcon,
   HomeIcon,
-  IdentificationIcon,
   PhoneIcon,
   SparklesIcon,
   UserCircleIcon,
+  IdentificationIcon,
+  BuildingStorefrontIcon
 } from '@heroicons/vue/24/outline'
 
-const {t} = useI18n()
+const { t } = useI18n()
+const profileStore = useProfileStore()
+const authStore = useAuthStore()
 
-const userProfile = ref()
-
-async function loadProfile() {
-  try {
-    const response = await api.get("/student-profile/me")
-    userProfile.value = response.data
-  } catch (error) {
-    console.log('Error loading user profile:', error)
-  }
+export interface PersonalInfoRow {
+  label: string
+  field: string
+  values: string[]
+  icon: Component
+  avatar?: string
+  placeholder: string
+  inputType: string
 }
 
-loadProfile()
+const isEditing = ref(false)
+const editingRow = ref<PersonalInfoRow | null>(null)
+const editValue = ref('')
 
-const personalInfoRows = computed(() => {
-  if (!userProfile.value || !userProfile.value.profile) return []
-  const profile = userProfile.value.profile
-  const isEmployer = profile.role?.toLowerCase() === 'employer'
+const personalInfoRows = computed<PersonalInfoRow[]>(() => {
+  const profile = profileStore.profileForm
+  const isEmployer = authStore.user?.role?.toLowerCase() === 'employer'
 
-  const baseRows = [
+  const baseRows: PersonalInfoRow[] = [
     {
       label: t('settings.personal.profilePicture'),
       field: 'avatar',
       values: [],
       icon: CameraIcon,
-      avatar: profile.profileImageUrl || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
+      avatar: profile.avatar || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
       placeholder: t('settings.personal.profilePicturePlaceholder'),
       inputType: 'url',
     },
-    // {
-    //   label: isEmployer ? t('settings.personal.companyName') : t('settings.personal.name'),
-    //   field: isEmployer ? 'companyName' : 'fullName',
-    //   values: [isEmployer ? profile.companyName || t('settings.personal.yourCompany') : profile.fullName || t('settings.personal.yourName')],
-    //   icon: isEmployer ? BuildingStorefrontIcon : IdentificationIcon,
-    //   placeholder: isEmployer ? t('settings.personal.companyNamePlaceholder') : t('settings.personal.namePlaceholder'),
-    //   inputType: 'text',
-    // },
+    {
+       label: isEmployer ? t('settings.personal.companyName') : t('settings.personal.name'),
+       field: isEmployer ? 'companyName' : 'name',
+       values: [isEmployer ? profile.companyName || t('settings.personal.yourCompany') : profile.name || t('settings.personal.yourName')],
+       icon: isEmployer ? BuildingStorefrontIcon : IdentificationIcon,
+       placeholder: isEmployer ? t('settings.personal.companyNamePlaceholder') : t('settings.personal.namePlaceholder'),
+       inputType: 'text',
+    },
     {
       label: t('settings.personal.username'),
       field: 'user_name',
@@ -79,7 +83,7 @@ const personalInfoRows = computed(() => {
     },
   ]
 
-  const studentRows = [
+  const studentRows: PersonalInfoRow[] = [
     {
       label: t('settings.personal.university'),
       field: 'university',
@@ -98,7 +102,7 @@ const personalInfoRows = computed(() => {
     },
   ]
 
-  const employerRows = [
+  const employerRows: PersonalInfoRow[] = [
     {
       label: t('settings.personal.industry'),
       field: 'industry',
@@ -128,9 +132,24 @@ const personalInfoRows = computed(() => {
   return isEmployer ? [...baseRows, ...employerRows] : [...baseRows, ...studentRows]
 })
 
-defineEmits<{
-  (e: 'openPersonalInfoEditor', row: any): void
-}>()
+function openEditor(row: PersonalInfoRow) {
+  editingRow.value = row
+  editValue.value = profileStore.profileForm[row.field] || ''
+  isEditing.value = true
+}
+
+async function saveEdit() {
+  if (!editingRow.value) return
+  const success = await profileStore.savePersonalInfoEdit(editingRow.value.field, editValue.value)
+  if (success) {
+    isEditing.value = false
+    editingRow.value = null
+  }
+}
+
+onMounted(() => {
+  profileStore.fetchPersonalInfo()
+})
 </script>
 
 <template>
@@ -139,7 +158,7 @@ defineEmits<{
       {{ $t('settings.personalInfo') }}
     </h2>
 
-    <div v-if="userProfile" class="overflow-hidden rounded-[1.25rem] bg-surface-container-low ring-1 ring-white/5">
+    <div class="overflow-hidden rounded-[1.25rem] bg-surface-container-low ring-1 ring-white/5">
       <article
           v-for="(row, index) in personalInfoRows"
           :key="row.label"
@@ -150,9 +169,9 @@ defineEmits<{
           ]"
           role="region"
           tabindex="0"
-          @click="$emit('openPersonalInfoEditor', row)"
-          @keydown.enter.prevent="$emit('openPersonalInfoEditor', row)"
-          @keydown.space.prevent="$emit('openPersonalInfoEditor', row)"
+          @click="openEditor(row)"
+          @keydown.enter.prevent="openEditor(row)"
+          @keydown.space.prevent="openEditor(row)"
       >
         <component :is="row.icon" class="h-4 w-4 shrink-0 text-on-surface-variant"/>
         <div class="min-w-0 flex-1">
@@ -174,6 +193,36 @@ defineEmits<{
         />
         <span class="text-lg font-black text-on-surface-variant/70">›</span>
       </article>
+    </div>
+    <div v-if="isEditing" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl">
+        <h3 class="font-display text-xl font-black text-on-surface">{{ editingRow?.label }}</h3>
+        <input
+            v-model="editValue"
+            :type="editingRow?.inputType || 'text'"
+            :placeholder="editingRow?.placeholder"
+            class="mt-4 w-full rounded-2xl bg-surface-container-low px-4 py-3 text-sm font-bold text-on-surface outline-none focus:ring-2 focus:ring-primary"
+            @keydown.enter="saveEdit"
+        />
+        <p v-if="profileStore.profileSaveError" class="mt-2 text-xs font-bold text-red-300">
+          {{ profileStore.profileSaveError }}
+        </p>
+        <div class="mt-6 flex justify-end gap-3">
+          <button
+              class="rounded-full px-5 py-2 text-sm font-black text-on-surface-variant transition hover:bg-surface-container-high"
+              @click="isEditing = false"
+          >
+            Cancel
+          </button>
+          <button
+              class="rounded-full bg-primary px-5 py-2 text-sm font-black text-on-primary transition hover:opacity-90 disabled:opacity-50"
+              :disabled="profileStore.isSavingProfile"
+              @click="saveEdit"
+          >
+            {{ profileStore.isSavingProfile ? 'Saving...' : 'Save' }}
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 </template>

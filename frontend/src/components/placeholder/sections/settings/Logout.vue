@@ -1,14 +1,21 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline'
+import { useAuthStore } from '@/stores/auth'
 
-defineProps<{
-  logoutError?: string
-  authLoading: boolean
-}>()
+const auth = useAuthStore()
+const router = useRouter()
+const logoutError = ref('')
 
-defineEmits<{
-  (e: 'handleLogout'): void
-}>()
+async function handleLogout() {
+  logoutError.value = ''
+  try {
+    await auth.logout(router)
+  } catch (error) {
+    logoutError.value = 'Could not logout. Please try again.'
+  }
+}
 </script>
 
 <template>
@@ -28,11 +35,11 @@ defineEmits<{
         {{ logoutError }}</p>
       <button
           class="mt-5 rounded-full bg-red-500 px-6 py-3 text-sm font-black text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-60"
-          :disabled="authLoading"
+          :disabled="auth.isLoading"
           type="button"
-          @click="$emit('handleLogout')"
+          @click="handleLogout"
       >
-        {{ authLoading ? $t('settings.logoutSection.loggingOut') : $t('settings.logout') }}
+        {{ auth.isLoading ? $t('settings.logoutSection.loggingOut') : $t('settings.logout') }}
       </button>
     </div>
   </section>
