@@ -8,8 +8,10 @@ import zh_cn from '../locales/zh_cn'
 import zh_tw from '../locales/zh_tw'
 
 
+const savedLocale = localStorage.getItem('user-locale') || 'en'
+
 const i18n = createI18n({
-  locale: 'en', // Default locale
+  locale: savedLocale, // Default locale
   fallbackLocale: 'en',
   messages: {
     // @ts-ignore
@@ -28,6 +30,7 @@ watch(
   () => i18n.global.locale,
   (lang) => {
     document.documentElement.setAttribute('lang', lang)
+    localStorage.setItem('user-locale', lang)
   },
   { immediate: true }
 )
