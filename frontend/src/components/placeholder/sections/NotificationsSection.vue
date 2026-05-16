@@ -1,23 +1,39 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { ref, onMounted } from 'vue'
+import api from '@/lib/api'
+import { isAxiosError } from 'axios'
 import { CheckCircleIcon, BellIcon } from '@heroicons/vue/24/outline'
 
-defineProps({
-  notifications: {
-    type: Array,
-    required: true
-  },
-  isLoading: {
-    type: Boolean,
-    default: false
-  },
-  loadError: {
-    type: String,
-    default: ''
-  }
-})
+const notifications = ref([])
+const isLoading = ref(false)
+const loadError = ref('')
 
-defineEmits(['mark-read'])
+async function fetchNotifications() {
+  isLoading.value = true
+  loadError.value = ''
+  try {
+    const { data } = await api.get('/notifications')
+    notifications.value = data.notifications || []
+  } catch (error) {
+    loadError.value = isAxiosError(error) ? error.response?.data?.message || error.message : 'Failed to load notifications.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function markNotificationAsRead(id) {
+  try {
+    await api.post(`/notifications/${id}/read`)
+    const target = notifications.value.find((n) => n.id === id)
+    if (target) target.isRead = true
+  } catch (error) {
+    console.error('Failed to mark notification as read:', error)
+  }
+}
+
+onMounted(() => {
+  fetchNotifications()
+})
 </script>
 
 <template>
@@ -60,7 +76,7 @@ defineEmits(['mark-read'])
 
         <button
           v-if="!item.isRead"
-          @click="$emit('mark-read', item.id)"
+          @click="markNotificationAsRead(item.id)"
           class="flex items-center gap-1.5 rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-primary transition hover:bg-primary hover:text-on-primary"
           title="Mark as read"
         >

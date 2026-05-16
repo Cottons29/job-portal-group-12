@@ -1,53 +1,68 @@
 <script setup>
+import { computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useProfileStore } from '@/stores/profile'
+import { useAuthStore } from '@/stores/auth'
 
 const { t } = useI18n()
+const profileStore = useProfileStore()
+const authStore = useAuthStore()
 
-defineProps({
-  profileForm: {
-    type: Object,
-    required: true
-  },
-  initials: {
-    type: String,
-    required: true
-  },
-  profileHandle: {
-    type: String,
-    required: true
-  },
-  profileStats: {
-    type: Array,
-    required: true
-  },
-  profileCategory: {
-    type: String,
-    required: true
-  },
-  profileBio: {
-    type: String,
-    required: true
-  },
-  profileEducation: {
-    type: String,
-    required: true
-  },
-  followedByAvatars: {
-    type: Array,
-    required: true
-  },
-  profileTabs: {
-    type: Array,
-    required: true
-  },
-  profileGallery: {
-    type: Array,
-    required: true
-  }
+const initials = computed(() => {
+  if (!profileStore.profileForm.name) return '?'
+  return profileStore.profileForm.name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
 })
 
+const profileHandle = computed(() => {
+  return profileStore.profileForm.user_name ? `@${profileStore.profileForm.user_name}` : initials.value
+})
+
+const profileStats = computed(() => [
+  { label: t('profilePage.posts'), value: '0' },
+  { label: t('profilePage.followers'), value: '1.2K' },
+  { label: t('profilePage.following'), value: '450' }
+])
+
+const profileCategory = computed(() => {
+  const isEmployer = authStore.user?.role?.toLowerCase() === 'employer'
+  return isEmployer ? profileStore.profileForm.industry : `Year ${profileStore.profileForm.yearLevel}`
+})
+
+const profileBio = computed(() => {
+  const isEmployer = authStore.user?.role?.toLowerCase() === 'employer'
+  return isEmployer ? profileStore.profileForm.companyDescription : profileStore.profileForm.bio
+})
+
+const profileEducation = computed(() => {
+  const isEmployer = authStore.user?.role?.toLowerCase() === 'employer'
+  return isEmployer ? profileStore.profileForm.address : `${profileStore.profileForm.university} - ${profileStore.profileForm.major}`
+})
+
+const followedByAvatars = [
+  'https://i.pravatar.cc/150?u=1',
+  'https://i.pravatar.cc/150?u=2',
+  'https://i.pravatar.cc/150?u=3'
+]
+
+const profileTabs = computed(() => [
+  { label: t('profilePage.posts'), active: true },
+  { label: t('profilePage.highlights'), active: false },
+  { label: t('profilePage.tagged'), active: false },
+])
+
+const profileGallery = []
+
 defineEmits(['openPost'])
+
+onMounted(() => {
+  profileStore.fetchPersonalInfo()
+})
 </script>
 
 <template>
@@ -62,9 +77,9 @@ defineEmits(['openPost'])
             <div
                 class="-mt-14 grid h-28 w-28 place-items-center overflow-hidden rounded-full bg-surface p-1 shadow-xl ring-4 ring-surface-container-low sm:h-36 sm:w-36">
               <img
-                  v-if="profileForm.avatar"
-                  :src="profileForm.avatar"
-                  :alt="`${profileForm.name} profile photo`"
+                  v-if="profileStore.profileForm.avatar"
+                  :src="profileStore.profileForm.avatar"
+                  :alt="`${profileStore.profileForm.name} profile photo`"
                   class="h-full w-full rounded-full object-cover"
               />
               <span v-else
@@ -82,7 +97,7 @@ defineEmits(['openPost'])
                     {{ profileHandle }}
                   </h2>
                 </div>
-                <p class="mt-1 text-base font-black text-on-surface">{{ profileForm.name }}</p>
+                <p class="mt-1 text-base font-black text-on-surface">{{ profileStore.profileForm.name }}</p>
               </div>
 
               <RouterLink
@@ -108,8 +123,8 @@ defineEmits(['openPost'])
               <p class="text-on-surface-variant">{{ profileCategory }}</p>
               <p>{{ profileBio }}</p>
               <p class="text-on-surface-variant">{{ profileEducation }}</p>
-              <p v-if="profileForm.jobType" class="text-on-surface-variant">
-                {{ t('profilePage.lookingFor', { jobType: profileForm.jobType }) }}
+              <p v-if="profileStore.profileForm.jobType" class="text-on-surface-variant">
+                {{ t('profilePage.lookingFor', { jobType: profileStore.profileForm.jobType }) }}
               </p>
               <a class="inline-flex items-center gap-2 font-black text-primary"
                  href="https://firststep.example/profile" rel="noopener noreferrer" target="_blank">

@@ -1,42 +1,51 @@
 <script setup>
+import { ref, onMounted } from 'vue'
+import { usePostStore } from '@/stores/posts'
+import { useAuthStore } from '@/stores/auth'
 import PostCard from '../PostCard.vue'
+import api from '@/lib/api'
 
-defineProps({
-  searchQuery: {
-    type: String,
-    required: true
-  },
-  searchRoleFilter: {
-    type: String,
-    required: true
-  },
-  searchResults: {
-    type: Array,
-    required: true
-  },
-  isSearching: {
-    type: Boolean,
-    default: false
-  },
-  searchError: {
-    type: String,
-    default: ''
-  },
-  userRole: {
-    type: String,
-    default: null
-  },
-  userId: {
-    type: String,
-    default: null
-  },
-  appliedPostIds: {
-    type: Set,
-    default: () => new Set()
+const postStore = usePostStore()
+const auth = useAuthStore()
+
+const searchQuery = ref('')
+const searchRoleFilter = ref('All')
+const searchResults = ref([])
+const isSearching = ref(false)
+const searchError = ref('')
+
+defineEmits(['open-post', 'view-applicants'])
+
+async function searchPosts() {
+  if (!searchQuery.value.trim()) {
+    searchResults.value = []
+    return
   }
-})
 
-defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-post', 'apply', 'view-applicants', 'engagement-change'])
+  isSearching.value = true
+  searchError.value = ''
+
+  try {
+    const { data } = await api.get('/posts', {
+      params: {
+        q: searchQuery.value,
+        role: searchRoleFilter.value === 'All' ? undefined : searchRoleFilter.value.toLowerCase(),
+      },
+    })
+    searchResults.value = (data.posts || []).map(postStore.mapPost)
+  } catch (error) {
+    searchError.value = error.response?.data?.message || 'Failed to search posts.'
+  } finally {
+    isSearching.value = false
+  }
+}
+
+onMounted(() => {
+  if (searchQuery.value) {
+    searchPosts()
+  }
+  postStore.fetchAppliedPosts()
+})
 </script>
 
 <template>
@@ -45,10 +54,9 @@ defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-po
       
       <!-- Search Bar & Filters -->
       <div class="rounded-4xl bg-surface-container-lowest p-5 shadow-sm ring-1 ring-white/5 sm:p-6">
-        <form @submit.prevent="$emit('search')" class="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <form @submit.prevent="searchPosts" class="flex flex-col gap-4 sm:flex-row sm:items-center">
           <input
-            :value="searchQuery"
-            @input="$emit('update:searchQuery', $event.target.value)"
+            v-model="searchQuery"
             class="flex-1 rounded-full bg-surface-container-low px-5 py-3 text-sm font-bold text-on-surface outline-none  transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
             placeholder="Search jobs, skills, or keywords..."
             type="text"
@@ -67,7 +75,7 @@ defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-po
           <button
             v-for="role in ['All', 'Employer', 'Student']"
             :key="role"
-            @click="$emit('update:searchRoleFilter', role); $emit('search')"
+            @click="searchRoleFilter = role; searchPosts()"
             :class="[
               'rounded-full px-4 py-1.5 text-xs font-black transition',
               searchRoleFilter === role 
@@ -95,13 +103,13 @@ defineEmits(['update:searchQuery', 'update:searchRoleFilter', 'search', 'open-po
           v-for="post in searchResults" 
           :key="post.id" 
           :post="post" 
-          :user-role="userRole"
-          :user-id="userId"
-          :applied-post-ids="appliedPostIds"
+          :user-role="auth.user?.role"
+          :user-id="auth.user?.id"
+          :applied-post-ids="postStore.appliedPostIds"
           @open="$emit('open-post', $event)"
-          @apply="$emit('apply', $event)"
+          @apply="postStore.handlePostApply($event)"
           @view-applicants="$emit('view-applicants', $event)"
-          @engagement-change="$emit('engagement-change', $event)"
+          @engagement-change="postStore.mergeEngagement($event)"
         />
       </TransitionGroup>
       

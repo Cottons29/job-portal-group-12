@@ -1,69 +1,181 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { CameraIcon, DocumentIcon, SparklesIcon } from '@heroicons/vue/24/outline'
+import { DocumentIcon, SparklesIcon } from '@heroicons/vue/24/outline'
 import FriendlyEditor from './FriendlyEditor.vue'
+import api from '@/lib/api'
+import { usePostStore } from '@/stores/posts'
+import { marked } from 'marked'
+import { isAxiosError } from 'axios'
 
 const { t } = useI18n()
+const postStore = usePostStore()
 
-defineProps({
-  postForm: {
-    type: Object,
-    required: true
-  },
-  isPosting: {
-    type: Boolean,
-    default: false
-  },
-  canSubmitPost: {
-    type: Boolean,
-    default: false
-  },
-  isUploadingMarkdownImage: {
-    type: Boolean,
-    default: false
-  },
-  postPhotoPreview: {
-    type: String,
-    default: ''
-  },
-  postPhotoName: {
-    type: String,
-    default: ''
-  },
-  postError: {
-    type: String,
-    default: ''
-  },
-  postMessage: {
-    type: String,
-    default: ''
-  },
-  postPreviewHtml: {
-    type: String,
-    default: ''
+const isMarkdownMode = ref(false)
+const isPosting = ref(false)
+const isUploadingMarkdownImage = ref(false)
+const postError = ref('')
+const postMessage = ref('')
+
+const postForm = reactive({
+  title: '',
+  content: '',
+})
+
+const postPhotoFile = ref(null)
+const postPhotoPreview = ref('')
+const postPhotoName = ref('')
+
+const canSubmitPost = computed(() => {
+  return postForm.title.trim().length > 0 && postForm.content.trim().length > 0
+})
+
+const postPreviewHtml = computed(() => {
+  try {
+    const rawHtml = marked.parse(postForm.content || '', { async: false, breaks: true })
+    return sanitizeMarkdownHtml(rawHtml)
+  } catch (e) {
+    return escapeHtml(postForm.content || '')
   }
 })
 
-const emit = defineEmits([
-  'submit',
-  'handleMarkdownImageUpload',
-  'handlePostPhotoChange',
-  'removePostPhoto',
-  'uploadImage'
-])
+function escapeHtml(value) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
 
-const isMarkdownMode = ref(false)
+function sanitizeMarkdownHtml(html) {
+  if (typeof DOMParser === 'undefined') return escapeHtml(html)
 
-const handleEditorUploadImage = (file, callback) => {
-  emit('uploadImage', file, callback)
+  const allowedTags = new Set([
+    'A', 'BLOCKQUOTE', 'BR', 'CODE', 'DEL', 'EM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+    'HR', 'IMG', 'LI', 'OL', 'P', 'PRE', 'STRONG', 'UL'
+  ])
+  const allowedAttributes = {
+    A: new Set(['href', 'title', 'target', 'rel']),
+    IMG: new Set(['src', 'alt', 'title'])
+  }
+  const parser = new DOMParser()
+  const document = parser.parseFromString(html, 'text/html')
+
+  document.body.querySelectorAll('*').forEach((element) => {
+    if (!allowedTags.has(element.tagName)) {
+      element.replaceWith(...Array.from(element.childNodes))
+      return
+    }
+
+    Array.from(element.attributes).forEach((attribute) => {
+      const allowedForTag = allowedAttributes[element.tagName]
+      const isSafeAttribute = allowedForTag?.has(attribute.name)
+      const value = attribute.value.trim().toLowerCase()
+
+      if (!isSafeAttribute || value.startsWith('javascript:') || value.startsWith('data:')) {
+        element.removeAttribute(attribute.name)
+      }
+    })
+  })
+
+  return document.body.innerHTML
+}
+
+async function uploadPostImage(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  const { data } = await api.post('/file-service/upload', formData)
+  return data.url
+}
+
+async function handleMarkdownImageUpload(event) {
+  const files = Array.from(event.target.files)
+  if (!files.length) return
+
+  isUploadingMarkdownImage.value = true
+  try {
+    for (const file of files) {
+      const url = await uploadPostImage(file)
+      if (url) {
+        postForm.content += `\n\n![${file.name}](${url})`
+      }
+    }
+  } catch (error) {
+    postError.value = 'Could not upload one or more images.'
+  } finally {
+    isUploadingMarkdownImage.value = false
+    event.target.value = ''
+  }
+}
+
+async function handleEditorUploadImage(file, callback) {
+  try {
+    const imageUrl = await uploadPostImage(file)
+    if (imageUrl) {
+      callback(imageUrl)
+    }
+  } catch (error) {
+    postError.value = 'Could not upload the image. Please try again.'
+  }
+}
+
+function handlePostPhotoChange(event) {
+  const file = event.target.files[0]
+  if (!file) return
+
+  if (postPhotoPreview.value) URL.revokeObjectURL(postPhotoPreview.value)
+  postPhotoFile.value = file
+  postPhotoPreview.value = URL.createObjectURL(file)
+  postPhotoName.value = file.name
+}
+
+function removePostPhoto() {
+  if (postPhotoPreview.value) URL.revokeObjectURL(postPhotoPreview.value)
+  postPhotoFile.value = null
+  postPhotoPreview.value = ''
+  postPhotoName.value = ''
+}
+
+async function submitPost() {
+  postError.value = ''
+  postMessage.value = ''
+
+  if (!canSubmitPost.value) {
+    postError.value = 'Please add a title and content before publishing.'
+    return
+  }
+
+  isPosting.value = true
+  try {
+    let imageUrl = ''
+    if (postPhotoFile.value) {
+      imageUrl = await uploadPostImage(postPhotoFile.value)
+    }
+
+    const { data } = await api.post('/posts', {
+      title: postForm.title.trim(),
+      content: postForm.content.trim(),
+      imageUrl,
+    })
+
+    postStore.posts = [postStore.mapPost(data.post), ...postStore.posts]
+    postMessage.value = 'Post published and saved successfully.'
+    postForm.title = ''
+    postForm.content = ''
+    removePostPhoto()
+  } catch (error) {
+    postError.value = isAxiosError(error) ? error.response?.data?.message || error.message : 'Could not publish your post.'
+  } finally {
+    isPosting.value = false
+  }
 }
 </script>
 
 <template>
   <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
     <form class="space-y-5 rounded-[2rem] bg-surface-container-lowest p-5 shadow-sm ring-1 ring-white/5 sm:p-6"
-          @submit.prevent="$emit('submit')">
+          @submit.prevent="submitPost">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p class="text-xs font-black uppercase tracking-[0.18em] text-primary">{{ t('createPost.newPost') }}</p>
@@ -132,7 +244,7 @@ const handleEditorUploadImage = (file, callback) => {
                 type="file"
                 multiple
                 :disabled="isUploadingMarkdownImage || isPosting"
-                @change="$emit('handleMarkdownImageUpload', $event)"
+                @change="handleMarkdownImageUpload"
             />
           </label>
         </div>

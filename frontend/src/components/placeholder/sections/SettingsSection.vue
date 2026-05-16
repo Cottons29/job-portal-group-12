@@ -13,50 +13,18 @@ import {
   ShieldCheckIcon
 } from "@heroicons/vue/24/outline";
 import {useI18n} from "vue-i18n";
+
 const {t, locale} = useI18n()
+
 defineProps({
-  profileLoadError: {
-    type: String,
-    default: ''
-  },
-  securityRows: {
-    type: Array,
-    required: true
-  },
   currentLocale: {
     type: String,
     required: true
-  },
-  passkeyLoading: {
-    type: Boolean,
-    default: false
-  },
-  passkeyMessage: {
-    type: String,
-    default: ''
-  },
-  passkeyError: {
-    type: String,
-    default: ''
-  },
-  passwordError: {
-    type: String,
-    default: ''
-  },
-  passwordMessage: {
-    type: String,
-    default: ''
-  },
-  logoutError: {
-    type: String,
-    default: ''
-  },
-  authLoading: {
-    type: Boolean,
-    default: false
   }
 });
+
 const activeSettingsSection = ref('personal')
+
 const settingsMenuItems = computed(() => [
   {
     label: t('settings.personalInfo'),
@@ -98,10 +66,7 @@ const settingsMenuItems = computed(() => [
     color: 'text-red-300',
     active: activeSettingsSection.value === 'logout'
   },
-  // {label: 'People & sharing', icon: UserGroupIcon, bg: 'bg-[#f8a9dc]', color: 'text-[#9b1f70]', to: '/settings'},
-  // {label: 'Wallet & subscriptions', icon: CreditCardIcon, bg: 'bg-[#ffc28e]', color: 'text-[#83460e]', to: '/settings'},
 ])
-
 
 const languageOptions = [
   {
@@ -142,13 +107,9 @@ const languageOptions = [
   },
 ]
 
-
-defineEmits([
-  'update:locale',
-  'openPersonalInfoEditor',
-  'handleLogout'
-])
-
+defineEmits<{
+  (e: 'update:locale', value: string): void
+}>()
 </script>
 
 <template>
@@ -173,17 +134,10 @@ defineEmits([
 
     <PersonalInfo
         v-if="activeSettingsSection === 'personal'"
-        @open-personal-info-editor="$emit('openPersonalInfoEditor', $event)"
     />
 
     <SecurityAndSignin
         v-else-if="activeSettingsSection === 'security'"
-        :security-rows="securityRows"
-        :passkey-loading="passkeyLoading"
-        :passkey-message="passkeyMessage"
-        :passkey-error="passkeyError"
-        :password-error="passwordError"
-        :password-message="passwordMessage"
     />
 
     <DataAndPrivacy
@@ -199,9 +153,6 @@ defineEmits([
 
     <Logout
         v-else-if="activeSettingsSection === 'logout'"
-        :logout-error="logoutError"
-        :auth-loading="authLoading"
-        @handle-logout="$emit('handleLogout')"
     />
   </div>
 </template>
