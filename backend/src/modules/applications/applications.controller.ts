@@ -36,15 +36,13 @@ export class ApplicationsController {
 
   @Get('me')
   async getMyApplications(@Req() req: any) {
-    const applications = await this.applicationsService.getApplicationsForStudent(req.user.sub);
+    const applications =
+      await this.applicationsService.getApplicationsForStudent(req.user.sub);
     return { applications };
   }
 
   @Get('post/:postId')
-  async getApplicantsForPost(
-    @Req() req: any,
-    @Param('postId') postId: string,
-  ) {
+  async getApplicantsForPost(@Req() req: any, @Param('postId') postId: string) {
     const applications = await this.applicationsService.getApplicantsForPost(
       req.user.sub,
       postId,

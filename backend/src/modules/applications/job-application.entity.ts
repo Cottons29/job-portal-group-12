@@ -29,7 +29,11 @@ export class JobApplication {
   @JoinColumn({ name: 'applicant_id' })
   applicant: User;
 
-  @ManyToOne(() => PostEntity, { eager: true, nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => PostEntity, {
+    eager: true,
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'post_id' })
   post: PostEntity;
 

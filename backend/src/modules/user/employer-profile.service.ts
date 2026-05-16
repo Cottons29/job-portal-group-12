@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -44,8 +48,12 @@ export class EmployerProfileService {
       const patentFilename = `patent-${userId}-${Date.now()}-${patentFile.originalname}`;
       const patentFilePath = path.join(uploadDir, patentFilename);
       //@ts-ignore
-      fs.writeFileSync(patentFilePath, patentFile.bufferUrl = `/uploads/${patentFilename}`);
-      
+      fs.writeFileSync(
+        patentFilePath,
+        //@ts-ignore
+        (patentFile.bufferUrl = `/uploads/${patentFilename}`),
+      );
+
       // Reset verification status if they uploaded a new patent
       user.isVerified = false;
     }

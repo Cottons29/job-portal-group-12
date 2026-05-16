@@ -18,7 +18,10 @@ export class PostShare {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => PostEntity, (post) => post.shares, { onDelete: 'CASCADE', nullable: false })
+  @ManyToOne(() => PostEntity, (post) => post.shares, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
   @JoinColumn({ name: 'post_id' })
   post: PostEntity;
 

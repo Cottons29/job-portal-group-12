@@ -20,7 +20,10 @@ export class PostLike {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => PostEntity, (post) => post.likes, { onDelete: 'CASCADE', nullable: false })
+  @ManyToOne(() => PostEntity, (post) => post.likes, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
   @JoinColumn({ name: 'post_id' })
   post: PostEntity;
 

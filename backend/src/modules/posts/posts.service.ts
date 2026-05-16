@@ -15,6 +15,7 @@ import { PostComment } from './post-comment.entity';
 import { PostLike } from './post-like.entity';
 import { PostEntity } from './post.entity';
 import { PostShare } from './post-share.entity';
+import { JobApplication } from '../applications/job-application.entity';
 
 interface FindAllPostsOptions {
   page?: string;
@@ -47,12 +48,17 @@ export class PostsService {
     private readonly postSharesRepository: Repository<PostShare>,
     @InjectRepository(PostBookmark)
     private readonly postBookmarksRepository: Repository<PostBookmark>,
+    @InjectRepository(JobApplication)
+    private readonly jobApplicationsRepository: Repository<JobApplication>,
     private readonly notificationsService: NotificationsService,
   ) {}
 
   async findAll(options: FindAllPostsOptions = {}, viewerId?: string) {
     const page = Math.max(Number.parseInt(options.page || '1', 10) || 1, 1);
-    const limit = Math.min(Math.max(Number.parseInt(options.limit || '10', 10) || 10, 1), 50);
+    const limit = Math.min(
+      Math.max(Number.parseInt(options.limit || '10', 10) || 10, 1),
+      50,
+    );
 
     const whereCondition: Record<string, unknown>[] = [];
 
@@ -63,7 +69,10 @@ export class PostsService {
           ? { author: { role: options.role.toUpperCase() } }
           : {};
 
-      whereCondition.push({ title: ILike(q), ...roleFilter }, { content: ILike(q), ...roleFilter });
+      whereCondition.push(
+        { title: ILike(q), ...roleFilter },
+        { content: ILike(q), ...roleFilter },
+      );
     } else if (options.role && options.role.toLowerCase() !== 'all') {
       whereCondition.push({ author: { role: options.role.toUpperCase() } });
     }
@@ -105,7 +114,9 @@ export class PostsService {
       throw new BadRequestException('Post title or content is too long');
     }
 
-    const author = await this.usersRepository.findOne({ where: { id: userId } });
+    const author = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
     if (!author) {
       throw new NotFoundException('User not found');
     }
@@ -134,14 +145,18 @@ export class PostsService {
     if (existing) {
       await this.postLikesRepository.remove(existing);
     } else {
-      const user = await this.usersRepository.findOne({ where: { id: userId } });
+      const user = await this.usersRepository.findOne({
+        where: { id: userId },
+      });
       if (!user) throw new NotFoundException('User not found');
       await this.postLikesRepository.save(
         this.postLikesRepository.create({ post, user }),
       );
     }
 
-    const likeCount = await this.postLikesRepository.count({ where: { post: { id: postId } } });
+    const likeCount = await this.postLikesRepository.count({
+      where: { post: { id: postId } },
+    });
     const liked = Boolean(
       await this.postLikesRepository.findOne({
         where: { post: { id: postId }, user: { id: userId } },
@@ -163,7 +178,9 @@ export class PostsService {
     if (existing) {
       await this.postBookmarksRepository.remove(existing);
     } else {
-      const user = await this.usersRepository.findOne({ where: { id: userId } });
+      const user = await this.usersRepository.findOne({
+        where: { id: userId },
+      });
       if (!user) throw new NotFoundException('User not found');
       await this.postBookmarksRepository.save(
         this.postBookmarksRepository.create({ post, user }),
@@ -188,9 +205,13 @@ export class PostsService {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    await this.postSharesRepository.save(this.postSharesRepository.create({ post, user }));
+    await this.postSharesRepository.save(
+      this.postSharesRepository.create({ post, user }),
+    );
 
-    const shareCount = await this.postSharesRepository.count({ where: { post: { id: postId } } });
+    const shareCount = await this.postSharesRepository.count({
+      where: { post: { id: postId } },
+    });
     return { shareCount };
   }
 
@@ -217,7 +238,9 @@ export class PostsService {
       throw new BadRequestException('Comment is too long');
     }
 
-    const author = await this.usersRepository.findOne({ where: { id: userId } });
+    const author = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
     if (!author) throw new NotFoundException('User not found');
 
     const saved = await this.postCommentsRepository.save(
@@ -232,7 +255,10 @@ export class PostsService {
     if (post.author.id !== userId) {
       const name = author.user_name || author.phone || 'Someone';
       this.notificationsService
-        .createNotification(post.author.id, `${name} commented on "${post.title}"`)
+        .createNotification(
+          post.author.id,
+          `${name} commented on "${post.title}"`,
+        )
         .catch(() => undefined);
     }
 
@@ -259,6 +285,14 @@ export class PostsService {
       where: { post: { id: postId } },
     });
     return { commentCount };
+  }
+
+  async getAppliedPostIds(userId: string): Promise<string[]> {
+    const applications = await this.jobApplicationsRepository.find({
+      where: { applicant: { id: userId } },
+      relations: ['post'],
+    });
+    return applications.map((app) => app.post.id);
   }
 
   private async ensurePostExists(postId: string) {
@@ -311,7 +345,10 @@ export class PostsService {
     };
   }
 
-  private async loadEngagement(postIds: string[], viewerId?: string): Promise<EngagementBundle> {
+  private async loadEngagement(
+    postIds: string[],
+    viewerId?: string,
+  ): Promise<EngagementBundle> {
     const emptyBundle = (): EngagementBundle => ({
       likeCount: new Map(),
       commentCount: new Map(),
@@ -366,9 +403,13 @@ export class PostsService {
 
     const bundle = emptyBundle();
     bundle.likeCount = toMap(likeRows as { postId: string; cnt: string }[]);
-    bundle.commentCount = toMap(commentRows as { postId: string; cnt: string }[]);
+    bundle.commentCount = toMap(
+      commentRows as { postId: string; cnt: string }[],
+    );
     bundle.shareCount = toMap(shareRows as { postId: string; cnt: string }[]);
-    bundle.bookmarkCount = toMap(bookmarkRows as { postId: string; cnt: string }[]);
+    bundle.bookmarkCount = toMap(
+      bookmarkRows as { postId: string; cnt: string }[],
+    );
 
     if (viewerId) {
       const [liked, bookmarked] = await Promise.all([

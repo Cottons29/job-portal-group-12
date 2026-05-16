@@ -47,7 +47,9 @@ export class ApplicationsService {
     }
 
     if (coverLetter && coverLetter.length > 3000) {
-      throw new BadRequestException('Cover letter is too long (max 3000 characters).');
+      throw new BadRequestException(
+        'Cover letter is too long (max 3000 characters).',
+      );
     }
 
     const application = this.appRepo.create({
@@ -93,7 +95,11 @@ export class ApplicationsService {
     });
   }
 
-  async updateStatus(employerId: string, applicationId: string, status: ApplicationStatus) {
+  async updateStatus(
+    employerId: string,
+    applicationId: string,
+    status: ApplicationStatus,
+  ) {
     const application = await this.appRepo.findOne({
       where: { id: applicationId },
       relations: ['post', 'post.author', 'applicant'],

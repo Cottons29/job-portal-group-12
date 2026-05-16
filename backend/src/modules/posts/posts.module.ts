@@ -10,10 +10,19 @@ import { PostEntity } from './post.entity';
 import { PostShare } from './post-share.entity';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
+import { JobApplication } from '../applications/job-application.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PostEntity, User, PostLike, PostComment, PostShare, PostBookmark]),
+    TypeOrmModule.forFeature([
+      PostEntity,
+      User,
+      PostLike,
+      PostComment,
+      PostShare,
+      PostBookmark,
+      JobApplication,
+    ]),
     NotificationsModule,
   ],
   controllers: [PostsController],

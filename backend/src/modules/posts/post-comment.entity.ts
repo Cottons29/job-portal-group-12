@@ -23,7 +23,10 @@ export class PostComment {
   @JoinColumn({ name: 'author_id' })
   author: User;
 
-  @ManyToOne(() => PostEntity, (post) => post.comments, { onDelete: 'CASCADE', nullable: false })
+  @ManyToOne(() => PostEntity, (post) => post.comments, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
   @JoinColumn({ name: 'post_id' })
   post: PostEntity;
 

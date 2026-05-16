@@ -20,7 +20,10 @@ export class PostBookmark {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => PostEntity, (post) => post.bookmarks, { onDelete: 'CASCADE', nullable: false })
+  @ManyToOne(() => PostEntity, (post) => post.bookmarks, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
   @JoinColumn({ name: 'post_id' })
   post: PostEntity;
 

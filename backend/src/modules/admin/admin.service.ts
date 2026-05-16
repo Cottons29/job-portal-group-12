@@ -19,8 +19,8 @@ export class AdminService {
   }
 
   async approveEmployer(id: string): Promise<void> {
-    const employer = await this.userRepo.findOne({ 
-      where: { id, role: UserRole.EMPLOYER } 
+    const employer = await this.userRepo.findOne({
+      where: { id, role: UserRole.EMPLOYER },
     });
     if (!employer) {
       throw new NotFoundException('Employer not found');
@@ -30,8 +30,8 @@ export class AdminService {
   }
 
   async rejectEmployer(id: string): Promise<void> {
-    const employer = await this.userRepo.findOne({ 
-      where: { id, role: UserRole.EMPLOYER } 
+    const employer = await this.userRepo.findOne({
+      where: { id, role: UserRole.EMPLOYER },
     });
     if (!employer) {
       throw new NotFoundException('Employer not found');

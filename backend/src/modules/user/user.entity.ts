@@ -75,7 +75,11 @@ export class User {
   @Column({ nullable: true })
   profileImageUrl?: string;
 
-  @Column('text', { array: true, default: () => 'ARRAY[]::text[]', nullable: true })
+  @Column('text', {
+    array: true,
+    default: () => 'ARRAY[]::text[]',
+    nullable: true,
+  })
   skills: string[];
 
   @Column({ nullable: true })

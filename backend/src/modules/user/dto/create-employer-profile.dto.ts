@@ -1,15 +1,11 @@
-import {
-  IsString,
-  IsOptional,
-  IsUrl,
-} from 'class-validator';
+import { IsString, IsOptional, IsUrl } from 'class-validator';
 
 export class CreateEmployerProfileDto {
   @IsString()
   companyName: string;
 
   @IsUrl()
-  patenttUrl: string; 
+  patenttUrl: string;
 
   @IsString()
   companyDescription: string;
