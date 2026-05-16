@@ -17,9 +17,8 @@ export class NotificationsController {
 
   @Get()
   async getNotifications(@Req() req: any) {
-    const notifications = await this.notificationsService.getNotificationsForUser(
-      req.user.sub,
-    );
+    const notifications =
+      await this.notificationsService.getNotificationsForUser(req.user.sub);
     return { notifications };
   }
 
