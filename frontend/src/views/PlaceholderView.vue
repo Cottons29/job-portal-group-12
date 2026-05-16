@@ -39,141 +39,46 @@
 
         <HomeSection
             v-if="activePage === 'home'"
-            :compose-actions="composeActions"
-            :focus-cards="focusCards"
-            :posts="posts"
-            :posts-error="postsError"
-            :posts-has-more="postsHasMore"
-            :posts-loading="postsLoading"
-            :posts-loading-more="postsLoadingMore"
-            :stories="stories"
-            :suggestions="suggestions"
-            :user-role="auth.user?.role"
-            :user-id="auth.user?.id"
-            :applied-post-ids="appliedPostIds"
             @open-post="openPost"
-            @engagement-change="mergeEngagement"
-            @apply="handlePostApply"
             @view-applicants="handleViewApplicants"
-            @show-profile="showUserProfile"
         />
 
         <SettingsSection
             v-else-if="activePage === 'settings'"
-            :auth-loading="auth.isLoading"
-            :logout-error="logoutError"
-            :passkey-error="passkeyError"
-            :passkey-loading="passkeyLoading"
-            :passkey-message="passkeyMessage"
-            :password-error="passwordError"
-            :password-message="passwordMessage"
-            :profile-load-error="profileLoadError"
-            :security-rows="securityRows"
             :current-locale="locale"
             @update:locale="locale = $event"
-            @open-personal-info-editor="openPersonalInfoEditor"
-            @handle-logout="handleLogout"
         />
 
         <ProfileSection
             v-else-if="activePage === 'profile'"
-            :followed-by-avatars="followedByAvatars"
-            :initials="initials"
-            :profile-bio="profileBio"
-            :profile-category="profileCategory"
-            :profile-education="profileEducation"
-            :profile-form="profileForm"
-            :profile-gallery="profileGallery"
-            :profile-handle="profileHandle"
-            :profile-stats="profileStats"
-            :profile-tabs="profileTabs"
             @open-post="openPost"
         />
 
         <CreatePostSection
             v-else-if="activePage === 'create'"
-            :can-submit-post="canSubmitPost"
-            :is-posting="isPosting"
-            :is-uploading-markdown-image="isUploadingMarkdownImage"
-            :post-error="postError"
-            :post-form="postForm"
-            :post-message="postMessage"
-            :post-photo-name="postPhotoName"
-            :post-photo-preview="postPhotoPreview"
-            :post-preview-html="postPreviewHtml"
-            @handle-markdown-image-upload="handleMarkdownImageUpload"
-            @handle-post-photo-change="handlePostPhotoChange"
-            @remove-post-photo="removePostPhoto"
-            @submit="submitPost"
-            @upload-image="handleEditorUploadImage"
         />
 
         <SearchSection
             v-else-if="activePage === 'search'"
-            :search-query="searchQuery"
-            :search-role-filter="searchRoleFilter"
-            :search-results="searchResults"
-            :is-searching="isSearching"
-            :search-error="searchError"
-            :user-role="auth.user?.role"
-            :user-id="auth.user?.id"
-            :applied-post-ids="appliedPostIds"
-            @update:search-query="searchQuery = $event"
-            @update:search-role-filter="searchRoleFilter = $event"
-            @search="searchPosts"
             @open-post="openPost"
-            @engagement-change="mergeEngagement"
-            @apply="handlePostApply"
             @view-applicants="handleViewApplicants"
         />
 
         <NotificationsSection
             v-else-if="activePage === 'notifications'"
-            :notifications="userNotifications"
-            :is-loading="isLoadingNotifications"
-            :load-error="loadNotificationsError"
-            @mark-read="markNotificationAsRead"
         />
 
         <Teleport to="body">
           <Transition name="modal">
-            <PersonalInfoEditor
-                v-if="editingField"
-                :editing-field="editingField"
-                :edit-value="editValue"
-                :is-saving-profile="isSavingProfile"
-                :profile-save-error="profileSaveError"
-                @close="closePersonalInfoEditor"
-                @save="savePersonalInfoEdit"
-                @update:edit-value="editValue = $event"
-            />
-          </Transition>
-        </Teleport>
-
-        <Teleport to="body">
-          <Transition name="modal">
-            <PasswordEditor
-                v-if="isPasswordEditorOpen"
-                :password-error="passwordError"
-                :password-form="passwordForm"
-                :password-loading="passwordLoading"
-                @close="closePasswordEditor"
-                @submit="updatePassword"
-            />
-          </Transition>
-        </Teleport>
-
-        <Teleport to="body">
-          <Transition name="modal">
             <PostModal
-                v-if="selectedPost"
-                :post="selectedPost"
-                :user-role="auth.user?.role"
+                v-if="postStore.selectedPost"
+                :applied-post-ids="postStore.appliedPostIds"
+                :post="postStore.selectedPost"
                 :user-id="auth.user?.id"
-                :applied-post-ids="appliedPostIds"
-                @close="closePost"
-                @engagement-change="mergeEngagement"
-                @apply="handlePostApply"
+                :user-role="auth.user?.role"
+                @apply="postStore.handlePostApply($event)"
+                @close="postStore.selectedPost = null"
+                @engagement-change="postStore.mergeEngagement($event)"
                 @view-applicants="handleViewApplicants"
             />
           </Transition>
@@ -182,9 +87,9 @@
         <Teleport to="body">
           <Transition name="modal">
             <ProfileModal
-                v-if="isProfileModalOpen"
-                :user="selectedUserProfile || { name: isProfileLoading ? 'Loading...' : 'User' }"
-                @close="closeProfileModal"
+                v-if="profileStore.isProfileModalOpen"
+                :user="profileStore.selectedUserProfile || { name: profileStore.isProfileLoading ? 'Loading...' : 'User' }"
+                @close="profileStore.closeProfileModal"
             />
           </Transition>
         </Teleport>
@@ -194,14 +99,10 @@
 </template>
 
 <script setup>
-import {computed, nextTick, onMounted, onUnmounted, reactive, ref, watch} from 'vue'
+import {computed, nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {isAxiosError} from 'axios'
-import {marked} from 'marked'
-import {startRegistration} from '@simplewebauthn/browser'
 import {useI18n} from 'vue-i18n'
 
-import api from '@/lib/api'
 import PlaceholderSidebar from '@/components/placeholder/PlaceholderSidebar.vue'
 import HomeSection from '@/components/placeholder/sections/HomeSection.vue'
 import SettingsSection from '@/components/placeholder/sections/SettingsSection.vue'
@@ -209,450 +110,66 @@ import ProfileSection from '@/components/placeholder/sections/ProfileSection.vue
 import CreatePostSection from '@/components/placeholder/sections/CreatePostSection.vue'
 import SearchSection from '@/components/placeholder/sections/SearchSection.vue'
 import NotificationsSection from '@/components/placeholder/sections/NotificationsSection.vue'
-import {io} from 'socket.io-client'
-import PersonalInfoEditor from '@/components/placeholder/sections/PersonalInfoEditor.vue'
-import PasswordEditor from '@/components/placeholder/sections/PasswordEditor.vue'
 import PostModal from '@/components/placeholder/sections/PostModal.vue'
 import ProfileModal from '@/components/placeholder/sections/ProfileModal.vue'
+
 import {useThemeMode} from '@/composables/useThemeMode'
 import {useAuthStore} from '@/stores/auth'
+import {usePostStore} from '@/stores/posts'
+import {useProfileStore} from '@/stores/profile'
+
 import {
-  AcademicCapIcon,
-  ArrowRightOnRectangleIcon,
   BellIcon,
-  BriefcaseIcon,
-  BuildingStorefrontIcon,
-  CameraIcon,
   ChatBubbleOvalLeftEllipsisIcon,
-  EnvelopeIcon,
   HomeIcon,
-  IdentificationIcon,
-  KeyIcon,
-  LockClosedIcon,
   MagnifyingGlassIcon,
-  PhoneIcon,
   PlusCircleIcon,
-  SparklesIcon,
-  SquaresPlusIcon,
   UserCircleIcon,
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const postStore = usePostStore()
+const profileStore = useProfileStore()
 const {t, locale} = useI18n()
+
 const showSidebarLabels = ref(false)
 const {appliedTheme, setThemePreference} = useThemeMode()
 
 const activePage = computed(() => route.name?.toString() || 'home')
-
-const defaultAvatar = 'https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=160&q=80'
-
-const profileForm = reactive({
-  name: 'Student User',
-  user_name: '',
-  email: 'student@example.com',
-  gender: '',
-  phone: '',
-  avatar: defaultAvatar,
-  university: '',
-  major: '',
-  yearLevel: '',
-  bio: '',
-  jobType: '',
-  expectedSalary: '',
-  currency: 'USD',
-  skills: [],
-  availability: null,
-  companyName: '',
-  industry: '',
-  address: '',
-  website: '',
-  companyDescription: '',
-})
-
-const profileLoadError = ref('')
-const profileSaveError = ref('')
-const isSavingProfile = ref(false)
-const editingField = ref(null)
-const editValue = ref('')
-const activeSettingsSection = ref('personal')
-
-const passwordForm = reactive({
-  current: '',
-  next: '',
-  confirm: '',
-})
-const passkeys = ref([])
-const passkeyLoading = ref(false)
-const passkeyMessage = ref('')
-const passkeyError = ref('')
-const passwordLoading = ref(false)
-const passwordMessage = ref('')
-const passwordError = ref('')
-const isPasswordEditorOpen = ref(false)
-const logoutError = ref('')
-
-const postForm = reactive({
-  title: '',
-  content: '',
-})
-
-const postPhotoFile = ref(null)
-const postPhotoPreview = ref('')
-const postPhotoName = ref('')
-const postMessage = ref('')
-const postError = ref('')
-const isPosting = ref(false)
-const isUploadingMarkdownImage = ref(false)
-const posts = ref([])
-const postsLoading = ref(false)
-const postsLoadingMore = ref(false)
-const postsError = ref('')
-const postsPage = ref(1)
-const postsHasMore = ref(true)
-const postsScrollListenerAttached = ref(false)
-const postsPerPage = 10
-const appliedPostIds = ref(new Set())
-const selectedPost = ref(null)
-const selectedUserProfile = ref(null)
-const isProfileModalOpen = ref(false)
-const isProfileLoading = ref(false)
-const mainScrollContainer = ref(null)
-
 const searchQuery = ref('')
-const searchRoleFilter = ref('All')
-const searchResults = ref([])
-const isSearching = ref(false)
-const searchError = ref('')
-
-const userNotifications = ref([])
-const isLoadingNotifications = ref(false)
-const loadNotificationsError = ref('')
-
-let socket = null
-
-async function fetchNotifications() {
-  if (!auth.isAuthenticated) return
-  isLoadingNotifications.value = true
-  loadNotificationsError.value = ''
-  try {
-    const { data } = await api.get('/notifications')
-    userNotifications.value = data.notifications || []
-  } catch (error) {
-    loadNotificationsError.value = getErrorMessage(error, 'Failed to load notifications.')
-  } finally {
-    isLoadingNotifications.value = false
-  }
-}
-
-async function markNotificationAsRead(id) {
-  try {
-    await api.patch(`/notifications/${id}/read`)
-    const target = userNotifications.value.find(n => n.id === id)
-    if (target) target.isRead = true
-  } catch (error) {
-    console.error('Failed to mark notification read:', error)
-  }
-}
-
-function initializeSocketConnection() {
-  if (socket) return
-  const userId = auth.user?.id
-  if (!userId) return
-
-  // Connect to the base backend WebSocket Gateway URL
-  socket = io(import.meta.env.VITE_API_URL || 'http://localhost:3000', {
-    query: { userId },
-  })
-
-  socket.on('notification.created', payload => {
-    // Dynamically insert incoming server push notifications directly into our view array
-    userNotifications.value.unshift(payload)
-  })
-}
-
-const canSubmitPost = computed(() => postForm.title.trim() && postForm.content.trim())
-const postPreviewHtml = computed(() => renderMarkdown(postForm.content || 'Start writing your post to see the preview here.'))
-
-const initials = computed(() => {
-  const letters = profileForm.name
-      .toString()
-      .split(' ')
-      .filter(Boolean)
-      .map((part) => part[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase()
-
-  return letters || 'SU'
-})
-
-const profileHandle = computed(() => {
-  const fallback = profileForm.name
-      .toString()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '.')
-      .replace(/^\.|\.$/g, '')
-
-  return profileForm.user_name || fallback || 'Guest'
-})
-
-const profileCategory = computed(() => profileForm.major || profileForm.jobType || 'Student profile')
-const profileEducation = computed(() => {
-  const details = [profileForm.university, profileForm.yearLevel].filter(Boolean)
-  return details.length ? details.join(' • ') : 'Add your university and year level in settings.'
-})
-const profileBio = computed(() => profileForm.bio || 'Showcase your skills, availability, and career goals for employers on FirstStep.')
-
-const profileStats = computed(() => [
-  {label: 'posts', value: posts.value.length || 6},
-  {label: 'followers', value: '1.2K'},
-  {label: 'following', value: profileForm.skills.length || 9},
-])
-
-const followedByAvatars = [
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=96&q=80',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=96&q=80',
-  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=96&q=80',
-]
-
-const profileTabs = computed(() => [
-  {label: 'Posts', icon: SquaresPlusIcon, active: true},
-  {label: 'Media', icon: CameraIcon, active: false},
-  {label: 'Reposts', icon: ArrowRightOnRectangleIcon, active: false},
-  {label: 'Tagged', icon: UserCircleIcon, active: false},
-])
-
-function getFirstContentImage(value = '') {
-  const markdownImage = value.match(/!\[[^\]]*]\(([^\s)]+)(?:\s+"[^"]*")?\)/)
-  if (markdownImage?.[1]) return markdownImage[1]
-
-  const htmlImage = value.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i)
-  if (htmlImage?.[1]) return htmlImage[1]
-
-  const imageUrl = value.match(/https?:\/\/\S+?\.(?:png|jpe?g|gif|webp|avif)(?:\?\S*)?/i)
-  return imageUrl?.[0] || ''
-}
-
-const profileGallery = computed(() => posts.value.map((post) => ({
-  title: post.title || 'Untitled post',
-  type: 'Post',
-  image: post.imageUrl || getFirstContentImage(post.desc),
-  post,
-})))
-
-function mergeEngagement(payload) {
-  if (!payload?.id) return
-  const {id, ...patch} = payload
-
-  const patchList = (listRef) => {
-    const list = listRef.value
-    const idx = list.findIndex((p) => p.id === id)
-    if (idx >= 0) {
-      Object.assign(list[idx], patch)
-    }
-  }
-
-  patchList(posts)
-  patchList(searchResults)
-  if (selectedPost.value?.id === id) {
-    Object.assign(selectedPost.value, patch)
-  }
-}
-
-async function refreshAppliedPosts() {
-  if (!auth.isAuthenticated || auth.user?.role?.toLowerCase() !== 'student') {
-    appliedPostIds.value = new Set()
-    return
-  }
-  try {
-    const {data} = await api.get('/applications/me')
-    appliedPostIds.value = new Set(
-        (data.applications || []).map((a) => a.post?.id).filter(Boolean),
-    )
-  } catch {
-    appliedPostIds.value = new Set()
-  }
-}
-
-async function handlePostApply(post) {
-  if (!post?.id) return
-  try {
-    await api.post('/applications', {postId: post.id})
-    const next = new Set(appliedPostIds.value)
-    next.add(post.id)
-    appliedPostIds.value = next
-  } catch (error) {
-    window.alert(getErrorMessage(error, 'Could not submit application.'))
-  }
-}
-
-async function handleViewApplicants(post) {
-  if (!post?.id) return
-  try {
-    const {data} = await api.get(`/applications/post/${post.id}`)
-    const n = data.applications?.length ?? 0
-    window.alert(`${n} applicant(s) for this post.`)
-  } catch (error) {
-    window.alert(getErrorMessage(error, 'Could not load applicants.'))
-  }
-}
-
-function checkOpenPostQuery() {
-  const raw = route.query.post
-  const pid = Array.isArray(raw) ? raw[0] : raw
-  if (!pid || typeof pid !== 'string') return
-  const found = posts.value.find((p) => p.id === pid)
-  if (found) {
-    openPost(found)
-  }
-}
-
-function openPost(post) {
-  if (!post) return
-  selectedPost.value = post
-}
-
-function closePost() {
-  selectedPost.value = null
-  if (route.query.post) {
-    const q = {...route.query}
-    delete q.post
-    router.replace({query: q})
-  }
-}
-
-const securityRows = computed(() => [
-  {
-    label: t('settings.security.passkeyLogin'),
-    values: [
-      passkeys.value.length
-          ? t(passkeys.value.length === 1 ? 'settings.security.passkeyAdded' : 'settings.security.passkeysAdded', { count: passkeys.value.length })
-          : t('settings.security.passkeyDescription'),
-    ],
-    icon: KeyIcon,
-    buttonLabel: passkeyLoading.value ? t('settings.security.addingPasskey') : t('settings.security.addPasskey'),
-    action: addPasskey,
-  },
-  {
-    label: t('settings.security.password'),
-    values: [passwordMessage.value || t('settings.security.passwordRecommendation')],
-    icon: LockClosedIcon,
-    action: openPasswordEditor,
-  },
-])
-
 
 const pages = computed(() => ({
   home: {
-    eyebrow: t('home.eyebrow'),
-    title: t('home.welcomeBack'),
+    eyebrow: t('dashboardPages.home.eyebrow'),
+    title: t('dashboardPages.home.title'),
+    description: t('dashboardPages.home.description'),
   },
   search: {
     eyebrow: t('dashboardPages.search.eyebrow'),
     title: t('dashboardPages.search.title'),
     description: t('dashboardPages.search.description'),
-    cards: [
-      {
-        title: t('dashboardPages.search.cards.0.title'),
-        description: t('dashboardPages.search.cards.0.description'),
-        icon: MagnifyingGlassIcon,
-        bg: 'bg-[#8fd99b]',
-        color: 'text-[#1f6c3b]'
-      },
-      {
-        title: t('dashboardPages.search.cards.1.title'),
-        description: t('dashboardPages.search.cards.1.description'),
-        icon: BuildingStorefrontIcon,
-        bg: 'bg-[#ffc28e]',
-        color: 'text-[#83460e]'
-      },
-    ],
   },
   messages: {
     eyebrow: t('dashboardPages.messages.eyebrow'),
     title: t('dashboardPages.messages.title'),
     description: t('dashboardPages.messages.description'),
-    cards: [
-      {
-        title: t('dashboardPages.messages.cards.0.title'),
-        description: t('dashboardPages.messages.cards.0.description'),
-        icon: ChatBubbleOvalLeftEllipsisIcon,
-        bg: 'bg-[#8ccaff]',
-        color: 'text-[#235d84]'
-      },
-      {
-        title: t('dashboardPages.messages.cards.1.title'),
-        description: t('dashboardPages.messages.cards.1.description'),
-        icon: UserCircleIcon,
-        bg: 'bg-[#ffc28e]',
-        color: 'text-[#83460e]'
-      },
-    ],
   },
   notifications: {
     eyebrow: t('dashboardPages.notifications.eyebrow'),
     title: t('dashboardPages.notifications.title'),
     description: t('dashboardPages.notifications.description'),
-    cards: [
-      {
-        title: t('dashboardPages.notifications.cards.0.title'),
-        description: t('dashboardPages.notifications.cards.0.description'),
-        icon: BellIcon,
-        bg: 'bg-[#d7b7ff]',
-        color: 'text-[#5b36a8]'
-      },
-      {
-        title: t('dashboardPages.notifications.cards.1.title'),
-        description: t('dashboardPages.notifications.cards.1.description'),
-        icon: BriefcaseIcon,
-        bg: 'bg-[#8fd99b]',
-        color: 'text-[#1f6c3b]'
-      },
-    ],
   },
   create: {
     eyebrow: t('dashboardPages.create.eyebrow'),
     title: t('dashboardPages.create.title'),
     description: t('dashboardPages.create.description'),
-    cards: [
-      {
-        title: t('dashboardPages.create.cards.0.title'),
-        description: t('dashboardPages.create.cards.0.description'),
-        icon: PlusCircleIcon,
-        bg: 'bg-[#f8a9dc]',
-        color: 'text-[#9b1f70]'
-      },
-      {
-        title: t('dashboardPages.create.cards.1.title'),
-        description: t('dashboardPages.create.cards.1.description'),
-        icon: BriefcaseIcon,
-        bg: 'bg-[#8fd99b]',
-        color: 'text-[#1f6c3b]'
-      },
-    ],
   },
   profile: {
     eyebrow: t('dashboardPages.profile.eyebrow'),
     title: t('dashboardPages.profile.title'),
     description: t('dashboardPages.profile.description'),
-    cards: [
-      {
-        title: t('dashboardPages.profile.cards.0.title'),
-        description: t('dashboardPages.profile.cards.0.description'),
-        icon: UserCircleIcon,
-        bg: 'bg-[#ffc28e]',
-        color: 'text-[#83460e]'
-      },
-      {
-        title: t('dashboardPages.profile.cards.1.title'),
-        description: t('dashboardPages.profile.cards.1.description'),
-        icon: BriefcaseIcon,
-        bg: 'bg-[#a8c0ff]',
-        color: 'text-[#243c78]'
-      },
-    ],
   },
   settings: {
     eyebrow: t('dashboardPages.settings.eyebrow'),
@@ -663,648 +180,21 @@ const pages = computed(() => ({
 
 const pageContent = computed(() => pages.value[activePage.value] || pages.value.home)
 
-function getErrorMessage(error, fallback) {
-  if (isAxiosError(error)) {
-    return error.response?.data?.message || error.message || fallback
-  }
-
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return fallback
+function openPost(post) {
+  postStore.selectedPost = post
 }
 
-function escapeHtml(value) {
-  return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;')
-}
-
-function sanitizeMarkdownHtml(html) {
-  if (typeof DOMParser === 'undefined') return escapeHtml(html)
-
-  const allowedTags = new Set([
-    'A', 'BLOCKQUOTE', 'BR', 'CODE', 'DEL', 'EM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
-    'HR', 'IMG', 'LI', 'OL', 'P', 'PRE', 'STRONG', 'UL'
-  ])
-  const allowedAttributes = {
-    A: new Set(['href', 'title', 'target', 'rel']),
-    IMG: new Set(['src', 'alt', 'title'])
-  }
-  const parser = new DOMParser()
-  const document = parser.parseFromString(html, 'text/html')
-
-  document.body.querySelectorAll('*').forEach((element) => {
-    if (!allowedTags.has(element.tagName)) {
-      element.replaceWith(...Array.from(element.childNodes))
-      return
-    }
-
-    Array.from(element.attributes).forEach((attribute) => {
-      const allowedForTag = allowedAttributes[element.tagName]
-      const isSafeAttribute = allowedForTag?.has(attribute.name)
-      const value = attribute.value.trim().toLowerCase()
-
-      if (!isSafeAttribute || value.startsWith('javascript:') || value.startsWith('data:')) {
-        element.removeAttribute(attribute.name)
-      }
-    })
-
-    if (element.tagName === 'A') {
-      element.setAttribute('target', '_blank')
-      element.setAttribute('rel', 'noopener noreferrer')
-    }
-  })
-
-  return document.body.innerHTML
-}
-
-function renderMarkdown(value) {
-  return sanitizeMarkdownHtml(marked.parse(value, {async: false, breaks: true}))
-}
-
-async function uploadPostImage(file) {
-  const formData = new FormData()
-  formData.append('file', file)
-  const {data} = await api.post('/upload/single', formData)
-  return data.file?.url || data.file?.streamUrl || ''
-}
-
-function buildMarkdownImage(file, url) {
-  const altText = file.name.replace(/\.[^.]+$/, '').trim() || 'uploaded image'
-  return `![${altText}](${url})`
-}
-
-function insertMarkdownImage(markdownImage) {
-  const currentContent = postForm.content.trimEnd()
-  postForm.content = currentContent ? `${currentContent}\n\n${markdownImage}` : markdownImage
-}
-
-async function handleMarkdownImageUpload(event) {
-  const files = Array.from(event.target.files || [])
-  postError.value = ''
-  postMessage.value = ''
-
-  if (!files.length) return
-
-  const invalidFile = files.find((file) => !file.type.startsWith('image/'))
-  if (invalidFile) {
-    postError.value = 'Please select only image files to upload into markdown.'
-    event.target.value = ''
-    return
-  }
-
-  isUploadingMarkdownImage.value = true
-  try {
-    const markdownImages = await Promise.all(
-        files.map(async (file) => {
-          const imageUrl = await uploadPostImage(file)
-          if (!imageUrl) throw new Error(`Upload finished, but the file URL was missing for ${file.name}.`)
-          return buildMarkdownImage(file, imageUrl)
-        }),
-    )
-    insertMarkdownImage(markdownImages.join('\n\n'))
-    postMessage.value = `${markdownImages.length} image(s) uploaded and inserted into your markdown.`
-  } catch (error) {
-    postError.value = getErrorMessage(error, 'Could not upload the markdown images. Please try again.')
-  } finally {
-    isUploadingMarkdownImage.value = false
-    event.target.value = ''
-  }
-}
-
-function handlePostPhotoChange(event) {
-  const [file] = event.target.files || []
-  postError.value = ''
-
-  if (!file) return
-
-  if (!file.type.startsWith('image/')) {
-    postError.value = 'Please select an image file for your post photo.'
-    event.target.value = ''
-    return
-  }
-
-  if (postPhotoPreview.value) URL.revokeObjectURL(postPhotoPreview.value)
-  postPhotoFile.value = file
-  postPhotoName.value = file.name
-  postPhotoPreview.value = URL.createObjectURL(file)
-}
-
-async function handleEditorUploadImage(file, callback) {
-  try {
-    const imageUrl = await uploadPostImage(file)
-    if (imageUrl) {
-      callback(imageUrl)
-    }
-  } catch (error) {
-    postError.value = getErrorMessage(error, 'Could not upload the image. Please try again.')
-  }
-}
-
-function removePostPhoto() {
-  if (postPhotoPreview.value) URL.revokeObjectURL(postPhotoPreview.value)
-  postPhotoFile.value = null
-  postPhotoPreview.value = ''
-  postPhotoName.value = ''
-}
-
-async function submitPost() {
-  postError.value = ''
-  postMessage.value = ''
-
-  if (!canSubmitPost.value) {
-    postError.value = 'Please add a title and markdown content before publishing.'
-    return
-  }
-
-  isPosting.value = true
-  try {
-    let imageUrl = ''
-
-    if (postPhotoFile.value) {
-      imageUrl = await uploadPostImage(postPhotoFile.value)
-    }
-
-    const {data} = await api.post('/posts', {
-      title: postForm.title.trim(),
-      content: postForm.content.trim(),
-      imageUrl,
-    })
-
-    posts.value = [mapPost(data.post), ...posts.value]
-    postMessage.value = 'Post published and saved successfully.'
-    postForm.title = ''
-    postForm.content = ''
-    removePostPhoto()
-  } catch (error) {
-    postError.value = getErrorMessage(error, 'Could not publish your post. Please try again.')
-  } finally {
-    isPosting.value = false
-  }
-}
-
-function mapPost(post) {
-  const authorName = post.author?.user_name || post.author?.phone || '<Blank>'
-  const createdAt = post.createdAt ? new Date(post.createdAt) : null
-
-  return {
-    id: post.id,
-    authorId: post.author?.id,
-    company: authorName,
-    meta: createdAt ? createdAt.toLocaleString() : 'Just now',
-    badge: 'Community post',
-    title: post.title,
-    desc: post.content,
-    descHtml: renderMarkdown(post.content || ''),
-    imageUrl: post.imageUrl,
-    tags: [],
-    logoBg: 'bg-[#aecbfa]',
-    logoText: 'text-[#1a4fa3]',
-    likeCount: post.likeCount ?? 0,
-    commentCount: post.commentCount ?? 0,
-    shareCount: post.shareCount ?? 0,
-    bookmarkCount: post.bookmarkCount ?? 0,
-    likedByMe: Boolean(post.likedByMe),
-    bookmarkedByMe: Boolean(post.bookmarkedByMe),
-  }
-}
-
-async function searchPosts() {
-  searchError.value = ''
-  isSearching.value = true
-
-  try {
-    const params = {
-      limit: 20,
-    }
-    if (searchQuery.value.trim()) params.q = searchQuery.value.trim()
-    if (searchRoleFilter.value !== 'All') params.role = searchRoleFilter.value.toUpperCase()
-
-    const {data} = await api.get('/posts', { params })
-    searchResults.value = Array.isArray(data.posts) ? data.posts.map(mapPost) : []
-  } catch (error) {
-    searchError.value = getErrorMessage(error, 'Search failed. Please try again.')
-  } finally {
-    isSearching.value = false
-    nextTick(() => checkOpenPostQuery())
-  }
-}
-
-async function loadPosts({page = 1, append = false} = {}) {
-  if (append) {
-    if (postsLoadingMore.value || postsLoading.value || !postsHasMore.value) return
-    postsLoadingMore.value = true
-  } else {
-    postsLoading.value = true
-    postsPage.value = 1
-    postsHasMore.value = true
-  }
-
-  postsError.value = ''
-
-  try {
-    const {data} = await api.get('/posts', {
-      params: {
-        page,
-        limit: postsPerPage,
-      },
-    })
-    const nextPosts = Array.isArray(data.posts) ? data.posts.map(mapPost) : []
-
-    if (append) {
-      const existingPostIds = new Set(posts.value.map((post) => post.id))
-      posts.value = [
-        ...posts.value,
-        ...nextPosts.filter((post) => !existingPostIds.has(post.id)),
-      ]
-    } else {
-      posts.value = nextPosts
-    }
-
-    postsPage.value = data.page || page
-    postsHasMore.value = Boolean(data.hasMore)
-  } catch (error) {
-    postsError.value = getErrorMessage(error, 'Failed to load posts from the backend.')
-  } finally {
-    postsLoading.value = false
-    postsLoadingMore.value = false
-    nextTick(() => checkOpenPostQuery())
-  }
-}
-
-function shouldLoadMorePosts() {
-  if (activePage.value !== 'home' || postsLoading.value || postsLoadingMore.value || !postsHasMore.value) {
-    return false
-  }
-
-  const container = mainScrollContainer.value
-  if (!container) return false
-
-  const scrollTarget = container.scrollHeight > container.clientHeight
-      ? container
-      : document.scrollingElement || document.documentElement
-
-  return scrollTarget.scrollTop + scrollTarget.clientHeight >= scrollTarget.scrollHeight - 240
-}
-
-function handleHomeScroll() {
-  if (shouldLoadMorePosts()) {
-    loadPosts({page: postsPage.value + 1, append: true})
-  }
-}
-
-function addHomeScrollListener() {
-  const container = mainScrollContainer.value
-  if (!container || postsScrollListenerAttached.value) return
-
-  container.addEventListener('scroll', handleHomeScroll, {passive: true})
-  window.addEventListener('scroll', handleHomeScroll, {passive: true})
-  postsScrollListenerAttached.value = true
-}
-
-function removeHomeScrollListener() {
-  const container = mainScrollContainer.value
-  if (!container || !postsScrollListenerAttached.value) return
-
-  container.removeEventListener('scroll', handleHomeScroll)
-  window.removeEventListener('scroll', handleHomeScroll)
-  postsScrollListenerAttached.value = false
-}
-
-function applyProfileData(profile, user) {
-  if (profile?.fullName) profileForm.name = profile.fullName
-  if (profile?.gender) profileForm.gender = profile.gender
-  if (profile?.phone || user?.phone) profileForm.phone = profile?.phone || user.phone
-  if (profile?.profileImageUrl) profileForm.avatar = profile.profileImageUrl
-  if (profile?.logoUrl) profileForm.avatar = profile.logoUrl
-
-  profileForm.user_name = user?.user_name || ''
-  if (user?.email) profileForm.email = user.email
-
-  if (profile?.university) profileForm.university = profile.university
-  if (profile?.major) profileForm.major = profile.major
-  if (profile?.yearLevel) profileForm.yearLevel = profile.yearLevel
-  if (profile?.bio) profileForm.bio = profile.bio
-  if (profile?.jobType) profileForm.jobType = profile.jobType
-  if (profile?.expectedSalary) profileForm.expectedSalary = profile.expectedSalary
-  if (profile?.currency) profileForm.currency = profile.currency
-  if (Array.isArray(profile?.skills)) profileForm.skills = profile.skills
-  if (profile?.availability) profileForm.availability = profile.availability
-
-  if (profile?.companyName) profileForm.companyName = profile.companyName
-  if (profile?.industry) profileForm.industry = profile.industry
-  if (profile?.address) profileForm.address = profile.address
-  if (profile?.website) profileForm.website = profile.website
-  if (profile?.companyDescription) profileForm.companyDescription = profile.companyDescription
-}
-
-async function fetchPersonalInfo() {
-  profileLoadError.value = ''
-
-  try {
-    const isEmployer = auth.user?.role?.toLowerCase() === 'employer'
-    const endpoint = isEmployer ? '/employer-profile/me' : '/student-profile/me'
-
-    const [{data: profileData}, accountUser] = await Promise.all([
-      api.get(endpoint),
-      auth.refreshUser(),
-    ])
-
-    applyProfileData(profileData.profile, accountUser)
-  } catch (error) {
-    profileLoadError.value = getErrorMessage(error, 'Failed to load your personal info.')
-  }
-}
-
-function openPersonalInfoEditor(row) {
-  editingField.value = row
-  editValue.value = profileForm[row.field] || ''
-  profileSaveError.value = ''
-}
-
-function closePersonalInfoEditor() {
-  editingField.value = null
-  editValue.value = ''
-  profileSaveError.value = ''
-}
-
-function buildProfileFormData() {
-  const formData = new FormData()
-  const isEmployer = auth.user?.role?.toLowerCase() === 'employer'
-
-  formData.append('user_name', profileForm.user_name || '')
-  formData.append('email', profileForm.email || '')
-  formData.append('phone', profileForm.phone || '')
-
-  if (isEmployer) {
-    formData.append('companyName', profileForm.companyName || '')
-    formData.append('industry', profileForm.industry || '')
-    formData.append('address', profileForm.address || '')
-    formData.append('website', profileForm.website || '')
-    formData.append('companyDescription', profileForm.companyDescription || '')
-  } else {
-    formData.append('fullName', profileForm.name || 'Student User')
-    formData.append('gender', profileForm.gender || '')
-    formData.append('profileImageUrl', profileForm.avatar || '')
-    formData.append('university', profileForm.university || 'Not set')
-    formData.append('major', profileForm.major || 'Not set')
-    formData.append('yearLevel', profileForm.yearLevel || '')
-    formData.append('bio', profileForm.bio || '')
-    formData.append('jobType', profileForm.jobType || '')
-    formData.append('expectedSalary', profileForm.expectedSalary || '')
-    formData.append('currency', profileForm.currency || 'USD')
-    formData.append('skills', JSON.stringify(profileForm.skills || []))
-    formData.append('availability', JSON.stringify(profileForm.availability || null))
-  }
-  return formData
-}
-
-async function savePersonalInfoEdit() {
-  if (!editingField.value) return
-
-  const field = editingField.value.field
-  profileSaveError.value = ''
-  isSavingProfile.value = true
-
-  try {
-    profileForm[field] = editValue.value.trim()
-    const isEmployer = auth.user?.role?.toLowerCase() === 'employer'
-    const endpoint = isEmployer ? '/employer-profile/setup' : '/student-profile'
-
-    const {data} = await api.post(endpoint, buildProfileFormData())
-    applyProfileData(isEmployer ? data : data.profile, null)
-    closePersonalInfoEditor()
-  } catch (error) {
-    profileSaveError.value = getErrorMessage(error, 'Failed to save your personal info.')
-  } finally {
-    isSavingProfile.value = false
-  }
-}
-
-onMounted(() => {
-  initializeSocketConnection()
-  refreshAppliedPosts()
-
-  if (activePage.value === 'home' || activePage.value === 'profile') {
-    loadPosts()
-  }
-
-  if (activePage.value === 'home') {
-    nextTick(() => {
-       addHomeScrollListener()
-       handleHomeScroll()
-    })
-  }
-
-  if (activePage.value === 'search') {
-    searchPosts()
-  }
-
-  if (activePage.value === 'settings' || activePage.value === 'profile') {
-    fetchPersonalInfo()
-  }
-
-  if (activePage.value === 'settings') {
-    loadPasskeys()
-  }
-
-  if (activePage.value === 'notifications') {
-    fetchNotifications()
-  }
-})
-
-onUnmounted(() => {
-  removeHomeScrollListener()
-  if (socket) {
-    socket.disconnect()
-    socket = null
-  }
-})
-
-watch(activePage, (page, previousPage) => {
-  if ((page === 'home' || page === 'profile') && previousPage !== page) {
-    loadPosts()
-  }
-
-  if (page === 'search' && previousPage !== 'search') {
-    searchPosts()
-  }
-
-  if (page === 'notifications' && previousPage !== 'notifications') {
-    fetchNotifications()
-  }
-
-  if (page === 'home') {
-    nextTick(() => {
-      addHomeScrollListener()
-      handleHomeScroll()
-    })
-  } else {
-    removeHomeScrollListener()
-  }
-
-  if (page === 'home' || page === 'profile') {
-    refreshAppliedPosts()
-  }
-})
-
-watch(
-  () => route.query.post,
-  () => {
-    nextTick(() => checkOpenPostQuery())
-  },
-)
-
-watch(
-  () => auth.isAuthenticated,
-  () => {
-    refreshAppliedPosts()
-  },
-)
-
-function toggleThemeMode() {
-  setThemePreference(appliedTheme.value === 'dark' ? 'light' : 'dark')
-}
-async function loadPasskeys() {
-  passkeyError.value = ''
-
-  try {
-    const {data} = await api.get('/auth/passkeys')
-    passkeys.value = data.passkeys
-  } catch (error) {
-    passkeyError.value = getErrorMessage(error, 'Could not load passkeys.')
-  }
-}
-
-function openPasswordEditor() {
-  passwordError.value = ''
-  isPasswordEditorOpen.value = true
-}
-
-function closePasswordEditor() {
-  isPasswordEditorOpen.value = false
-  passwordError.value = ''
-  passwordForm.current = ''
-  passwordForm.next = ''
-  passwordForm.confirm = ''
-}
-
-async function addPasskey() {
-  passkeyError.value = ''
-  passkeyMessage.value = ''
-
-  if (!window.PublicKeyCredential) {
-    passkeyError.value = 'Passkeys are not supported in this browser.'
-    return
-  }
-
-  passkeyLoading.value = true
-  try {
-    const {data: options} = await api.post('/auth/passkey/register/options')
-    const response = await startRegistration({optionsJSON: options})
-    const {data} = await api.post('/auth/passkey/register/verify', {response})
-    passkeys.value = data.passkeys
-    passkeyMessage.value = 'Passkey added successfully.'
-  } catch (error) {
-    passkeyError.value = getErrorMessage(error, 'Could not add passkey. Please try again.')
-  } finally {
-    passkeyLoading.value = false
-  }
-}
-
-async function showUserProfile(userId) {
-  if (!userId) return
-  isProfileLoading.value = true
-  isProfileModalOpen.value = true
-  selectedUserProfile.value = null
-
-  try {
-    let profile;
-    try {
-      const {data} = await api.get(`/student-profile/${userId}`)
-      profile = data.profile
-    } catch (e) {
-      const {data} = await api.get(`/employer-profile/${userId}`)
-      profile = data.profile
-    }
-
-    if (profile) {
-      selectedUserProfile.value = {
-        name: profile.fullName || profile.companyName || 'User',
-        user_name: profile.user?.user_name,
-        avatar: profile.profileImageUrl || profile.logoUrl,
-        bio: profile.bio || profile.companyDescription,
-        education: profile.university ? `${profile.university} - ${profile.major}` : profile.industry,
-        category: profile.yearLevel ? `Year ${profile.yearLevel}` : profile.address,
-        postCount: 0 // Could be fetched separately
-      }
-    } else {
-      selectedUserProfile.value = { name: 'User not found' }
-    }
-  } catch (error) {
-    selectedUserProfile.value = { name: 'Error loading profile' }
-  } finally {
-    isProfileLoading.value = false
-  }
-}
-
-function closeProfileModal() {
-  isProfileModalOpen.value = false
-  selectedUserProfile.value = null
-}
-
-async function handleLogout() {
-  logoutError.value = ''
-
-  try {
-    await auth.logout(router)
-  } catch (error) {
-    logoutError.value = getErrorMessage(error, 'Could not logout. Please try again.')
-  }
-}
-
-async function updatePassword() {
-  passwordError.value = ''
-  passwordMessage.value = ''
-
-  if (!passwordForm.current || !passwordForm.next || !passwordForm.confirm) {
-    passwordError.value = 'Please fill in all password fields.'
-    return
-  }
-
-  if (passwordForm.next.length < 8) {
-    passwordError.value = 'New password must be at least 8 characters.'
-    return
-  }
-
-  if (passwordForm.next !== passwordForm.confirm) {
-    passwordError.value = 'New passwords do not match.'
-    return
-  }
-
-  passwordLoading.value = true
-  try {
-    await api.post('/auth/password', {
-      currentPassword: passwordForm.current,
-      newPassword: passwordForm.next,
-    })
-    passwordMessage.value = 'Password updated successfully.'
-    closePasswordEditor()
-  } catch (error) {
-    passwordError.value = getErrorMessage(error, 'Could not update password. Check your current password and try again.')
-  } finally {
-    passwordLoading.value = false
-  }
+function handleViewApplicants(postId) {
+  router.push(`/posts/${postId}/applicants`)
 }
 
 function handleHomeSearch() {
   if (!searchQuery.value.trim()) return
-  router.push('/search')
+  router.push({ name: 'search', query: { q: searchQuery.value } })
+}
+
+function toggleThemeMode() {
+  setThemePreference(appliedTheme.value === 'dark' ? 'light' : 'dark')
 }
 
 const navigationItems = computed(() => [
@@ -1349,30 +239,47 @@ const sidebarItems = computed(() => navigationItems.value.map((item) => ({
   active: item.page === activePage.value,
 })))
 
-const stories = [
-  {name: 'Brown Coffee', ring: 'bg-[#aecbfa]'},
-  {name: 'RUPP', ring: 'bg-[#d7b7ff]'},
-  {name: 'Wing Bank', ring: 'bg-[#8fd99b]'},
-  {name: 'Chip Mong', ring: 'bg-[#ffc28e]'},
-  {name: 'Smart', ring: 'bg-[#8ccaff]'},
-  {name: 'Pi Pay', ring: 'bg-[#f8a9dc]'},
-]
+const mainScrollContainer = ref(null)
 
-const composeActions = computed(() => [
-  {label: t('home.post'), icon: PlusCircleIcon, color: 'text-[#1a4fa3]'},
-  {label: t('home.jobAlert'), icon: BriefcaseIcon, color: 'text-[#246b36]'},
-  {label: t('home.company'), icon: BuildingStorefrontIcon, color: 'text-[#8a4a11]'},
-])
+function handleHomeScroll() {
+  if (!mainScrollContainer.value || activePage.value !== 'home') return
+  const {scrollTop, scrollHeight, clientHeight} = mainScrollContainer.value
+  if (scrollTop + clientHeight >= scrollHeight - 200) {
+    postStore.fetchPosts({ page: postStore.postsPage + 1, append: true })
+  }
+}
 
-const focusCards = computed(() => [
-  {label: t('home.savedJobs'), value: '8', desc: 'Three saved roles close in the next 48 hours.'},
-  {label: t('home.applications'), value: '5', desc: 'Two employers viewed your student profile today.'},
-  {label: t('home.profileStrength'), value: '86%', desc: 'Add availability to improve match ranking.'},
-])
+onMounted(() => {
+  if (mainScrollContainer.value) {
+    mainScrollContainer.value.addEventListener('scroll', handleHomeScroll)
+  }
+})
 
-const suggestions = [
-  {name: 'Sokha Recruiter', role: 'Hospitality roles near BKK1', bg: 'bg-[#8fd99b]', text: 'text-[#246b36]'},
-  {name: 'Dara Mentor', role: 'RUPP alumni · Product design', bg: 'bg-[#d7b7ff]', text: 'text-[#6a39b8]'},
-  {name: 'Smart Careers', role: 'Internships and campus events', bg: 'bg-[#8ccaff]', text: 'text-[#235d84]'},
-]
+onUnmounted(() => {
+  if (mainScrollContainer.value) {
+    mainScrollContainer.value.removeEventListener('scroll', handleHomeScroll)
+  }
+})
+
+watch(activePage, (newPage) => {
+  if (newPage === 'home') {
+    nextTick(() => {
+      if (mainScrollContainer.value) {
+         mainScrollContainer.value.scrollTop = 0
+      }
+    })
+  }
+})
 </script>
+
+<style>
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+</style>
