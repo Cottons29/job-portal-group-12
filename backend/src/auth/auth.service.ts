@@ -149,13 +149,21 @@ export class AuthService {
     return this.sanitizeUser(user);
   }
 
-  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
     if (!currentPassword || !newPassword) {
-      throw new BadRequestException('Current password and new password are required');
+      throw new BadRequestException(
+        'Current password and new password are required',
+      );
     }
 
     if (newPassword.length < 8) {
-      throw new BadRequestException('New password must be at least 8 characters');
+      throw new BadRequestException(
+        'New password must be at least 8 characters',
+      );
     }
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -188,7 +196,9 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    const existingCredentials = await this.passkeyRepository.find({ where: { userId } });
+    const existingCredentials = await this.passkeyRepository.find({
+      where: { userId },
+    });
     const options = await generateRegistrationOptions({
       rpName: this.rpName,
       rpID: this.rpId,
@@ -215,7 +225,10 @@ export class AuthService {
     return options;
   }
 
-  async finishPasskeyRegistration(userId: string, response: RegistrationResponseJSON) {
+  async finishPasskeyRegistration(
+    userId: string,
+    response: RegistrationResponseJSON,
+  ) {
     this.pruneChallenges();
 
     const challengeRecord = this.registrationChallenges.get(userId);
@@ -237,7 +250,8 @@ export class AuthService {
       throw new BadRequestException('Passkey registration failed');
     }
 
-    const { credential, credentialDeviceType, credentialBackedUp } = verification.registrationInfo;
+    const { credential, credentialDeviceType, credentialBackedUp } =
+      verification.registrationInfo;
     const existing = await this.passkeyRepository.findOne({
       where: { credentialId: credential.id },
     });
@@ -287,7 +301,9 @@ export class AuthService {
     const clientData = JSON.parse(
       Buffer.from(response.response.clientDataJSON, 'base64').toString('utf8'),
     );
-    const challengeRecord = this.authenticationChallenges.get(clientData.challenge);
+    const challengeRecord = this.authenticationChallenges.get(
+      clientData.challenge,
+    );
     if (!challengeRecord) {
       throw new BadRequestException('Passkey login challenge expired');
     }
@@ -325,7 +341,10 @@ export class AuthService {
     passkey.backedUp = verification.authenticationInfo.credentialBackedUp;
     await this.passkeyRepository.save(passkey);
 
-    return { user: this.sanitizeUser(passkey.user), token: this.createToken(passkey.user) };
+    return {
+      user: this.sanitizeUser(passkey.user),
+      token: this.createToken(passkey.user),
+    };
   }
 
   async sendOtp(email: string): Promise<void> {
