@@ -86,7 +86,7 @@ const khmer_lang: AppLanguage = {
             saving: 'កំពុងរក្សាទុក...',
             save: 'រក្សាទុក',
             profilePicture: 'រូបភាពគណនី',
-            profilePicturePlaceholder: 'បិទភ្ជាប់ URL រូបភាពគណនី',
+            profilePicturePlaceholder: 'ជ្រើសរើសរូបភាពគណនី',
             companyName: 'ឈ្មោះក្រុមហ៊ុន',
             name: 'ឈ្មោះ',
             yourCompany: 'ក្រុមហ៊ុនរបស់អ្នក',

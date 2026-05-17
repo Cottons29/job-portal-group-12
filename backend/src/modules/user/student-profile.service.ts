@@ -43,6 +43,7 @@ export class StudentProfileService {
     userId: string,
     data: Record<string, unknown>,
     file?: Express.Multer.File,
+    profileImageFile?: Express.Multer.File,
   ): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
@@ -90,7 +91,10 @@ export class StudentProfileService {
       user.cvUrl = uploadedFile.url;
     }
 
-    if (data.profileImageUrl) {
+    if (profileImageFile) {
+      const uploadedImage = await this.sheepFileService.upload(profileImageFile);
+      user.profileImageUrl = uploadedImage.url;
+    } else if (data.profileImageUrl) {
       user.profileImageUrl = String(data.profileImageUrl);
     }
 

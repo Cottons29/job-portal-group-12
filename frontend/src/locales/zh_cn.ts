@@ -86,7 +86,7 @@ const zh_cn: AppLanguage = {
       saving: '正在保存...',
       save: '保存',
       profilePicture: '个人头像',
-      profilePicturePlaceholder: '粘贴头像图片 URL',
+      profilePicturePlaceholder: '选择头像图片',
       companyName: '公司名称',
       name: '姓名',
       yourCompany: '你的公司',

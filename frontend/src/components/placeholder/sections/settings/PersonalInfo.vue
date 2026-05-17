@@ -34,6 +34,7 @@ export interface PersonalInfoRow {
 const isEditing = ref(false)
 const editingRow = ref<PersonalInfoRow | null>(null)
 const editValue = ref('')
+const editFile = ref<File | null>(null)
 
 const personalInfoRows = computed<PersonalInfoRow[]>(() => {
   const profile = profileStore.profileForm
@@ -47,7 +48,7 @@ const personalInfoRows = computed<PersonalInfoRow[]>(() => {
       icon: CameraIcon,
       avatar: profile.avatar || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
       placeholder: t('settings.personal.profilePicturePlaceholder'),
-      inputType: 'url',
+      inputType: isEmployer ? 'url' : 'file',
     },
     {
        label: isEmployer ? t('settings.personal.companyName') : t('settings.personal.name'),
@@ -135,15 +136,21 @@ const personalInfoRows = computed<PersonalInfoRow[]>(() => {
 function openEditor(row: PersonalInfoRow) {
   editingRow.value = row
   editValue.value = profileStore.profileForm[row.field] || ''
+  editFile.value = null
   isEditing.value = true
 }
 
 async function saveEdit() {
   if (!editingRow.value) return
-  const success = await profileStore.savePersonalInfoEdit(editingRow.value.field, editValue.value)
+  const success = await profileStore.savePersonalInfoEdit(
+    editingRow.value.field,
+    editValue.value,
+    editFile.value || undefined,
+  )
   if (success) {
     isEditing.value = false
     editingRow.value = null
+    editFile.value = null
   }
 }
 
@@ -198,6 +205,14 @@ onMounted(() => {
       <div class="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl">
         <h3 class="font-display text-xl font-black text-on-surface">{{ editingRow?.label }}</h3>
         <input
+            v-if="editingRow?.inputType === 'file'"
+            type="file"
+            accept="image/*"
+            class="mt-4 w-full rounded-2xl bg-surface-container-low px-4 py-3 text-sm font-bold text-on-surface outline-none focus:ring-2 focus:ring-primary"
+            @change="editFile = ($event.target as HTMLInputElement).files?.[0] || null"
+        />
+        <input
+            v-else
             v-model="editValue"
             :type="editingRow?.inputType || 'text'"
             :placeholder="editingRow?.placeholder"
