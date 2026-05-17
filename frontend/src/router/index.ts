@@ -175,14 +175,8 @@ router.beforeEach(async (to) => {
             return '/home'
         }
 
-        // 3. If they have an email but needsOnboarding is true
-        if (authStore.needsOnboarding) {
-            // Must allow them into the onboarding flow, otherwise redirect
-            if (!to.path.startsWith('/onboarding')) {
-                return authStore.user?.role?.toLowerCase() === 'employer' 
-                    ? '/onboarding/employer' 
-                    : '/onboarding/student'
-            }
+        // Allow them to navigate to onboarding explicitly if they want, but don't force it
+        if (authStore.needsOnboarding && to.path.startsWith('/onboarding')) {
             return true
         }
 
