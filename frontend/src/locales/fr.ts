@@ -86,7 +86,7 @@ const fr: AppLanguage = {
       saving: 'Enregistrement...',
       save: 'Enregistrer',
       profilePicture: 'Photo de profil',
-      profilePicturePlaceholder: "Collez l’URL de l’image de profil",
+      profilePicturePlaceholder: "Choisissez une image de profil",
       companyName: 'Nom de l’entreprise',
       name: 'Nom',
       yourCompany: 'Votre entreprise',

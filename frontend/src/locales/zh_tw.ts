@@ -86,7 +86,7 @@ const zh_tw: AppLanguage = {
       saving: '儲存中...',
       save: '儲存',
       profilePicture: '個人頭像',
-      profilePicturePlaceholder: '貼上頭像圖片 URL',
+      profilePicturePlaceholder: '選擇頭像圖片',
       companyName: '公司名稱',
       name: '姓名',
       yourCompany: '你的公司',

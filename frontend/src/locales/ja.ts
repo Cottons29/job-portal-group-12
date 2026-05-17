@@ -86,7 +86,7 @@ const ja: AppLanguage = {
       saving: '保存中...',
       save: '保存',
       profilePicture: 'プロフィール画像',
-      profilePicturePlaceholder: 'プロフィール画像の URL を貼り付け',
+      profilePicturePlaceholder: 'プロフィール画像を選択',
       companyName: '会社名',
       name: '名前',
       yourCompany: 'あなたの会社',
