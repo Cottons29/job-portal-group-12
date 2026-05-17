@@ -26,7 +26,7 @@ export class ApplicationsService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  async apply(studentId: string, postId: string, coverLetter?: string) {
+  async apply(studentId: string, postId: string, coverLetter?: string, portfolioUrl?: string, resumeUrl?: string) {
     const post = await this.postsRepo.findOne({ where: { id: postId } });
     if (!post) {
       throw new NotFoundException('Post not found.');
@@ -56,6 +56,8 @@ export class ApplicationsService {
       applicant: student,
       post,
       coverLetter: coverLetter?.trim() || undefined,
+      portfolioUrl: portfolioUrl?.trim() || undefined,
+      resumeUrl: resumeUrl?.trim() || undefined,
     });
 
     const savedApp = await this.appRepo.save(application);

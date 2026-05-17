@@ -8,9 +8,9 @@ import { PostComment } from './post-comment.entity';
 import { PostLike } from './post-like.entity';
 import { PostEntity } from './post.entity';
 import { PostShare } from './post-share.entity';
+import { JobApplication } from '../applications/job-application.entity';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
-import { JobApplication } from '../applications/job-application.entity';
 
 @Module({
   imports: [

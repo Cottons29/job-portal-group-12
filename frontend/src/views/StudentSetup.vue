@@ -120,9 +120,9 @@ function getSkillColor(index) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface font-sans flex flex-col">
+  <div class="w-full h-full font-sans flex flex-col bg-transparent">
     <!-- Main Content Container -->
-    <div class="w-full max-w-4xl mx-auto px-4 md:px-6 pt-12 pb-24 flex-1">
+    <div class="w-full max-w-4xl mx-auto px-4 md:px-6 pt-6 pb-12 flex-1">
       <!-- Step Indicator -->
       <div class="flex justify-center mb-6">
         <div class="inline-flex items-center justify-center rounded-full bg-surface-container px-4 py-1.5 min-w-[100px] border border-outline-variant/30">

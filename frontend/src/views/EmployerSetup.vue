@@ -90,7 +90,7 @@ async function handleSave() {
     })
     
     authStore.user.profileCompleted = true
-    router.push('/dashboard')
+    router.push('/home')
   } catch (err) {
     console.error('Failed to save profile:', err)
     errorMsg.value = err.response?.data?.message || 'Failed to complete profile. Please try again.'
@@ -101,8 +101,8 @@ async function handleSave() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#f8fafc] font-sans flex flex-col">
-    <div class="w-full max-w-3xl mx-auto px-4 md:px-6 pt-12 pb-24 flex-1">
+  <div class="w-full h-full font-sans flex flex-col bg-transparent">
+    <div class="w-full max-w-3xl mx-auto px-4 md:px-6 pt-6 pb-12 flex-1">
       
       <!-- Step Indicator -->
       <div class="mb-4">

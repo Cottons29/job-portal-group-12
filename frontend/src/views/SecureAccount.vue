@@ -82,7 +82,7 @@ const handleVerifyOtp = async () => {
     <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-secondary-container/30 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute top-1/4 right-20 w-32 h-32 bg-surface-container-high rounded-full blur-xl pointer-events-none"></div>
 
-    <div class="w-full max-w-[560px] p-8 md:p-14 z-10">
+    <div class="w-full max-w-[560px] p-4 sm:p-8 md:p-14 z-10">
       
       <!-- Logo or Icon Graphic -->
       <div class="flex justify-center mb-10">
@@ -94,8 +94,8 @@ const handleVerifyOtp = async () => {
 
       <!-- STEP 1: EMAIL ENTRY -->
       <div v-if="step === 'EMAIL'">
-        <div class="text-center mb-12">
-          <h2 class="font-display text-[2.75rem] font-extrabold text-on-surface tracking-tight leading-tight">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="font-display text-[2.25rem] sm:text-[2.75rem] font-extrabold text-on-surface tracking-tight leading-tight">
             Secure Your Account
           </h2>
           <p class="mt-4 text-on-surface-variant text-[1.15rem]" style="line-height: 1.6">
@@ -103,7 +103,7 @@ const handleVerifyOtp = async () => {
           </p>
         </div>
 
-        <div class="bg-surface-container-lowest rounded-[2.5rem] p-10 sm:p-12" style="box-shadow: 0 24px 48px rgba(11, 28, 48, 0.08)">
+        <div class="bg-surface-container-lowest rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 md:p-12" style="box-shadow: 0 24px 48px rgba(11, 28, 48, 0.08)">
           <form class="space-y-8" @submit.prevent="handleSendOtp">
             <div>
               <label for="email" class="block text-base font-semibold text-on-surface mb-3">
@@ -164,8 +164,8 @@ const handleVerifyOtp = async () => {
 
       <!-- STEP 2: VERIFY OTP -->
       <div v-else>
-        <div class="text-center mb-12">
-          <h2 class="font-display text-[2.75rem] font-extrabold text-on-surface tracking-tight leading-tight">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="font-display text-[2.25rem] sm:text-[2.75rem] font-extrabold text-on-surface tracking-tight leading-tight">
             Check Your Email
           </h2>
           <p class="mt-4 text-on-surface-variant text-[1.15rem]" style="line-height: 1.6">
@@ -173,7 +173,7 @@ const handleVerifyOtp = async () => {
           </p>
         </div>
 
-        <div class="bg-surface-container-lowest rounded-[2.5rem] p-10 sm:p-12" style="box-shadow: 0 24px 48px rgba(11, 28, 48, 0.08)">
+        <div class="bg-surface-container-lowest rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 md:p-12" style="box-shadow: 0 24px 48px rgba(11, 28, 48, 0.08)">
           <form class="space-y-8" @submit.prevent="handleVerifyOtp">
             <div>
               <label for="otp" class="block text-base font-semibold text-on-surface mb-3 text-center">

@@ -172,7 +172,7 @@ router.beforeEach(async (to) => {
 
         // Prevent navigating back to secure-account when not needed
         if (to.path === '/secure-account' && !authStore.needsEmailRecovery) {
-            return '/onboarding'
+            return '/home'
         }
 
         // 3. If they have an email but needsOnboarding is true

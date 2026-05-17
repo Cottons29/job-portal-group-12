@@ -1,9 +1,9 @@
-
 export interface Job {
   id: string
   title: string
   company: string
   salary: string
-location: string
+  location: string
   tags: string[]
+  matchScore?: number | null
 }
