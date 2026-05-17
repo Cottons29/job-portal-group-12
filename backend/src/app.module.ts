@@ -13,6 +13,7 @@ import { PostsModule } from './modules/posts/posts.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { FollowsModule } from './modules/follows/follows.module';
+import { StoriesModule } from './modules/stories/stories.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { FollowsModule } from './modules/follows/follows.module';
     ApplicationsModule,
     MessagesModule,
     FollowsModule,
+    StoriesModule,
   ],
   controllers: [AppController],
   providers: [

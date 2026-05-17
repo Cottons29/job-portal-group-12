@@ -194,46 +194,77 @@
           </Transition>
         </Teleport>
 
-        <!-- Add Story Modal Overlay -->
+        <!-- ✨ Add Story Modal — supports text + photo -->
         <Teleport to="body">
           <Transition name="modal">
-            <div v-if="showAddStoryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-              <div class="w-full max-w-lg rounded-[1.5rem] bg-white p-6 shadow-2xl transition-all">
-                <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
-                  <h3 class="font-display text-xl font-black text-slate-900">Add Company Brand Story</h3>
-                  <button @click="showAddStoryModal = false" class="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">
-                    Close
-                  </button>
+            <div v-if="showAddStoryModal" class="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 backdrop-blur-md sm:items-center sm:p-4" @click.self="clearStoryModal">
+              <div class="w-full max-w-md rounded-t-[2rem] bg-surface p-6 shadow-2xl ring-1 ring-white/10 sm:rounded-[2rem]">
+
+                <!-- Header -->
+                <div class="mb-5 flex items-center justify-between">
+                  <div>
+                    <h3 class="font-display text-xl font-black text-on-surface">Create a Story</h3>
+                    <p class="mt-0.5 text-xs text-on-surface-variant/70">Share a moment, update, or photo</p>
+                  </div>
+                  <button @click="clearStoryModal" class="grid h-8 w-8 place-items-center rounded-full bg-surface-container-high text-on-surface-variant hover:text-on-surface transition cursor-pointer text-lg font-bold">✕</button>
                 </div>
+
+                <!-- Preview -->
+                <div
+                  class="mb-5 flex h-36 w-full items-center justify-center overflow-hidden rounded-[1.25rem] text-white text-center transition-all"
+                  :style="{ background: storyPreviewUrl ? 'transparent' : storyBgColor }"
+                >
+                  <img v-if="storyPreviewUrl" :src="storyPreviewUrl" class="h-full w-full object-cover rounded-[1.25rem]" alt="Preview" />
+                  <p v-else-if="storyText" class="px-5 text-lg font-black leading-snug drop-shadow">{{ storyText }}</p>
+                  <p v-else class="text-white/50 text-sm font-bold">Your story preview</p>
+                </div>
+
                 <div class="space-y-4">
-                  <label class="block">
-                    <span class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">
-                      Quick Status / Story Announcement
-                    </span>
-                    <textarea
-                      v-model="storyText"
-                      rows="4"
-                      required
-                      placeholder="e.g. We just reached 50 team members in Phnom Penh! 🎉 or Hiring Flutter interns next week!"
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-600 resize-none"
-                    ></textarea>
-                  </label>
-                  
-                  <div class="flex justify-end gap-3 pt-2">
-                    <button
-                      type="button"
-                      @click="showAddStoryModal = false"
-                      class="rounded-full px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-50 transition cursor-pointer"
-                    >
+                  <!-- Type tabs -->
+                  <div class="flex gap-2">
+                    <button @click="storyType = 'text'; storyFile = null; storyPreviewUrl = ''" :class="['flex-1 rounded-full py-2 text-xs font-black transition', storyType === 'text' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant']">✏️ Text</button>
+                    <label :class="['flex-1 cursor-pointer rounded-full py-2 text-center text-xs font-black transition', storyType === 'photo' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant']">
+                      📷 Photo
+                      <input type="file" accept="image/*,video/*" class="sr-only" @change="onStoryFileChange" />
+                    </label>
+                  </div>
+
+                  <!-- Text input (show when text or as caption for photo) -->
+                  <textarea
+                    v-model="storyText"
+                    rows="3"
+                    :placeholder="storyType === 'photo' ? 'Add a caption... (optional)' : 'What\'s happening? Share an update 🎉'"
+                    class="w-full resize-none rounded-2xl bg-surface-container-high px-4 py-3 text-sm font-semibold text-on-surface outline-none placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/60 transition"
+                  />
+
+                  <!-- BG Color picker (text only) -->
+                  <div v-if="storyType === 'text'" class="flex items-center gap-2">
+                    <span class="text-xs font-black uppercase tracking-wider text-on-surface-variant/60">Color</span>
+                    <div class="flex gap-2">
+                      <button
+                        v-for="color in storyBgOptions"
+                        :key="color"
+                        type="button"
+                        @click="storyBgColor = color"
+                        class="h-7 w-7 rounded-full transition-transform hover:scale-110"
+                        :class="storyBgColor === color ? 'ring-2 ring-offset-2 ring-offset-surface ring-white scale-110' : ''"
+                        :style="{ background: color }"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex gap-3 pt-1">
+                    <button type="button" @click="clearStoryModal" class="flex-1 rounded-full bg-surface-container-high py-3 text-sm font-black text-on-surface-variant transition hover:bg-surface-container-highest cursor-pointer">
                       Cancel
                     </button>
                     <button
                       type="button"
                       @click="publishStory"
-                      :disabled="isPublishingStory || !storyText.trim()"
-                      class="rounded-full bg-blue-600 px-6 py-2.5 text-sm font-black text-white shadow-lg transition hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+                      :disabled="isPublishingStory || (!storyText.trim() && !storyFile)"
+                      class="flex-1 rounded-full bg-primary py-3 text-sm font-black text-on-primary shadow-lg transition hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      {{ isPublishingStory ? 'Publishing...' : 'Publish Story' }}
+                      {{ isPublishingStory ? '🚀 Publishing...' : '✨ Share Story' }}
                     </button>
                   </div>
                 </div>
@@ -241,6 +272,7 @@
             </div>
           </Transition>
         </Teleport>
+
 
         <!-- Applicants Modal Overlay -->
         <Teleport to="body">
@@ -1419,6 +1451,7 @@ async function savePersonalInfoEdit() {
 onMounted(() => {
   initializeSocketConnection()
   refreshAppliedPosts()
+  fetchStories()
 
   if (activePage.value === 'home' || activePage.value === 'profile') {
     loadPosts()
@@ -1675,32 +1708,20 @@ const sidebarItems = computed(() => navigationItems.value.map((item) => ({
   active: item.page === activePage.value,
 })))
 
-const stories = computed(() => {
-  const brandsMap = new Map()
-  
-  const defaultBrands = [
-    {name: 'Brown Coffee', ring: 'bg-[#aecbfa]', avatar: null},
-    {name: 'RUPP', ring: 'bg-[#d7b7ff]', avatar: null},
-    {name: 'Wing Bank', ring: 'bg-[#8fd99b]', avatar: null},
-    {name: 'Chip Mong', ring: 'bg-[#ffc28e]', avatar: null},
-    {name: 'Smart', ring: 'bg-[#8ccaff]', avatar: null},
-    {name: 'Pi Pay', ring: 'bg-[#f8a9dc]', avatar: null},
-  ]
-  defaultBrands.forEach(b => brandsMap.set(b.name, b))
+const stories = ref([])
+const isLoadingStories = ref(false)
 
-  posts.value.forEach(post => {
-    if (post.userRole === 'employer' || post.author?.role === 'employer') {
-      const name = post.company || 'Employer'
-      brandsMap.set(name, {
-        name,
-        ring: 'bg-[#8ccaff]',
-        avatar: post.author?.employerProfile?.logoUrl || null
-      })
-    }
-  })
-
-  return Array.from(brandsMap.values()).slice(0, 6)
-})
+async function fetchStories() {
+  isLoadingStories.value = true
+  try {
+    const { data } = await api.get('/stories')
+    stories.value = data || []
+  } catch (e) {
+    console.error('Failed to fetch stories:', e)
+  } finally {
+    isLoadingStories.value = false
+  }
+}
 
 const composeActions = computed(() => {
   const isEmployer = auth.user?.role === 'employer'
@@ -1795,22 +1816,48 @@ function handleComposerClick() {
 
 const showAddStoryModal = ref(false)
 const storyText = ref('')
+const storyBgColor = ref('#6366f1')
+const storyFile = ref(null)
+const storyPreviewUrl = ref('')
 const isPublishingStory = ref(false)
+const storyType = ref('text') // 'text' | 'photo'
+
+const storyBgOptions = [
+  '#6366f1', '#a855f7', '#ec4899', '#f97316', '#10b981', '#0ea5e9', '#f59e0b', '#ef4444'
+]
+
+function onStoryFileChange(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+  storyFile.value = file
+  storyPreviewUrl.value = URL.createObjectURL(file)
+  storyType.value = 'photo'
+}
+
+function clearStoryModal() {
+  storyText.value = ''
+  storyBgColor.value = '#6366f1'
+  storyFile.value = null
+  storyPreviewUrl.value = ''
+  storyType.value = 'text'
+  showAddStoryModal.value = false
+}
 
 async function publishStory() {
   if (isPublishingStory.value) return
+  if (!storyText.value.trim() && !storyFile.value) return
   isPublishingStory.value = true
   try {
-    await api.post('/posts', {
-      title: 'Brand Story Update',
-      content: storyText.value
-    })
-    storyText.value = ''
-    showAddStoryModal.value = false
-    await loadPosts()
+    const formData = new FormData()
+    if (storyText.value.trim()) formData.append('text', storyText.value.trim())
+    formData.append('bgColor', storyBgColor.value)
+    if (storyFile.value) formData.append('media', storyFile.value)
+    await api.post('/stories', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+    clearStoryModal()
+    fetchStories()
   } catch (e) {
-    console.error('Failed to publish brand story:', e)
-    window.alert('Could not publish story update.')
+    console.error('Failed to publish story:', e)
+    window.alert('Could not publish story. Please try again.')
   } finally {
     isPublishingStory.value = false
   }
@@ -1842,109 +1889,231 @@ function downloadResumePdf() {
     .map(s => `<span class="skill-tag">${s}</span>`)
     .join(' ')
     
+  const fullName = profileForm.fullName || profileForm.name || 'Student Profile'
+  const category = profileCategory.value || 'Candidate'
+  const education = profileEducation.value || 'Ph Phnom Penh, Cambodia'
+  const phone = profileForm.phone || 'No phone listed'
+  const email = auth.user?.email || ''
+  const bio = profileBio.value || 'No summary bio uploaded.'
+  const university = profileForm.university || 'N/A'
+  const expectedSalary = profileForm.expectedSalary 
+    ? profileForm.expectedSalary + ' ' + (profileForm.currency || 'USD') 
+    : 'Open to offers'
+
   printWindow.document.write(`
     <html>
       <head>
-        <title>\${profileForm.fullName || profileForm.name || 'Resume'} - Professional Profile</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+        <title>${fullName} - Professional Profile</title>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
         <style>
           body {
-            font-family: 'Inter', sans-serif;
-            color: #1e293b;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #0f172a;
             line-height: 1.6;
-            padding: 40px;
-            max-width: 800px;
+            padding: 48px;
+            max-width: 850px;
             margin: 0 auto;
+            background-color: #ffffff;
           }
           .header {
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 24px;
-            margin-bottom: 24px;
+            position: relative;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 28px;
+            margin-bottom: 32px;
+          }
+          .header::before {
+            content: '';
+            position: absolute;
+            top: -48px;
+            left: -48px;
+            right: -48px;
+            height: 6px;
+            background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+          }
+          .name-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
           }
           .name {
-            font-size: 32px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 36px;
             font-weight: 800;
-            color: #2563eb;
+            color: #1e1b4b;
             margin: 0;
-            letter-spacing: -0.03em;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
           }
-          .title {
-            font-size: 16px;
+          .title-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+            color: #4f46e5;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.05);
+          }
+          .meta-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 13px;
             font-weight: 600;
             color: #64748b;
-            margin-top: 4px;
+            margin-top: 14px;
+          }
+          .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
           }
           .section {
-            margin-bottom: 24px;
+            margin-bottom: 32px;
           }
           .section-title {
-            font-size: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #2563eb;
-            border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 6px;
-            margin-bottom: 12px;
+            letter-spacing: 0.12em;
+            color: #4f46e5;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .bio {
+            color: #334155;
+            font-size: 14.5px;
+            font-weight: 400;
+            line-height: 1.7;
+            margin: 0;
+            white-space: pre-wrap;
           }
           .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 20px;
           }
           .card {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 16px;
+            background: #fafafc;
+            border-radius: 12px;
+            padding: 18px;
             border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+          }
+          .card strong {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 6px;
+          }
+          .card p {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+          }
+          .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-left: -4px;
           }
           .skill-tag {
             display: inline-block;
-            background: #eff6ff;
-            color: #1e40af;
-            padding: 6px 12px;
-            border-radius: 9999px;
-            font-size: 12px;
+            background: #f5f3ff;
+            color: #6d28d9;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 13px;
             font-weight: 600;
-            margin: 4px;
+            border: 1px solid #ede9fe;
+            box-shadow: 0 1px 2px rgba(109, 40, 217, 0.02);
           }
-          .bio {
-            color: #475569;
-            font-size: 14px;
+          @media print {
+            body {
+              padding: 20px;
+            }
+            .header::before {
+              top: -20px;
+              left: -20px;
+              right: -20px;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .title-badge {
+              background: #f3e8ff !important;
+              color: #4f46e5 !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .card {
+              background: #fafafc !important;
+              border: 1px solid #e2e8f0 !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .skill-tag {
+              background: #f5f3ff !important;
+              color: #6d28d9 !important;
+              border: 1px solid #ede9fe !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
           }
         </style>
       </head>
       <body>
         <div class="header">
-          <h1 class="name">\${profileForm.fullName || profileForm.name || 'Student Profile'}</h1>
-          <p class="title">\${profileCategory.value || 'Candidate'}</p>
-          <p style="font-size:12px; color:#64748b; margin-top:8px;">
-            📍 \${profileEducation.value || 'Phnom Penh, Cambodia'} | 📞 \${profileForm.phone || 'No phone listed'} | ✉|️ \${auth.user?.email || ''}
-          </p>
+          <div class="name-container">
+            <h1 class="name">${fullName}</h1>
+            <span class="title-badge">${category}</span>
+          </div>
+          <div class="meta-info">
+            <span class="meta-item">📍 ${education}</span>
+            <span class="meta-item">📞 ${phone}</span>
+            <span class="meta-item">✉️ ${email}</span>
+          </div>
         </div>
+        
         <div class="section">
           <div class="section-title">Professional Summary</div>
-          <p class="bio">\${profileBio.value || 'No summary bio uploaded.'}</p>
+          <p class="bio">${bio}</p>
         </div>
+        
         <div class="section">
           <div class="section-title">Education & Details</div>
           <div class="grid-2">
             <div class="card">
-              <strong>University</strong>
-              <p style="margin:4px 0 0; font-size:14px; color:#475569;">\${profileForm.university || 'N/A'}</p>
+              <strong>University / Institution</strong>
+              <p>${university}</p>
             </div>
             <div class="card">
               <strong>Expected Salary</strong>
-              <p style="margin:4px 0 0; font-size:14px; color:#475569;">\${profileForm.expectedSalary ? profileForm.expectedSalary + ' ' + (profileForm.currency || 'USD') : 'Open to offers'}</p>
+              <p>${expectedSalary}</p>
             </div>
           </div>
         </div>
+        
         <div class="section">
           <div class="section-title">Skills & Core Expertise</div>
-          <div style="margin-left:-4px;">
-            \${skillsList.length ? skillsList : '<p style="font-size:14px; color:#64748b;">No skills listed.</p>'}
+          <div class="skills-container">
+            ${skillsList.length ? skillsList : '<p style="font-size:14px; color:#64748b;">No skills listed.</p>'}
           </div>
         </div>
+
         <script>
           window.onload = function() {
             window.print();
