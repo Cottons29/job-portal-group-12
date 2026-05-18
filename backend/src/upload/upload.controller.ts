@@ -16,11 +16,11 @@ import type { Request, Response as ExpressResponse } from 'express';
 
 import { SheepFileService } from '../common/sheep-file.service';
 
-@Controller('upload')
+@Controller()
 export class UploadController {
   constructor(private readonly sheepFileService: SheepFileService) {}
 
-  @Post('single')
+  @Post('upload/single')
   @UseInterceptors(FileInterceptor('file'))
   async uploadSingle(
     @UploadedFile() file: Express.Multer.File,
@@ -42,7 +42,7 @@ export class UploadController {
     };
   }
 
-  @Post('multiple')
+  @Post('upload/multiple')
   @UseInterceptors(FilesInterceptor('files', 10))
   async uploadMultiple(
     @UploadedFiles() files: Express.Multer.File[],
@@ -100,6 +100,8 @@ export class UploadController {
   }
 
   private backendFileUrl(request: Request, filename: string): string {
-    return `${request.protocol}://${request.get('host')}/api/upload/files/${encodeURIComponent(filename)}`;
+    const protocol = request.headers['x-forwarded-proto'] || request.protocol;
+    const host = request.get('host');
+    return `${protocol}://${host}/api/files/${encodeURIComponent(filename)}`;
   }
 }

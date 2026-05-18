@@ -14,5 +14,6 @@ import { UploadController } from './upload.controller';
   ],
   controllers: [UploadController],
   providers: [SheepFileService],
+  exports: [SheepFileService],
 })
 export class UploadModule {}
