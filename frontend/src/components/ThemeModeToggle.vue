@@ -3,11 +3,10 @@ import { computed } from 'vue'
 import { ComputerDesktopIcon, MoonIcon, SunIcon } from '@heroicons/vue/24/outline'
 import { useThemeMode } from '@/composables/useThemeMode'
 
-const props = defineProps({
-  embedded: {
-    type: Boolean,
-    default: false,
-  },
+withDefaults(defineProps<{
+  embedded?: boolean
+}>(), {
+  embedded: false
 })
 
 const { appliedTheme, themePreference, setThemePreference } = useThemeMode()

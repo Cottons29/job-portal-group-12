@@ -18,6 +18,7 @@ const profile = useEmployerProfileStore()
 const authStore = useAuthStore()
 
 const isDraggingPatent = ref(false)
+const isDraggingLogo = ref(false)
 const logoPreview = ref(null)
 
 const isSaving = ref(false)
@@ -51,16 +52,24 @@ function handlePatentSelect(e) {
   if (file) profile.setPatentFile(file)
 }
 
+function handleLogoDrop(e) {
+  isDraggingLogo.value = false
+  const file = e.dataTransfer?.files?.[0]
+  if (file) setLogoFile(file)
+}
+
 function handleLogoSelect(e) {
   const file = e.target.files?.[0]
-  if (file) {
-    profile.setLogoFile(file)
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      logoPreview.value = e.target.result
-    }
-    reader.readAsDataURL(file)
+  if (file) setLogoFile(file)
+}
+
+function setLogoFile(file) {
+  profile.setLogoFile(file)
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    logoPreview.value = e.target.result
   }
+  reader.readAsDataURL(file)
 }
 
 async function handleSave() {
@@ -82,7 +91,7 @@ async function handleSave() {
 
     const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
     
-    await axios.post(`${API_BASE}/employer-profile/setup`, formData, {
+    await axios.post(`${API_BASE}/profile/employer/setup`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${authStore.token}`
@@ -124,13 +133,25 @@ async function handleSave() {
       <!-- Main Form Card -->
       <div class="mt-8 rounded-[2rem] bg-white p-8 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         
-        <!-- Company Branding (Logo) -->
         <div class="mb-8 flex flex-col md:flex-row gap-6 items-center md:items-start">
-          <div class="relative group cursor-pointer" @click="$refs.logoInput.click()">
+          <div 
+            class="relative group cursor-pointer" 
+            @click="$refs.logoInput.click()"
+            @dragover.prevent="isDraggingLogo = true"
+            @dragleave="isDraggingLogo = false"
+            @drop.prevent="handleLogoDrop"
+          >
             <input ref="logoInput" type="file" accept="image/png, image/jpeg" class="hidden" @change="handleLogoSelect" />
-            <div class="w-24 h-24 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center bg-[#f8fafc] overflow-hidden group-hover:border-[#2563eb] transition-colors relative">
+            <div 
+              :class="[
+                'w-24 h-24 rounded-full border-2 border-dashed flex items-center justify-center overflow-hidden transition-all duration-300 relative',
+                isDraggingLogo 
+                  ? 'border-[#2563eb] bg-[#2563eb]/10' 
+                  : 'border-slate-300 bg-[#f8fafc] group-hover:border-[#2563eb]'
+              ]"
+            >
               <img v-if="logoPreview" :src="logoPreview" class="w-full h-full object-cover" />
-              <CameraIcon v-else class="w-8 h-8 text-slate-400" />
+              <CameraIcon v-else :class="['w-8 h-8 transition-colors', isDraggingLogo ? 'text-[#2563eb]' : 'text-slate-400']" />
             </div>
             <div class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#155dfc] text-white flex items-center justify-center shadow-lg transform translate-x-1/4 translate-y-1/4">
               <CloudArrowUpIcon class="w-4 h-4" />

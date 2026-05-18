@@ -77,7 +77,7 @@ async function handleSave() {
 
     const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
-    await axios.post(`${API_BASE}/student-profile/setup`, formData, {
+    await axios.post(`${API_BASE}/profile/student/setup`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${authStore.token}`,

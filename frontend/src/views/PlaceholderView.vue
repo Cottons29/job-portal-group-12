@@ -68,6 +68,14 @@
             v-else-if="activePage === 'notifications'"
         />
 
+        <MessagesSection
+            v-else-if="activePage === 'messages'"
+            :user-id="auth.user?.id"
+            :user-role="auth.user?.role"
+        />
+
+
+
         <Teleport to="body">
           <Transition name="modal">
             <PostModal
@@ -126,6 +134,7 @@ import {
   PlusCircleIcon,
   UserCircleIcon,
 } from '@heroicons/vue/24/outline'
+import MessagesSection from "@/components/placeholder/sections/MessagesSection.vue";
 
 const route = useRoute()
 const router = useRouter()
