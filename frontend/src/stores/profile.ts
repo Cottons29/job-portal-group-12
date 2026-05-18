@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
-import api from '@/lib/api'
+import api, { resolveUrl } from '@/lib/api'
 import { isAxiosError } from 'axios'
 import { useAuthStore } from './auth'
+import { usePostStore } from './posts'
 
 export const useProfileStore = defineStore('profile', () => {
   const auth = useAuthStore()
@@ -37,7 +38,7 @@ export const useProfileStore = defineStore('profile', () => {
   const isProfileLoading = ref(false)
   const isProfileModalOpen = ref(false)
 
-  function applyProfileData(profile, accountUser) {
+  function applyProfileData(profile: any, accountUser: any) {
     if (accountUser) {
       profileForm.user_name = accountUser.user_name || ''
       profileForm.email = accountUser.email || ''
@@ -46,7 +47,7 @@ export const useProfileStore = defineStore('profile', () => {
 
     profileForm.name = profile?.fullName || ''
     profileForm.gender = profile?.gender || ''
-    profileForm.avatar = profile?.profileImageUrl || profile?.logoUrl || ''
+    profileForm.avatar = resolveUrl(profile?.profileImageUrl || profile?.logoUrl || '')
     profileForm.university = profile?.university || ''
     profileForm.major = profile?.major || ''
     profileForm.yearLevel = profile?.yearLevel || ''
@@ -67,8 +68,7 @@ export const useProfileStore = defineStore('profile', () => {
   async function fetchPersonalInfo() {
     profileLoadError.value = ''
     try {
-      const isEmployer = auth.user?.role?.toLowerCase() === 'employer'
-      const endpoint = isEmployer ? '/employer-profile/me' : '/student-profile/me'
+      const endpoint = '/profile/me'
 
       const [{ data: profileData }, accountUser] = await Promise.all([
         api.get(endpoint),
@@ -95,10 +95,22 @@ export const useProfileStore = defineStore('profile', () => {
       formData.append('address', profileForm.address || '')
       formData.append('website', profileForm.website || '')
       formData.append('companyDescription', profileForm.companyDescription || '')
+      
+      if (profileForm.avatar instanceof File) {
+        formData.append('avatarFile', profileForm.avatar)
+      } else {
+        formData.append('logoUrl', profileForm.avatar || '')
+      }
     } else {
       formData.append('fullName', profileForm.name || 'Student User')
       formData.append('gender', profileForm.gender || '')
-      formData.append('profileImageUrl', profileForm.avatar || '')
+      
+      if (profileForm.avatar instanceof File) {
+        formData.append('avatarFile', profileForm.avatar)
+      } else {
+        formData.append('profileImageUrl', profileForm.avatar || '')
+      }
+      
       formData.append('university', profileForm.university || 'Not set')
       formData.append('major', profileForm.major || 'Not set')
       formData.append('yearLevel', profileForm.yearLevel || '')
@@ -112,17 +124,23 @@ export const useProfileStore = defineStore('profile', () => {
     return formData
   }
 
-  async function savePersonalInfoEdit(field, value) {
+  async function savePersonalInfoEdit(field: any, value: any) {
     profileSaveError.value = ''
     isSavingProfile.value = true
 
     try {
-      if (field) profileForm[field] = value.trim()
-      const isEmployer = auth.user?.role?.toLowerCase() === 'employer'
-      const endpoint = isEmployer ? '/employer-profile/setup' : '/student-profile'
+      //@ts-ignore
+      if (field) {
+        if (typeof value === 'string') {
+          profileForm[field] = value.trim()
+        } else {
+          profileForm[field] = value
+        }
+      }
+      const endpoint = '/profile/update'
 
       const { data } = await api.post(endpoint, buildProfileFormData())
-      applyProfileData(isEmployer ? data : data.profile, null)
+      applyProfileData(data, null)
       return true
     } catch (error) {
       profileSaveError.value = isAxiosError(error) ? error.response?.data?.message || error.message : 'Failed to save personal info.'
@@ -131,7 +149,7 @@ export const useProfileStore = defineStore('profile', () => {
       isSavingProfile.value = false
     }
   }
-
+  //@ts-ignore
   async function showUserProfile(userId) {
     if (!userId) return
     isProfileLoading.value = true
@@ -139,29 +157,32 @@ export const useProfileStore = defineStore('profile', () => {
     selectedUserProfile.value = null
 
     try {
-      let profile;
-      try {
-        const { data } = await api.get(`/student-profile/${userId}`)
-        profile = data.profile
-      } catch (e) {
-        const { data } = await api.get(`/employer-profile/${userId}`)
-        profile = data.profile
-      }
+      const [profileRes, postsRes] = await Promise.all([
+        api.get(`/profile/${userId}`),
+        api.get('/posts', { params: { authorId: userId, limit: 12 } })
+      ])
+
+      const profile = profileRes.data.profile
+      const postStore = usePostStore()
 
       if (profile) {
+        //@ts-ignore
         selectedUserProfile.value = {
           name: profile.fullName || profile.companyName || 'User',
           user_name: profile.user?.user_name,
-          avatar: profile.profileImageUrl || profile.logoUrl,
+          avatar: resolveUrl(profile.profileImageUrl || profile.logoUrl),
           bio: profile.bio || profile.companyDescription,
           education: profile.university ? `${profile.university} - ${profile.major}` : profile.industry,
           category: profile.yearLevel ? `Year ${profile.yearLevel}` : profile.address,
-          postCount: 0
+          postCount: postsRes.data.total || 0,
+          posts: (postsRes.data.posts || []).map(postStore.mapPost)
         }
       } else {
+        //@ts-ignore
         selectedUserProfile.value = { name: 'User not found' }
       }
     } catch (error) {
+      //@ts-ignore
       selectedUserProfile.value = { name: 'Error loading profile' }
     } finally {
       isProfileLoading.value = false

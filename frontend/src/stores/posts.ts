@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import api from '@/lib/api'
+import api, { resolveUrl } from '@/lib/api'
 import { isAxiosError } from 'axios'
 import { marked } from 'marked'
 
@@ -16,19 +16,22 @@ export const usePostStore = defineStore('posts', () => {
   const selectedPost = ref(null)
   // @ts-ignore
   function mapPost(post) {
-    const authorName = post.author?.user_name || post.author?.phone || '<Blank>'
+    const author = post.author
+    const authorName = author?.fullName || author?.companyName || author?.user_name || author?.phone || '<Blank>'
+    const authorAvatar = author?.profileImageUrl || author?.logoUrl
     const createdAt = post.createdAt ? new Date(post.createdAt) : null
 
     return {
       id: post.id,
-      authorId: post.author?.id,
+      authorId: author?.id,
       company: authorName,
       meta: createdAt ? createdAt.toLocaleString() : 'Just now',
       badge: 'Community post',
       title: post.title,
       desc: post.content,
       descHtml: renderMarkdown(post.content || ''),
-      imageUrl: post.imageUrl,
+      imageUrl: resolveUrl(post.imageUrl),
+      authorAvatar: resolveUrl(authorAvatar),
       tags: [],
       logoBg: 'bg-[#aecbfa]',
       logoText: 'text-[#1a4fa3]',
@@ -97,36 +100,16 @@ export const usePostStore = defineStore('posts', () => {
     }
   }
   // @ts-ignore
-  function mergeEngagement({ id, type, count, active }) {
+  function mergeEngagement(patch) {
     // @ts-ignore
-    const target = posts.value.find((p) => p.id === id)
+    const target = posts.value.find((p) => p.id === patch.id)
     if (!target) return
 
-    if (type === 'like') {
-      // @ts-ignore
-      target.likeCount = count
-      // @ts-ignore
-      target.likedByMe = active
-    } else if (type === 'bookmark') {
-      // @ts-ignore
-      target.bookmarkCount = count
-      // @ts-ignore
-      target.bookmarkedByMe = active
-    }
+    Object.assign(target, patch)
 
     // @ts-ignore
-    if (selectedPost.value && selectedPost.value.id === id) {
-       if (type === 'like') {
-         // @ts-ignore
-          selectedPost.value.likeCount = count
-         // @ts-ignore
-          selectedPost.value.likedByMe = active
-        } else if (type === 'bookmark') {
-         // @ts-ignore
-          selectedPost.value.bookmarkCount = count
-         // @ts-ignore
-          selectedPost.value.bookmarkedByMe = active
-        }
+    if (selectedPost.value && selectedPost.value.id === patch.id) {
+      Object.assign(selectedPost.value, patch)
     }
   }
   // @ts-ignore

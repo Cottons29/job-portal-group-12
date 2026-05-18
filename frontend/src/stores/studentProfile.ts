@@ -108,7 +108,7 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
   /**
    * Persist the full onboarding form to the backend.
    *
-   * Sends a `multipart/form-data` payload to `POST /student-profile` so the
+   * Sends a `multipart/form-data` payload to `POST /profile/student/setup` so the
    * optional CV file can ride alongside the JSON-encoded fields. Complex
    * shapes (`skills`, `availability`) are serialised as JSON strings since
    * `FormData` only carries scalars.
@@ -136,7 +136,7 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
         formData.append('cv', cvFile.value)
       }
 
-      const { data } = await api.post<StudentProfileResponse>('/student-profile', formData)
+      const { data } = await api.post<StudentProfileResponse>('/profile/student/setup', formData)
       return data.profile
     } catch (err) {
       saveError.value = getErrorMessage(err)
