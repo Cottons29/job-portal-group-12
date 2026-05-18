@@ -30,89 +30,42 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div class="auth-page app-page min-h-screen bg-slate-50 dark:bg-zinc-950 transition-colors duration-200">
-    <!-- Hero Section (Desktop) -->
-    <div class="hidden lg:flex flex-col items-center justify-center p-12 w-1/2 bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-zinc-950 dark:via-blue-950/30 dark:to-zinc-900 relative overflow-hidden">
-      <!-- Ambient Soft Gradients (Premium Mesh Vibe) -->
-      <div class="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] bg-blue-200/20 dark:bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] bg-indigo-200/15 dark:bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      
-      <div class="relative z-10 flex flex-col items-center text-center max-w-xl">
-        <!-- Floating Isometric Illustration Container -->
-        <div class="floating-illustration mb-10 transform hover:scale-[1.02] hover:-translate-y-2 transition-all duration-500 ease-out">
-          <img
-            src="/images/isometric-hero.png"
-            alt="Campus to Career Illustration"
-            class="w-full max-w-lg object-contain drop-shadow-2xl"
-          />
-        </div>
-
-        <h1 class="font-display text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight transition-colors">
-          Your <span class="text-blue-600 dark:text-blue-500">bridge</span> from campus to career.
-        </h1>
-        
-        <p class="text-slate-600 dark:text-slate-400 text-lg mt-4 max-w-md transition-colors">
-          Connect with top local employers in Phnom Penh and find the flexible roles that fit your class schedule.
-        </p>
-      </div>
-      
-      <!-- Right border divider -->
-      <div class="absolute right-0 top-0 bottom-0 w-px bg-slate-200/80 dark:bg-zinc-850/80"></div>
-    </div>
-
-    <!-- Form Panel -->
-    <div class="auth-page__form-panel bg-slate-50 dark:bg-zinc-950 transition-colors duration-200">
+  <div class="auth-page app-page">
+    <div class="auth-page__form-panel">
       <!-- Tonal layering decorative elements -->
-      <div class="auth-page__top-line dark:bg-blue-500/10"></div>
-      <div class="auth-page__soft-circle dark:bg-indigo-500/5"></div>
+      <div class="auth-page__top-line"></div>
+      <div class="auth-page__soft-circle"></div>
 
-      <div class="auth-page__form-content bg-white dark:bg-zinc-900 p-6 sm:p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-none transition-all duration-200">
+      <div class="auth-page__form-content bg-surface-container-low p-8 rounded-3xl">
         <!-- Logo -->
-        <div class="mb-4 sm:mb-6 flex justify-center">
-          <!-- Light Mode: Normal Logo -->
+        <div class="mb-8">
           <img
             src="/images/logo.png"
             alt="FirstStep Logo"
-            class="h-20 sm:h-24 w-auto object-contain dark:hidden select-none pointer-events-none"
+            class="h-50 w-auto object-contain"
           />
-          <!-- Dark Mode: Color-Preserved Seamless Split Logo -->
-          <div class="hidden dark:relative dark:flex h-20 sm:h-24 w-auto justify-center select-none pointer-events-none">
-            <!-- Left Part: Chevron Icon (Original Pristine Colors) -->
-            <img
-              src="/images/logo.png"
-              alt="FirstStep Logo Icon"
-              class="h-full w-auto object-contain"
-              style="clip-path: inset(0 68% 0 0);"
-            />
-            <!-- Right Part: Text (Inverted & Hue-Rotated to turn Black to White while keeping Blue) -->
-            <img
-              src="/images/logo.png"
-              alt="FirstStep Logo Text"
-              class="absolute top-0 left-0 h-full w-auto object-contain"
-              style="clip-path: inset(0 0 0 32%); filter: invert(1) hue-rotate(180deg);"
-            />
-          </div>
         </div>
 
         <!-- Editorial heading -->
-        <h2 class="font-display text-[1.75rem] sm:text-[1.85rem] font-bold text-slate-900 dark:text-white text-center tracking-tight leading-tight transition-colors">
+        <h2 class="font-display text-[1.85rem] font-bold text-on-surface text-center tracking-tight leading-tight">
           {{ isSignUp ? t('auth.signupTitle') : t('auth.loginTitle') }}
         </h2>
-        <p class="mt-2 text-slate-500 dark:text-slate-400 text-[0.9rem] sm:text-[0.95rem] text-center transition-colors" style="line-height: 1.6">
+        <p class="mt-2 text-on-surface-variant text-[0.95rem]" style="line-height: 1.6">
           {{ isSignUp ? t('auth.signupSubtitle') : t('auth.loginSubtitle') }}
         </p>
 
         <!-- Login / Sign Up Tabs — tonal layering, no borders -->
-        <div class="mt-7 flex rounded-full bg-slate-100 dark:bg-zinc-800 p-1.5 border border-slate-200 dark:border-zinc-700 transition-colors">
+        <div class="mt-7 flex rounded-full bg-surface-container p-1.5 border border-outline-variant/30">
           <button
             id="tab-login"
             @click="auth.setMode('login')"
             :class="[
               'flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 cursor-pointer',
               auth.mode === 'login'
-                ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white',
+                ? 'bg-surface-container-lowest text-on-surface'
+                : 'text-on-surface-variant hover:text-on-surface',
             ]"
+            :style="auth.mode === 'login' ? 'box-shadow: 0 1px 6px rgba(0, 0, 0, 0.28)' : ''"
           >
             {{ t('auth.logIn') }}
           </button>
@@ -122,25 +75,27 @@ function handleSubmit() {
             :class="[
               'flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 cursor-pointer',
               auth.mode === 'signup'
-                ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white',
+                ? 'bg-surface-container-lowest text-on-surface'
+                : 'text-on-surface-variant hover:text-on-surface',
             ]"
+            :style="auth.mode === 'signup' ? 'box-shadow: 0 1px 6px rgba(0, 0, 0, 0.28)' : ''"
           >
             {{ t('auth.signUp') }}
           </button>
         </div>
 
         <!-- Role Toggle — flat primary active state -->
-        <div class="mt-4 flex rounded-full bg-slate-100 dark:bg-zinc-800 p-1.5 border border-slate-200 dark:border-zinc-700 transition-colors">
+        <div class="mt-4 flex rounded-full bg-surface-container p-1.5 border border-outline-variant/30">
           <button
             id="role-student"
             @click="auth.setRole('student')"
             :class="[
               'flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 cursor-pointer',
               auth.role === 'student'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white',
+                ? 'bg-primary text-surface-container-lowest'
+                : 'text-on-surface-variant hover:text-on-surface',
             ]"
+            :style="auth.role === 'student' ? 'box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28)' : ''"
           >
             <AcademicCapIcon class="w-4 h-4" />
             {{ t('auth.student') }}
@@ -151,9 +106,10 @@ function handleSubmit() {
             :class="[
               'flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 cursor-pointer',
               auth.role === 'employer'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white',
+                ? 'bg-primary text-surface-container-lowest'
+                : 'text-on-surface-variant hover:text-on-surface',
             ]"
+            :style="auth.role === 'employer' ? 'box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28)' : ''"
           >
             <BuildingOfficeIcon class="w-4 h-4" />
             {{ t('auth.employer') }}
@@ -171,7 +127,7 @@ function handleSubmit() {
         >
           <div
             v-if="auth.error"
-            class="mt-4 flex items-center gap-2 rounded-2xl bg-red-950/50 dark:bg-red-950/70 px-4 py-3 text-sm text-red-200 border border-red-900/60"
+            class="mt-4 flex items-center gap-2 rounded-2xl bg-red-950/50 px-4 py-3 text-sm text-red-200 border border-red-900/60"
           >
             {{ auth.error }}
           </div>
@@ -181,33 +137,33 @@ function handleSubmit() {
         <form @submit.prevent="handleSubmit" class="mt-6 space-y-5">
           <!-- Phone Number -->
           <div>
-            <label for="phone-input" class="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2 transition-colors">
+            <label for="phone-input" class="block text-sm font-semibold text-on-surface mb-2">
               {{ t('auth.phoneNumber') }}
             </label>
-            <div class="flex items-center rounded-full bg-slate-50 border border-slate-200 focus-within:ring-2 focus-within:ring-blue-600 focus-within:border-blue-600 dark:bg-zinc-800 dark:border-zinc-700 dark:focus-within:ring-blue-500 dark:focus-within:border-blue-500 transition-all duration-200"
+            <div class="field-shell"
             >
-              <span class="flex items-center gap-1.5 pl-5 pr-3 text-sm text-slate-500 dark:text-slate-400">
+              <span class="flex items-center gap-1.5 pl-5 pr-3 text-sm text-on-surface-variant">
                 <PhoneIcon class="w-4 h-4" />
-                <span class="font-semibold text-slate-800 dark:text-slate-200">+855</span>
+                <span class="font-semibold text-on-surface">+855</span>
               </span>
               <input
                 id="phone-input"
                 v-model="auth.phone"
                 type="tel"
                 placeholder="12 345 678"
-                class="field-control auth-page__input text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none rounded-full"
+                class="field-control auth-page__input"
               />
             </div>
           </div>
 
           <!-- Password -->
           <div>
-            <label for="password-input" class="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2 transition-colors">
+            <label for="password-input" class="block text-sm font-semibold text-on-surface mb-2">
               {{ t('auth.password') }}
             </label>
-            <div class="flex items-center rounded-full bg-slate-50 border border-slate-200 focus-within:ring-2 focus-within:ring-blue-600 focus-within:border-blue-600 dark:bg-zinc-800 dark:border-zinc-700 dark:focus-within:ring-blue-500 dark:focus-within:border-blue-500 transition-all duration-200"
+            <div class="field-shell"
             >
-              <span class="pl-5 pr-2 text-slate-500 dark:text-slate-400">
+              <span class="pl-5 pr-2 text-on-surface-variant">
                 <LockClosedIcon class="w-4 h-4" />
               </span>
               <input
@@ -215,12 +171,12 @@ function handleSubmit() {
                 v-model="auth.password"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="Enter your password"
-                class="field-control auth-page__input text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none rounded-full"
+                class="field-control auth-page__input"
               />
               <button
                 type="button"
                 @click="showPassword = !showPassword"
-                class="pr-5 pl-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                class="pr-5 pl-2 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
                 aria-label="Toggle password visibility"
               >
                 <EyeSlashIcon v-if="showPassword" class="w-4 h-4" />
@@ -239,12 +195,15 @@ function handleSubmit() {
             leave-to-class="opacity-0 translate-y-[-8px]"
           >
             <div v-if="isSignUp">
-              <label for="confirm-password-input" class="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2 transition-colors">
+              <label for="confirm-password-input" class="block text-sm font-semibold text-on-surface mb-2">
                 {{ t('auth.confirmPassword') }}
               </label>
-              <div class="flex items-center rounded-full bg-slate-50 border border-slate-200 focus-within:ring-2 focus-within:ring-blue-600 focus-within:border-blue-600 dark:bg-zinc-800 dark:border-zinc-700 dark:focus-within:ring-blue-500 dark:focus-within:border-blue-500 transition-all duration-200"
+              <div class="flex items-center rounded-full bg-surface-container focus-within:bg-surface-container-low transition-all duration-200 border border-outline-variant/30"
+                   :style="'box-shadow: none'"
+                   @focusin="$event.currentTarget.style.boxShadow = '0 0 0 2px rgba(138, 180, 248, 0.28)'"
+                   @focusout="$event.currentTarget.style.boxShadow = 'none'"
               >
-                <span class="pl-5 pr-2 text-slate-500 dark:text-slate-400">
+                <span class="pl-5 pr-2 text-on-surface-variant">
                   <LockClosedIcon class="w-4 h-4" />
                 </span>
                 <input
@@ -252,12 +211,12 @@ function handleSubmit() {
                   v-model="auth.confirmPassword"
                   :type="showConfirmPassword ? 'text' : 'password'"
                   placeholder="Confirm your password"
-                  class="field-control auth-page__input text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none rounded-full"
+                  class="field-control auth-page__input"
                 />
                 <button
                   type="button"
                   @click="showConfirmPassword = !showConfirmPassword"
-                  class="pr-5 pl-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                  class="pr-5 pl-2 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
                   aria-label="Toggle confirm password visibility"
                 >
                   <EyeSlashIcon v-if="showConfirmPassword" class="w-4 h-4" />
@@ -269,7 +228,7 @@ function handleSubmit() {
 
           <!-- Forgot Password (login only) -->
           <div v-if="!isSignUp" class="flex justify-end">
-            <button type="button" class="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors cursor-pointer">
+            <button type="button" class="text-xs font-semibold text-primary-container hover:text-primary transition-colors cursor-pointer">
               {{ t('auth.forgotPassword') }}
             </button>
           </div>
@@ -279,11 +238,11 @@ function handleSubmit() {
             id="submit-btn"
             type="submit"
             :disabled="auth.isLoading"
-            class="w-full flex items-center justify-center gap-2 py-3 px-6 text-sm font-extrabold rounded-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-500 transition-all duration-200 shadow-md shadow-blue-500/20 disabled:opacity-50 cursor-pointer"
+            class="btn-primary auth-page__submit"
           >
             <svg
               v-if="auth.isLoading"
-              class="w-4 h-4 animate-spin text-white"
+              class="w-4 h-4 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -296,9 +255,9 @@ function handleSubmit() {
 
         <!-- Divider -->
         <div class="my-6 flex items-center gap-4">
-          <div class="flex-1 h-px bg-slate-200 dark:bg-zinc-800"></div>
-          <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 tracking-widest uppercase">{{ t('auth.orContinueWith') }}</span>
-          <div class="flex-1 h-px bg-slate-200 dark:bg-zinc-800"></div>
+          <div class="flex-1 h-px bg-surface-container"></div>
+          <span class="text-[11px] font-semibold text-on-surface-variant tracking-widest uppercase">{{ t('auth.orContinueWith') }}</span>
+          <div class="flex-1 h-px bg-surface-container"></div>
         </div>
 
         <!-- Social Buttons — tonal surface, no borders -->
@@ -309,8 +268,8 @@ function handleSubmit() {
             type="button"
             @click="auth.loginWithPasskey(router)"
             :disabled="auth.isLoading"
-            class="flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 px-5 py-3 text-sm font-black text-slate-800 dark:text-slate-200 transition-all duration-200 hover:bg-surface-container-high disabled:opacity-60 cursor-pointer border border-slate-200 dark:border-zinc-700"
-            style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05)"
+            class="flex items-center justify-center rounded-full bg-surface-container px-5 py-3 text-sm font-black text-on-surface transition-all duration-200 hover:bg-surface-container-high disabled:opacity-60 cursor-pointer border border-outline-variant/30"
+            style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20)"
             aria-label="Continue with passkey"
           >
             {{ t('auth.usePasskey') }}
@@ -318,8 +277,8 @@ function handleSubmit() {
           <button
             id="btn-google"
             type="button"
-            class="flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-all duration-200 cursor-pointer border border-slate-200 dark:border-zinc-700"
-            style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05)"
+            class="flex items-center justify-center w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high transition-all duration-200 cursor-pointer border border-outline-variant/30"
+            style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20)"
             aria-label="Continue with Google"
           >
             <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -332,8 +291,8 @@ function handleSubmit() {
           <button
             id="btn-facebook"
             type="button"
-            class="flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-all duration-200 cursor-pointer border border-slate-200 dark:border-zinc-700"
-            style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05)"
+            class="flex items-center justify-center w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high transition-all duration-200 cursor-pointer border border-outline-variant/30"
+            style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20)"
             aria-label="Continue with Facebook"
           >
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2">
@@ -343,17 +302,16 @@ function handleSubmit() {
         </div>
 
         <!-- Terms -->
-        <p class="mt-8 text-center text-xs text-slate-500 dark:text-slate-400 leading-relaxed transition-colors">
+        <p class="mt-8 text-center text-xs text-on-surface-variant leading-relaxed">
           {{ t('auth.termsText') }}
-          <a href="#" class="text-blue-600 dark:text-blue-400 font-medium underline underline-offset-2 transition-colors">{{ t('auth.termsOfService') }}</a>
+          <a href="#" class="text-primary-container hover:text-primary font-medium underline underline-offset-2 transition-colors">{{ t('auth.termsOfService') }}</a>
           and
-          <a href="#" class="text-blue-600 dark:text-blue-400 font-medium underline underline-offset-2 transition-colors">{{ t('auth.privacyPolicy') }}</a>.
+          <a href="#" class="text-primary-container hover:text-primary font-medium underline underline-offset-2 transition-colors">{{ t('auth.privacyPolicy') }}</a>.
         </p>
       </div>
     </div>
   </div>
 </template>
-
 
 <style scoped>
 input::placeholder {
@@ -364,20 +322,7 @@ input:focus::placeholder {
 }
 
 :global(html[data-theme='dark'] .dark-theme-logo) {
-  filter: invert(1) hue-rotate(180deg);
+  filter: brightness(0) invert(1);
   opacity: 0.9;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.floating-illustration {
-  animation: float 6s ease-in-out infinite;
 }
 </style>

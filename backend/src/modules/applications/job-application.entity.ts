@@ -40,12 +40,6 @@ export class JobApplication {
   @Column({ type: 'text', nullable: true })
   coverLetter?: string;
 
-  @Column({ type: 'text', nullable: true })
-  portfolioUrl?: string;
-
-  @Column({ type: 'text', nullable: true })
-  resumeUrl?: string;
-
   @Column({
     type: 'enum',
     enum: ApplicationStatus,

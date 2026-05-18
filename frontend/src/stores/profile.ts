@@ -81,7 +81,7 @@ export const useProfileStore = defineStore('profile', () => {
     }
   }
 
-  function buildProfileFormData(profileImageFile?: File) {
+  function buildProfileFormData() {
     const formData = new FormData()
     const isEmployer = auth.user?.role?.toLowerCase() === 'employer'
 
@@ -108,25 +108,20 @@ export const useProfileStore = defineStore('profile', () => {
       formData.append('currency', profileForm.currency || 'USD')
       formData.append('skills', JSON.stringify(profileForm.skills || []))
       formData.append('availability', JSON.stringify(profileForm.availability || null))
-      if (profileImageFile) {
-        formData.append('profileImageFile', profileImageFile)
-      }
     }
     return formData
   }
 
-  async function savePersonalInfoEdit(field, value, file?: File) {
+  async function savePersonalInfoEdit(field, value) {
     profileSaveError.value = ''
     isSavingProfile.value = true
 
     try {
+      if (field) profileForm[field] = value.trim()
       const isEmployer = auth.user?.role?.toLowerCase() === 'employer'
-      if (field && !(field === 'avatar' && file && !isEmployer)) {
-        profileForm[field] = value.trim()
-      }
       const endpoint = isEmployer ? '/employer-profile/setup' : '/student-profile'
 
-      const { data } = await api.post(endpoint, buildProfileFormData(file))
+      const { data } = await api.post(endpoint, buildProfileFormData())
       applyProfileData(isEmployer ? data : data.profile, null)
       return true
     } catch (error) {

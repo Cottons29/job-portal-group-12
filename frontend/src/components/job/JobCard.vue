@@ -19,12 +19,6 @@
 
           <div class="flex flex-wrap gap-2">
             <span
-              v-if="job.matchScore !== undefined && job.matchScore !== null"
-              class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wide bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm flex items-center gap-1"
-            >
-              ✨ {{ job.matchScore }}% Match
-            </span>
-            <span
               v-for="tag in job.tags"
               :key="tag"
               class="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide"

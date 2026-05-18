@@ -93,30 +93,13 @@ export class PostsService {
       viewerId,
     );
 
-    const studentProfile = viewerId
-      ? await this.usersRepository.findOne({ where: { id: viewerId } })
-      : null;
-
     return {
-      posts: posts.map((p) => this.serializePost(p, engagement, studentProfile)),
+      posts: posts.map((p) => this.serializePost(p, engagement)),
       page,
       limit,
       total,
       hasMore: page * limit < total,
     };
-  }
-
-  async findOne(id: string, viewerId?: string) {
-    const post = await this.postsRepository.findOne({
-      where: { id },
-      relations: ['author'],
-    });
-    if (!post) throw new NotFoundException('Post not found');
-    const engagement = await this.loadEngagement([post.id], viewerId);
-    const studentProfile = viewerId
-      ? await this.usersRepository.findOne({ where: { id: viewerId } })
-      : null;
-    return this.serializePost(post, engagement, studentProfile);
   }
 
   async create(userId: string, dto: CreatePostDto) {
@@ -169,13 +152,6 @@ export class PostsService {
       await this.postLikesRepository.save(
         this.postLikesRepository.create({ post, user }),
       );
-
-      if (post.author.id !== userId) {
-        const name = user.user_name || user.phone || 'Someone';
-        this.notificationsService
-          .createNotification(post.author.id, `${name} liked your post "${post.title}"`)
-          .catch(() => undefined);
-      }
     }
 
     const likeCount = await this.postLikesRepository.count({
@@ -232,13 +208,6 @@ export class PostsService {
     await this.postSharesRepository.save(
       this.postSharesRepository.create({ post, user }),
     );
-
-    if (post.author.id !== userId) {
-      const name = user.user_name || user.phone || 'Someone';
-      this.notificationsService
-        .createNotification(post.author.id, `${name} shared your post "${post.title}"`)
-        .catch(() => undefined);
-    }
 
     const shareCount = await this.postSharesRepository.count({
       where: { post: { id: postId } },
@@ -358,21 +327,7 @@ export class PostsService {
     };
   }
 
-  private serializePost(post: PostEntity, engagement: EngagementBundle, studentProfile?: User | null) {
-    let matchScore: number | null = null;
-    if (studentProfile) {
-      const textToMatch = `${post.title} ${post.content}`.toLowerCase();
-      const skills = studentProfile.skills || [];
-      if (skills.length > 0) {
-        const matchedCount = skills.filter(skill => textToMatch.includes(skill.toLowerCase())).length;
-        matchScore = Math.round((matchedCount / skills.length) * 100);
-      } else {
-        matchScore = textToMatch.includes(studentProfile.major?.toLowerCase()) ? 95 : 75;
-      }
-    } else {
-      matchScore = 80;
-    }
-
+  private serializePost(post: PostEntity, engagement: EngagementBundle) {
     return {
       id: post.id,
       title: post.title,
@@ -387,7 +342,6 @@ export class PostsService {
       bookmarkCount: engagement.bookmarkCount.get(post.id) ?? 0,
       likedByMe: engagement.likedIds.has(post.id),
       bookmarkedByMe: engagement.bookmarkedIds.has(post.id),
-      matchScore,
     };
   }
 

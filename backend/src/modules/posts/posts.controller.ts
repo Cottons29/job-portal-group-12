@@ -91,12 +91,6 @@ export class PostsController {
     return this.postsService.findAll({ page, limit, q, role }, req.user?.sub);
   }
 
-  @Get(':id')
-  async findOne(@Req() req: any, @Param('id') id: string) {
-    const post = await this.postsService.findOne(id, req.user?.sub);
-    return { post };
-  }
-
   @UseGuards(AuthenticatedGuard)
   @Post()
   @HttpCode(HttpStatus.CREATED)

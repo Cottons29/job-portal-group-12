@@ -57,47 +57,28 @@ watch(
     </button>
 
     <nav class="flex items-center justify-between gap-1 lg:flex-col lg:items-stretch lg:justify-start lg:gap-1.5">
-      <template v-for="item in items" :key="item.label">
-        <RouterLink
-            v-if="item.to"
-            :to="item.to"
+      <component
+          :is="item.to ? RouterLink : 'button'"
+          v-for="item in items"
+          :key="item.label"
+          :to="item.to"
+          :type="item.to ? undefined : 'button'"
+          :class="[
+          item.active ? 'lg:rounded-full' : 'hover:bg-surface-container-high lg:rounded-full',
+          'lg:justify-start lg:gap-3 lg:px-2.5',
+          'group relative flex items-center justify-center gap-4 rounded-2xl px-2 py-2 text-left transition-colors lg:py-1.5'
+        ]"
+      >
+        <span
             :class="[
-            item.active ? 'lg:rounded-full bg-surface-container-high' : 'hover:bg-surface-container-high lg:rounded-full',
-            'lg:justify-start lg:gap-3 lg:px-2.5',
-            'group relative flex items-center justify-center gap-4 rounded-2xl px-2 py-2 text-left transition-colors lg:py-1.5'
+            item.active ? [item.bg, item.color, 'active-sidebar-shape '] : [item.bg, 'rounded-full border-2 border-transparent'],
+            'grid h-12 w-12 shrink-0 place-items-center  lg:h-10 lg:w-10'
           ]"
         >
-          <span
-              :class="[
-              item.active ? [item.bg, item.color, 'active-sidebar-shape'] : [item.bg, 'rounded-full border-2 border-transparent'],
-              'grid h-12 w-12 shrink-0 place-items-center lg:h-10 lg:w-10'
-            ]"
-          >
-            <component :is="item.icon" :class="[item.color, 'h-7 w-7 transition-all duration-300 lg:h-5 lg:w-5']"/>
-          </span>
-          <SidebarLabel :show-labels="labelsVisible">{{ item.label }}</SidebarLabel>
-        </RouterLink>
-        <button
-            v-else
-            type="button"
-            :class="[
-            item.active ? 'lg:rounded-full bg-surface-container-high' : 'hover:bg-surface-container-high lg:rounded-full',
-            'lg:justify-start lg:gap-3 lg:px-2.5',
-            'group relative flex items-center justify-center gap-4 rounded-2xl px-2 py-2 text-left transition-colors lg:py-1.5'
-          ]"
-          @click="item.onClick && item.onClick()"
-        >
-          <span
-              :class="[
-              item.active ? [item.bg, item.color, 'active-sidebar-shape'] : [item.bg, 'rounded-full border-2 border-transparent'],
-              'grid h-12 w-12 shrink-0 place-items-center lg:h-10 lg:w-10'
-            ]"
-          >
-            <component :is="item.icon" :class="[item.color, 'h-7 w-7 transition-all duration-300 lg:h-5 lg:w-5']"/>
-          </span>
-          <SidebarLabel :show-labels="labelsVisible">{{ item.label }}</SidebarLabel>
-        </button>
-      </template>
+          <component :is="item.icon" :class="[item.color, 'h-7 w-7 transition-all duration-300 lg:h-5 lg:w-5']"/>
+        </span>
+        <SidebarLabel :show-labels="labelsVisible">{{ item.label }}</SidebarLabel>
+      </component>
     </nav>
 
     <div class="mt-auto hidden border-t border-outline-variant/50 pt-4 lg:block">

@@ -24,14 +24,12 @@ export class ApplicationsController {
   @HttpCode(HttpStatus.CREATED)
   async apply(
     @Req() req: any,
-    @Body() body: { postId: string; coverLetter?: string; portfolioUrl?: string; resumeUrl?: string },
+    @Body() body: { postId: string; coverLetter?: string },
   ) {
     const application = await this.applicationsService.apply(
       req.user.sub,
       body.postId,
       body.coverLetter,
-      body.portfolioUrl,
-      body.resumeUrl,
     );
     return { message: 'Application submitted', application };
   }

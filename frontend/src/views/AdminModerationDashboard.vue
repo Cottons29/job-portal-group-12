@@ -234,7 +234,7 @@
 
 <script setup>
 import {ref, computed, onMounted} from 'vue'
-import api from '@/lib/api'
+import axios from 'axios'
 import {
   MagnifyingGlassIcon,
   AdjustmentsHorizontalIcon,
@@ -274,7 +274,7 @@ const averageWaitTime = computed(() => {
 
 const fetchPendingEmployers = async () => {
   try {
-    const response = await api.get('/admin/employers/pending');
+    const response = await axios.get('http://localhost:3000/api/admin/employers/pending');
     pendingEmployers.value = response.data.map(emp => {
       // Determine if action is required based on wait time > 3 days
       const applied = new Date(emp.createdAt);
@@ -315,7 +315,7 @@ const closeModal = () => {
 const approveEmployer = async () => {
   if (!selectedEmployer.value) return;
   try {
-    await api.patch(`/admin/employers/${selectedEmployer.value.id}/approve`);
+    await axios.patch(`http://localhost:3000/api/admin/employers/${selectedEmployer.value.id}/approve`);
     pendingEmployers.value = pendingEmployers.value.filter(emp => emp.id !== selectedEmployer.value.id);
     closeModal();
   } catch (error) {
@@ -327,7 +327,7 @@ const approveEmployer = async () => {
 const rejectEmployer = async () => {
   if (!selectedEmployer.value) return;
   try {
-    await api.delete(`/admin/employers/${selectedEmployer.value.id}/reject`);
+    await axios.delete(`http://localhost:3000/api/admin/employers/${selectedEmployer.value.id}/reject`);
     pendingEmployers.value = pendingEmployers.value.filter(emp => emp.id !== selectedEmployer.value.id);
     closeModal();
   } catch (error) {

@@ -88,7 +88,7 @@ const english_lang: AppLanguage = {
       saving: 'Saving...',
       save: 'Save',
       profilePicture: 'Profile picture',
-      profilePicturePlaceholder: 'Choose a profile image',
+      profilePicturePlaceholder: 'Paste profile image URL',
       companyName: 'Company name',
       name: 'Name',
       yourCompany: 'Your company',

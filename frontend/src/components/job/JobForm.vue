@@ -12,23 +12,17 @@
       <div class="flex items-center gap-3">
         <button
           type="button"
-          @click="router.push('/home')"
-          class="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+          class="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
         >
           Cancel
         </button>
         <button
           type="submit"
-          :disabled="isSubmitting"
-          class="rounded-full bg-slate-950 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition hover:bg-blue-600 cursor-pointer disabled:opacity-50"
+          class="rounded-full bg-slate-950 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition hover:bg-blue-600"
         >
-          {{ isSubmitting ? 'Publishing...' : 'Publish Job' }}
+          Publish Job
         </button>
       </div>
-    </div>
-
-    <div v-if="errorMsg" class="mb-6 rounded-[8px] bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">
-      {{ errorMsg }}
     </div>
 
     <div class="space-y-6">
@@ -38,7 +32,6 @@
           <input
             v-model="form.position"
             type="text"
-            required
             placeholder="e.g. Frontend Developer"
             class="form-control h-14"
           />
@@ -49,7 +42,6 @@
           <input
             v-model="form.title"
             type="text"
-            required
             placeholder="e.g. Senior Creative Lead"
             class="form-control h-14"
           />
@@ -64,7 +56,6 @@
             type="number"
             min="1"
             step="1"
-            required
             placeholder="1"
             class="form-control h-14 px-4"
           />
@@ -77,7 +68,6 @@
             v-model="form.deadline"
             type="date"
             :min="today"
-            required
             class="form-control h-14 px-4"
           />
           <p class="mt-2 text-xs text-slate-400">Deadline must be today or later.</p>
@@ -95,7 +85,7 @@
             v-for="language in languages"
             :key="language"
             type="button"
-            class="h-9 min-w-24 rounded-full px-5 text-xs font-bold transition cursor-pointer"
+            class="h-9 min-w-24 rounded-full px-5 text-xs font-bold transition"
             :class="form.language === language ? 'bg-white text-blue-600 shadow-md' : 'text-slate-500 hover:text-blue-600'"
             @click="form.language = language"
           >
@@ -109,7 +99,6 @@
         <textarea
           v-model="form.description"
           rows="6"
-          required
           placeholder="Describe the mission and the impact of this role..."
           class="form-control resize-none py-4"
         ></textarea>
@@ -120,7 +109,6 @@
         <textarea
           v-model="form.requirements"
           rows="5"
-          required
           placeholder="List technical skills, education, and soft skills..."
           class="form-control resize-none py-4"
         ></textarea>
@@ -135,7 +123,6 @@
               v-model="form.minPay"
               type="number"
               min="0"
-              required
               placeholder="Min"
               class="form-control h-14"
             />
@@ -144,7 +131,6 @@
               v-model="form.maxPay"
               type="number"
               min="0"
-              required
               placeholder="Max"
               class="form-control h-14"
             />
@@ -168,19 +154,18 @@
         <p class="text-xs text-slate-400">Review opportunity details before publishing.</p>
 
         <div class="flex gap-3">
-          <a
-            href="mailto:support@firststep.com"
-            class="rounded-[8px] bg-blue-50 px-6 py-3 text-sm font-bold text-blue-600 transition hover:bg-blue-100 flex items-center justify-center"
+          <button
+            type="button"
+            class="rounded-[8px] bg-blue-50 px-6 py-3 text-sm font-bold text-blue-600 transition hover:bg-blue-100"
           >
             Need Help?
-          </a>
+          </button>
           <button
             type="submit"
-            :disabled="isSubmitting"
-            class="inline-flex items-center justify-center gap-2 rounded-[8px] bg-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 cursor-pointer disabled:opacity-50"
+            class="inline-flex items-center justify-center gap-2 rounded-[8px] bg-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
           >
             <Send class="h-4 w-4" />
-            {{ isSubmitting ? 'Creating...' : 'Create Job Posting' }}
+            Create Job Posting
           </button>
         </div>
       </div>
@@ -189,14 +174,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { reactive } from 'vue'
 import { Languages, Lightbulb, Send } from 'lucide-vue-next'
-import api from '@/lib/api'
-
-const router = useRouter()
-const isSubmitting = ref(false)
-const errorMsg = ref('')
 
 const languages = ['Khmer', 'English', 'Bilingual']
 
@@ -215,37 +194,8 @@ const form = reactive({
 
 const today = new Date().toISOString().split('T')[0]
 
-const handleSubmit = async () => {
-  if (isSubmitting.value) return
-  isSubmitting.value = true
-  errorMsg.value = ''
-  try {
-    const payloadContent = `
-### Role Overview
-${form.description}
-
-### Technical & Soft Requirements
-${form.requirements}
-
-### Details
-- **Hires Needed:** ${form.hiresNeeded}
-- **Required Language:** ${form.language}
-- **Estimated Pay Range:** ${form.minPay} - ${form.maxPay} ${form.currency}
-- **Application Deadline:** ${form.deadline}
-    `.trim()
-
-    await api.post('/posts', {
-      title: `${form.position} (${form.title})`,
-      content: payloadContent
-    })
-
-    router.push('/home')
-  } catch (err: any) {
-    console.error('Failed to create job posting:', err)
-    errorMsg.value = err.response?.data?.message || 'Failed to complete posting. Please verify inputs.'
-  } finally {
-    isSubmitting.value = false
-  }
+const handleSubmit = () => {
+  console.log('Create job posting:', { ...form })
 }
 </script>
 
