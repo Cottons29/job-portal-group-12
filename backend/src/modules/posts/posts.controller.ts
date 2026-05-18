@@ -41,6 +41,11 @@ export class PostsController {
     return this.postsService.recordShare(postId, req.user.sub);
   }
 
+  @Get(':postId')
+  async findOne(@Req() req: any, @Param('postId') postId: string) {
+    return this.postsService.findOne(postId, req.user?.sub);
+  }
+
   @Get(':postId/comments')
   async listComments(@Param('postId') postId: string) {
     const comments = await this.postsService.listComments(postId);
@@ -87,8 +92,12 @@ export class PostsController {
     @Query('limit') limit?: string,
     @Query('q') q?: string,
     @Query('role') role?: string,
+    @Query('authorId') authorId?: string,
   ) {
-    return this.postsService.findAll({ page, limit, q, role }, req.user?.sub);
+    return this.postsService.findAll(
+      { page, limit, q, role, authorId },
+      req.user?.sub,
+    );
   }
 
   @UseGuards(AuthenticatedGuard)

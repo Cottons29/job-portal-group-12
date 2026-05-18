@@ -22,6 +22,7 @@ interface FindAllPostsOptions {
   limit?: string;
   q?: string;
   role?: string;
+  authorId?: string;
 }
 
 type EngagementBundle = {
@@ -68,13 +69,23 @@ export class PostsService {
         options.role && options.role.toLowerCase() !== 'all'
           ? { author: { role: options.role.toUpperCase() } }
           : {};
+      const authorFilter = options.authorId ? { author: { id: options.authorId } } : {};
 
       whereCondition.push(
-        { title: ILike(q), ...roleFilter },
-        { content: ILike(q), ...roleFilter },
+        { title: ILike(q), ...roleFilter, ...authorFilter },
+        { content: ILike(q), ...roleFilter, ...authorFilter },
       );
-    } else if (options.role && options.role.toLowerCase() !== 'all') {
-      whereCondition.push({ author: { role: options.role.toUpperCase() } });
+    } else {
+      const condition: any = {};
+      if (options.role && options.role.toLowerCase() !== 'all') {
+        condition.author = { ...condition.author, role: options.role.toUpperCase() };
+      }
+      if (options.authorId) {
+        condition.author = { ...condition.author, id: options.authorId };
+      }
+      if (Object.keys(condition).length > 0) {
+        whereCondition.push(condition);
+      }
     }
 
     const findOptions: Record<string, unknown> = {
@@ -102,6 +113,20 @@ export class PostsService {
     };
   }
 
+  async findOne(postId: string, viewerId?: string) {
+    const post = await this.postsRepository.findOne({
+      where: { id: postId },
+      relations: ['author'],
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    const engagement = await this.loadEngagement([post.id], viewerId);
+    return this.serializePost(post, engagement);
+  }
+
   async create(userId: string, dto: CreatePostDto) {
     const title = dto.title?.trim();
     const content = dto.content?.trim();
@@ -124,7 +149,7 @@ export class PostsService {
     const post = this.postsRepository.create({
       title,
       content,
-      imageUrl: dto.imageUrl?.trim() || undefined,
+      imageUrl: this.toRelativePath(dto.imageUrl?.trim() || undefined),
       author,
     });
 
@@ -332,7 +357,7 @@ export class PostsService {
       id: post.id,
       title: post.title,
       content: post.content,
-      imageUrl: post.imageUrl,
+      imageUrl: this.toRelativePath(post.imageUrl),
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       author: post.author,
@@ -343,6 +368,16 @@ export class PostsService {
       likedByMe: engagement.likedIds.has(post.id),
       bookmarkedByMe: engagement.bookmarkedIds.has(post.id),
     };
+  }
+
+  private toRelativePath(urlOrPath?: string): string | undefined {
+    if (!urlOrPath) return urlOrPath;
+    try {
+      const url = new URL(urlOrPath);
+      return url.pathname + url.search + url.hash;
+    } catch {
+      return urlOrPath;
+    }
   }
 
   private async loadEngagement(
