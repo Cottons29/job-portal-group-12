@@ -180,6 +180,11 @@ const english_lang: AppLanguage = {
     noBio: 'No bio provided',
   },
   dashboardPages: {
+    home: {
+      eyebrow: 'Home',
+      title: 'Welcome to your feed.',
+      description: 'See the latest updates and opportunities from your network.',
+    },
     search: {
       eyebrow: 'Search',
       title: 'Find jobs, people, and companies.',

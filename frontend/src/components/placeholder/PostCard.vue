@@ -60,7 +60,7 @@
         v-if="localPost.imageUrl && full"
         :src="localPost.imageUrl"
         :alt="localPost.title"
-        class="mt-5 max-h-96 w-full rounded-[1rem] object-cover"
+        class="mt-5 max-h-96 w-full rounded-2xl object-cover"
     />
     <div class="mt-6 flex flex-wrap gap-2">
         <span
@@ -78,7 +78,6 @@
       <button
           type="button"
           class="flex items-center gap-1.5 rounded-full bg-surface-container-low px-3 py-2 text-xs font-black text-primary transition hover:bg-tertiary-fixed disabled:opacity-40"
-          :disabled="socialBusy"
           aria-label="Like post"
           @click.stop="toggleLike"
       >
@@ -90,7 +89,7 @@
       <button
           type="button"
           class="flex items-center gap-1.5 rounded-full bg-surface-container-low px-3 py-2 text-xs font-black text-primary transition hover:bg-tertiary-fixed disabled:opacity-40"
-          :disabled="socialBusy"
+
           aria-label="Comments"
           @click.stop="toggleComments"
       >
@@ -101,7 +100,7 @@
       <button
           type="button"
           class="flex items-center gap-1.5 rounded-full bg-surface-container-low px-3 py-2 text-xs font-black text-primary transition hover:bg-tertiary-fixed disabled:opacity-40"
-          :disabled="socialBusy"
+
           aria-label="Share post"
           @click.stop="sharePost"
       >
@@ -112,7 +111,6 @@
       <button
           type="button"
           class="flex items-center gap-1.5 rounded-full bg-surface-container-low px-3 py-2 text-xs font-black text-primary transition hover:bg-tertiary-fixed disabled:opacity-40"
-          :disabled="socialBusy"
           aria-label="Save post"
           @click.stop="toggleBookmark"
       >
@@ -124,7 +122,8 @@
 
     <div class="flex flex-wrap items-center gap-2">
       <button
-          v-if="userRole?.toLowerCase() === 'student' && userId && userId !== localPost.authorId && !appliedPostIds.has(localPost.id)"
+
+          v-if="userRole?.toLowerCase() === 'student' && userId && userId !== localPost.authorId && !appliedPostIds?.has(localPost.id)"
           class="rounded-full border-2 border-transparent bg-primary px-5 py-2.5 text-sm font-black text-on-primary transition hover:border-primary hover:bg-primary-container hover:text-primary"
           type="button"
           @click.stop="$emit('apply', localPost)"
@@ -132,7 +131,7 @@
         {{ $t('home.applyNow') }}
       </button>
       <button
-          v-else-if="userRole?.toLowerCase() === 'student' && userId && userId !== localPost.authorId && appliedPostIds.has(localPost.id)"
+          v-else-if="userRole?.toLowerCase() === 'student' && userId && userId !== localPost.authorId && appliedPostIds?.has(localPost.id)"
           class="flex cursor-default items-center gap-2 rounded-full border-2 border-transparent bg-[#8fd99b]/20 px-5 py-2.5 text-sm font-black text-[#1f6c3b]"
           type="button"
       >
@@ -190,7 +189,7 @@
         <textarea
             v-model="newComment"
             rows="2"
-            class="min-h-[3rem] flex-1 resize-y rounded-xl border border-outline-variant/50 bg-surface px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary"
+            class="min-h-12 flex-1 resize-y rounded-xl border border-outline-variant/50 bg-surface px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary"
             placeholder="Write a comment…"
             maxlength="2000"
         />
@@ -245,8 +244,9 @@
   import {BookmarkIcon as BookmarkIconSolid, HeartIcon as HeartIconSolid} from '@heroicons/vue/24/solid'
   import api from '@/lib/api'
   import {isAxiosError} from 'axios'
-  import type {Post} from '@/types/profile'
+  import type {Post, PostComment} from '@/types/profile'
   import {usePostStore} from '@/stores/posts'
+  import {useAuthStore} from '@/stores/auth'
 
   const props = defineProps<{
     post: Post
@@ -256,14 +256,21 @@
     appliedPostIds?: Set<string | number>
   }>()
 
-  const emit = defineEmits(['open', 'apply', 'view-applicants', 'engagement-change', 'show-profile'])
+  const emit = defineEmits<{
+    (e: 'open', post: Post): void
+    (e: 'apply', post: Post): void
+    (e: 'view-applicants', post: Post): void
+    (e: 'engagement-change', payload: { id: string } & Partial<Post>): void
+    (e: 'show-profile', authorId: string): void
+  }>()
 
   const postStore = usePostStore()
+  const authStore = useAuthStore()
   const localPost = ref<Post>(props.post)
   const socialBusy = ref(false)
   const socialError = ref('')
   const commentsOpen = ref(false)
-  const comments = ref([])
+  const comments = ref<PostComment[]>([])
   const commentsLoading = ref(false)
   const commentsError = ref('')
   const newComment = ref('')
@@ -309,6 +316,7 @@
       })
       authorPosts.value = (data.posts || [])
           .map(postStore.mapPost)
+          //@ts-ignore
           .filter(p => p.id !== localPost.value.id)
     } catch (e) {
       console.error('Failed to load author posts:', e)
@@ -326,7 +334,7 @@
       },
   )
 
-  function formatCommentTime(iso) {
+  function formatCommentTime(iso: string) {
     if (!iso) return ''
     try {
       return new Date(iso).toLocaleString()
@@ -335,11 +343,11 @@
     }
   }
 
-  function engagementPayload(patch) {
+  function engagementPayload(patch: Partial<Post>) {
     return {id: localPost.value.id, ...patch}
   }
 
-  function readErrorMessage(error, fallback) {
+  function readErrorMessage(error: unknown, fallback: string) {
     if (isAxiosError(error)) {
       const msg = error.response?.data?.message
       return Array.isArray(msg) ? msg.join(', ') : msg || fallback
@@ -348,14 +356,31 @@
   }
 
   async function toggleLike() {
+    if (socialBusy.value) return
     socialError.value = ''
+    
+    const previousLiked = localPost.value.likedByMe
+    const previousCount = localPost.value.likeCount
+
+    // Optimistic update
+    localPost.value.likedByMe = !previousLiked
+    localPost.value.likeCount = (previousCount || 0) + (localPost.value.likedByMe ? 1 : -1)
+    emit('engagement-change', engagementPayload({
+      likedByMe: localPost.value.likedByMe,
+      likeCount: localPost.value.likeCount
+    }))
+
     socialBusy.value = true
     try {
       const {data} = await api.post(`/posts/${localPost.value.id}/like`)
-      emit('engagement-change', engagementPayload({likedByMe: data.liked, likeCount: data.likeCount}))
       localPost.value.likedByMe = data.liked
       localPost.value.likeCount = data.likeCount
+      emit('engagement-change', engagementPayload({likedByMe: data.liked, likeCount: data.likeCount}))
     } catch (error) {
+      // Rollback
+      localPost.value.likedByMe = previousLiked
+      localPost.value.likeCount = previousCount
+      emit('engagement-change', engagementPayload({likedByMe: previousLiked, likeCount: previousCount}))
       socialError.value = readErrorMessage(error, 'Could not update like.')
     } finally {
       socialBusy.value = false
@@ -363,17 +388,31 @@
   }
 
   async function toggleBookmark() {
+    if (socialBusy.value) return
     socialError.value = ''
+
+    const previousBookmarked = localPost.value.bookmarkedByMe
+    const previousCount = localPost.value.bookmarkCount
+
+    // Optimistic update
+    localPost.value.bookmarkedByMe = !previousBookmarked
+    localPost.value.bookmarkCount = (previousCount || 0) + (localPost.value.bookmarkedByMe ? 1 : -1)
+    emit('engagement-change', engagementPayload({
+      bookmarkedByMe: localPost.value.bookmarkedByMe,
+      bookmarkCount: localPost.value.bookmarkCount
+    }))
+
     socialBusy.value = true
     try {
       const {data} = await api.post(`/posts/${localPost.value.id}/bookmark`)
-      emit(
-          'engagement-change',
-          engagementPayload({bookmarkedByMe: data.bookmarked, bookmarkCount: data.bookmarkCount}),
-      )
       localPost.value.bookmarkedByMe = data.bookmarked
       localPost.value.bookmarkCount = data.bookmarkCount
+      emit('engagement-change', engagementPayload({bookmarkedByMe: data.bookmarked, bookmarkCount: data.bookmarkCount}))
     } catch (error) {
+      // Rollback
+      localPost.value.bookmarkedByMe = previousBookmarked
+      localPost.value.bookmarkCount = previousCount
+      emit('engagement-change', engagementPayload({bookmarkedByMe: previousBookmarked, bookmarkCount: previousCount}))
       socialError.value = readErrorMessage(error, 'Could not update bookmark.')
     } finally {
       socialBusy.value = false
@@ -381,19 +420,28 @@
   }
 
   async function sharePost() {
+    if (socialBusy.value) return
     socialError.value = ''
+
+    const previousCount = localPost.value.shareCount
+
+    // Optimistic update
+    localPost.value.shareCount = (previousCount || 0) + 1
+    emit('engagement-change', engagementPayload({shareCount: localPost.value.shareCount}))
+
     socialBusy.value = true
     try {
       const {data} = await api.post(`/posts/${localPost.value.id}/share`)
-      emit('engagement-change', engagementPayload({shareCount: data.shareCount}))
       localPost.value.shareCount = data.shareCount
+      emit('engagement-change', engagementPayload({shareCount: data.shareCount}))
+
       const url = `${window.location.origin}/home?post=${localPost.value.id}`
       const shareText = `${localPost.value.title}\n${url}`
       if (navigator.share) {
         try {
           await navigator.share({title: localPost.value.title, text: shareText, url})
         } catch (e) {
-          if (e?.name !== 'AbortError') {
+          if ((e as any)?.name !== 'AbortError') {
             await navigator.clipboard.writeText(shareText)
           }
         }
@@ -401,6 +449,9 @@
         await navigator.clipboard.writeText(shareText)
       }
     } catch (error) {
+      // Rollback
+      localPost.value.shareCount = previousCount
+      emit('engagement-change', engagementPayload({shareCount: previousCount}))
       socialError.value = readErrorMessage(error, 'Could not share this post.')
     } finally {
       socialBusy.value = false
@@ -426,40 +477,73 @@
 
   async function submitComment() {
     const text = newComment.value.trim()
-    if (!text) return
+    if (!text || commentSubmitting.value) return
+    
+    const previousComments = [...comments.value]
+    const previousCommentCount = localPost.value.commentCount
+    
+    // Optimistic comment
+    const tempId = Date.now()
+    const optimisticComment: PostComment = {
+      id: tempId,
+      author: {
+        id: props.userId || authStore.user?.id || 'me',
+        user_name: authStore.user?.user_name || 'You'
+      },
+      content: text,
+      createdAt: new Date().toISOString()
+    }
+    
+    comments.value = [...comments.value, optimisticComment]
+    localPost.value.commentCount = (previousCommentCount || 0) + 1
+    emit('engagement-change', engagementPayload({commentCount: localPost.value.commentCount}))
+    
+    newComment.value = ''
     commentSubmitting.value = true
     socialError.value = ''
+    
     try {
       const {data} = await api.post(`/posts/${localPost.value.id}/comments`, {content: text})
-      newComment.value = ''
-      comments.value = [...comments.value, data.comment]
-      emit('engagement-change', engagementPayload({commentCount: data.commentCount}))
+      comments.value = comments.value.map(c => c.id === tempId ? data.comment : c)
       localPost.value.commentCount = data.commentCount
+      emit('engagement-change', engagementPayload({commentCount: data.commentCount}))
     } catch (error) {
+      // Rollback
+      comments.value = previousComments
+      localPost.value.commentCount = previousCommentCount
+      emit('engagement-change', engagementPayload({commentCount: previousCommentCount}))
+      newComment.value = text
       socialError.value = readErrorMessage(error, 'Could not post comment.')
     } finally {
       commentSubmitting.value = false
     }
   }
 
-  async function removeComment(commentId) {
+  async function removeComment(commentId: string | number) {
     socialError.value = ''
+    const previousComments = [...comments.value]
+    const previousCommentCount = localPost.value.commentCount
+    
+    // Optimistic remove
+    comments.value = comments.value.filter((c) => c.id !== commentId)
+    localPost.value.commentCount = Math.max(0, (previousCommentCount || 0) - 1)
+    emit('engagement-change', engagementPayload({commentCount: localPost.value.commentCount}))
+    
     try {
       const {data} = await api.delete(`/posts/${localPost.value.id}/comments/${commentId}`)
-      comments.value = comments.value.filter((c) => c.id !== commentId)
-      emit('engagement-change', engagementPayload({commentCount: data.commentCount}))
       localPost.value.commentCount = data.commentCount
+      emit('engagement-change', engagementPayload({commentCount: data.commentCount}))
     } catch (error) {
+      // Rollback
+      comments.value = previousComments
+      localPost.value.commentCount = previousCommentCount
+      emit('engagement-change', engagementPayload({commentCount: previousCommentCount}))
       socialError.value = readErrorMessage(error, 'Could not delete comment.')
     }
   }
 </script>
 
 <style scoped>
-.post-preview {
-  max-height: 14rem;
-  overflow: hidden;
-}
 
 .post-preview__fade {
   background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--fs-surface-container-lowest) 100%, transparent));
@@ -483,7 +567,7 @@
 .post-markdown :deep(h3),
 .post-markdown :deep(h4) {
   color: var(--fs-on-surface);
-  font-family: var(--font-display);
+  font-family: var(--font-display),serif;
   font-weight: 900;
   letter-spacing: -0.04em;
   line-height: 1.15;

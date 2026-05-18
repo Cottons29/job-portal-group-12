@@ -173,6 +173,11 @@ const ja: AppLanguage = {
     followedBy: 'キャンパス採用担当者、メンター、同級生がフォロー中',
   },
   dashboardPages: {
+    home: {
+      eyebrow: 'ホーム',
+      title: 'フィードへようこそ。',
+      description: 'ネットワークからの最新のアップデートや機会を確認しましょう。',
+    },
     search: {
       eyebrow: '検索',
       title: '求人、人、会社を見つけましょう。',

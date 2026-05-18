@@ -173,6 +173,11 @@ const zh_tw: AppLanguage = {
     followedBy: '由校園招募人員、導師和同學追蹤',
   },
   dashboardPages: {
+    home: {
+      eyebrow: '首頁',
+      title: '歡迎來到您的動態。',
+      description: '查看來自您網絡的最新動態和機會。',
+    },
     search: {
       eyebrow: '搜尋',
       title: '尋找職缺、人員和公司。',

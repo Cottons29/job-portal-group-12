@@ -173,6 +173,11 @@ const zh_cn: AppLanguage = {
     followedBy: '由校园招聘人员、导师和同学关注',
   },
   dashboardPages: {
+    home: {
+      eyebrow: '首页',
+      title: '欢迎来到你的动态。',
+      description: '查看来自你网络的最新动态和机会。',
+    },
     search: {
       eyebrow: '搜索',
       title: '查找职位、人员和公司。',

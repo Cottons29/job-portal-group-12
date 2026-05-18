@@ -173,6 +173,11 @@ const fr: AppLanguage = {
     followedBy: 'Suivi par des recruteurs du campus, des mentors et des camarades',
   },
   dashboardPages: {
+    home: {
+      eyebrow: 'Accueil',
+      title: 'Bienvenue sur votre flux.',
+      description: 'Découvrez les dernières mises à jour et opportunités de votre réseau.',
+    },
     search: {
       eyebrow: 'Recherche',
       title: 'Trouvez des emplois, des personnes et des entreprises.',

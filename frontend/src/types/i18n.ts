@@ -250,6 +250,7 @@ export interface DashboardPageContent {
 }
 
 export interface DashboardPages {
+  home: DashboardPageContent;
   search: DashboardPageContent;
   messages: DashboardPageContent;
   notifications: DashboardPageContent;
@@ -297,6 +298,7 @@ export interface AppLanguage {
   footer: Footer;
   home: Home;
   settings: SettingsPage;
+  title: string;
   dashboardPages: DashboardPages;
   createPost: CreatePostPage;
   profilePage: ProfilePage;
