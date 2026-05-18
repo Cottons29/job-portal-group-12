@@ -6,10 +6,8 @@ import { memoryStorage } from 'multer';
 import { User } from './user.entity';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { StudentProfileController } from './student-profile.controller';
-import { StudentProfileService } from './student-profile.service';
-import { EmployerProfileController } from './employer-profile.controller';
-import { EmployerProfileService } from './employer-profile.service';
+import { ProfileController } from './profile.controller';
+import { ProfileService } from './profile.service';
 import { SheepFileService } from '../../common/sheep-file.service';
 
 @Module({
@@ -22,15 +20,13 @@ import { SheepFileService } from '../../common/sheep-file.service';
   ],
   controllers: [
     UserController,
-    StudentProfileController,
-    EmployerProfileController,
+    ProfileController,
   ],
   providers: [
     UserService,
-    StudentProfileService,
-    EmployerProfileService,
+    ProfileService,
     SheepFileService,
   ],
-  exports: [UserService, StudentProfileService, EmployerProfileService],
+  exports: [UserService, ProfileService],
 })
 export class UserModule {}
