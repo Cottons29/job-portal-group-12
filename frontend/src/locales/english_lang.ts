@@ -261,6 +261,15 @@ const english_lang: AppLanguage = {
       description: 'Update your name, email address, and password to keep your student account accurate and secure.',
     },
   },
+  stories: {
+    addStory: 'Add Story',
+    shareMoment: 'Share a moment with your community.',
+    startTyping: 'Start typing...',
+    uploadPhoto: 'Upload Photo',
+    changePhoto: 'Change Photo',
+    postStory: 'Post Story',
+    posting: 'Posting...',
+  },
 }
 
 export default english_lang
