@@ -24,5 +24,12 @@ api.interceptors.request.use((config) => {
     return config
 })
 
+export function resolveUrl(path?: string): string {
+    if (!path) return ''
+    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) return path
+    const base = baseURL.replace(/\/api$/, '')
+    return `${base}${path.startsWith('/') ? '' : '/'}${path}`
+}
+
 export default api
-export {baseURL as API_BASE}
+export { baseURL as API_BASE }
