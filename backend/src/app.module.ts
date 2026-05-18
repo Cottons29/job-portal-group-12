@@ -9,6 +9,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { UserModule } from './modules/user/user.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
+import {StoriesModule} from "./modules/stories/stories.module";
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ApplicationsModule } from './modules/applications/applications.module';
     UserModule,
     PostsModule,
     ApplicationsModule,
+    StoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
