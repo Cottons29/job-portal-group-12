@@ -54,6 +54,7 @@ export class AuthController {
       body.role,
     );
     req.session.userId = user.id;
+    (req.session as any).userRole = user.role;
     return { message: 'Registration successful', user, token };
   }
 
@@ -69,6 +70,7 @@ export class AuthController {
       body.password,
     );
     req.session.userId = user.id;
+    (req.session as any).userRole = user.role;
     return { message: 'Login successful', user, token };
   }
 
@@ -88,6 +90,7 @@ export class AuthController {
       body.response,
     );
     req.session.userId = user.id;
+    (req.session as any).userRole = user.role;
     return { message: 'Passkey login successful', user, token };
   }
 

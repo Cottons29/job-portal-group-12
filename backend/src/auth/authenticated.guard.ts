@@ -14,7 +14,10 @@ export class AuthenticatedGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     if (request.session?.userId) {
-      request['user'] = { sub: request.session.userId };
+      request['user'] = {
+        sub: request.session.userId,
+        role: (request.session as any).userRole,
+      };
       return true;
     }
 
