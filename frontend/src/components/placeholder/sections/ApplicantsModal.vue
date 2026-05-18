@@ -1,23 +1,27 @@
-<script setup>
+<script setup lang="ts">
 import { CheckCircleIcon, ClockIcon, XCircleIcon } from '@heroicons/vue/24/outline'
+import type { Post } from '@/types/profile'
 
-defineProps({
-  post: {
-    type: Object,
-    required: true
-  },
-  applicants: {
-    type: Array,
-    required: true
-  },
-  isLoading: {
-    type: Boolean,
-    default: false
-  },
-  loadError: {
-    type: String,
-    default: ''
+export interface Applicant {
+  id: string | number
+  status: 'PENDING' | 'REVIEWED' | 'ACCEPTED' | 'REJECTED'
+  createdAt: string
+  coverLetter?: string
+  applicant?: {
+    user_name?: string
+    email?: string
+    avatar?: string
   }
+}
+
+withDefaults(defineProps<{
+  post: Post
+  applicants: Applicant[]
+  isLoading?: boolean
+  loadError?: string
+}>(), {
+  isLoading: false,
+  loadError: ''
 })
 
 defineEmits(['close', 'update-status'])

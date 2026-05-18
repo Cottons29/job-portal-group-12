@@ -1,20 +1,15 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { PaperAirplaneIcon } from '@heroicons/vue/24/outline'
+import type { Post } from '@/types/profile'
 
-const props = defineProps({
-  post: {
-    type: Object,
-    required: true
-  },
-  isSubmitting: {
-    type: Boolean,
-    default: false
-  },
-  submitError: {
-    type: String,
-    default: ''
-  }
+const props = withDefaults(defineProps<{
+  post: Post
+  isSubmitting?: boolean
+  submitError?: string
+}>(), {
+  isSubmitting: false,
+  submitError: ''
 })
 
 const emit = defineEmits(['close', 'submit'])

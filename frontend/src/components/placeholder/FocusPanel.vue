@@ -19,13 +19,16 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { SparklesIcon } from '@heroicons/vue/24/outline'
 
-defineProps({
-  cards: {
-    type: Array,
-    required: true,
-  },
-})
+export interface FocusCard {
+  label: string
+  value: string | number
+  desc: string
+}
+
+defineProps<{
+  cards: FocusCard[]
+}>()
 </script>

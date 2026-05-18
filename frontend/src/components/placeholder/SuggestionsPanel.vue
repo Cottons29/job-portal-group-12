@@ -18,11 +18,15 @@
   </section>
 </template>
 
-<script setup>
-defineProps({
-  suggestions: {
-    type: Array,
-    required: true,
-  },
-})
+<script setup lang="ts">
+export interface Suggestion {
+  name: string
+  role: string
+  bg: string
+  text: string
+}
+
+defineProps<{
+  suggestions: Suggestion[]
+}>()
 </script>

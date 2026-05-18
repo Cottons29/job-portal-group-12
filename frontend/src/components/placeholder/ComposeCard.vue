@@ -1,8 +1,27 @@
+<script setup lang="ts">
+
+export type Action = {
+  label: string,
+  icon: any,
+  color: string,
+}
+
+const props = defineProps<{
+  actions: Action[],
+  imageUrl: string,
+}>()
+
+console.log(`This is image url ${ props.imageUrl ?? 'no image'}`,)
+
+
+</script>
+
+
 <template>
   <div class="rounded-[1.25rem] bg-surface-container-lowest p-5">
     <div class="flex items-center gap-4">
       <div class="grid h-12 w-12 place-items-center rounded-full bg-[#d7b7ff] text-sm font-black text-[#6a39b8]">
-        ST
+        <img :src="imageUrl" alt="Placeholder avatar" class="h-10 w-10 rounded-full">
       </div>
       <button class="flex-1 rounded-full bg-surface-container px-5 py-3 text-left text-sm font-bold text-on-surface-variant transition hover:bg-surface-container">
         {{ $t('home.sharePlaceholder') }}
@@ -21,11 +40,4 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  actions: {
-    type: Array,
-    required: true,
-  },
-})
-</script>
+

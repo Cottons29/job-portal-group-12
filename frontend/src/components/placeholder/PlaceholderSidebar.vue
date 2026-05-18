@@ -1,24 +1,24 @@
-<script setup>
-import {ref, watch} from 'vue'
-import {RouterLink} from 'vue-router'
-import {Cog6ToothIcon, MoonIcon, SunIcon} from '@heroicons/vue/24/outline'
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
+import { Cog6ToothIcon, MoonIcon, SunIcon } from '@heroicons/vue/24/outline'
 import SidebarLabel from './SidebarLabel.vue'
-import {Bars3Icon} from "@heroicons/vue/24/outline"
+import { Bars3Icon } from "@heroicons/vue/24/outline"
 
-const props = defineProps({
-  items: {
-    type: Array,
-    required: true,
-  },
-  showLabels: {
-    type: Boolean,
-    required: true,
-  },
-  appliedTheme: {
-    type: String,
-    required: true,
-  },
-})
+export interface SidebarItem {
+  label: string
+  icon: any
+  to?: string
+  active?: boolean
+  bg: string
+  color: string
+}
+
+const props = defineProps<{
+  items: SidebarItem[]
+  showLabels: boolean
+  appliedTheme: string
+}>()
 
 defineEmits(['toggle-labels', 'toggle-theme'])
 
@@ -134,7 +134,7 @@ watch(
   transition: all 0.2s ease-in-out;
   aspect-ratio: 1;
   scale: 1.1;
-  --g: /21.98% 21.98% radial-gradient(#000 calc(71% - 1px), #0000 71%) no-repeat;
+  --g:/20.56% 20.56% radial-gradient(#000 calc(71% - 1px),#0000 71%) no-repeat;
   mask: 100% 50% var(--g), 92.063% 77.032% var(--g), 70.771% 95.482% var(--g), 42.884% 99.491% var(--g), 17.257% 87.787% var(--g), 2.025% 64.087% var(--g), 2.025% 35.913% var(--g), 17.257% 12.213% var(--g), 42.884% 0.509% var(--g), 70.771% 4.518% var(--g), 92.063% 22.968% var(--g), radial-gradient(100% 100%, #000 37.43%, #0000 calc(37.43% + 1px));
 }
 </style>

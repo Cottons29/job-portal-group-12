@@ -1,25 +1,14 @@
-<script setup>
+<script setup lang="ts">
 import PostCard from '../PostCard.vue'
 import BaseModal from './BaseModal.vue'
+import type { Post } from '@/types/profile'
 
-defineProps({
-  post: {
-    type: Object,
-    required: true
-  },
-  userRole: {
-    type: String,
-    default: null
-  },
-  userId: {
-    type: String,
-    default: null
-  },
-  appliedPostIds: {
-    type: Object,
-    default: () => new Set()
-  }
-})
+defineProps<{
+  post: Post
+  userRole?: string | null
+  userId?: string | null
+  appliedPostIds?: Set<string | number>
+}>()
 
 defineEmits(['close', 'engagement-change', 'apply', 'view-applicants'])
 </script>

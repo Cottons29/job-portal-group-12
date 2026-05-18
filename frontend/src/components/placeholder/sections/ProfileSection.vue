@@ -1,9 +1,11 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useProfileStore } from '@/stores/profile'
 import { useAuthStore } from '@/stores/auth'
+import api from '@/lib/api'
+import { usePostStore } from '@/stores/posts'
 
 const { t } = useI18n()
 const profileStore = useProfileStore()
@@ -56,18 +58,37 @@ const profileTabs = computed(() => [
   { label: t('profilePage.tagged'), active: false },
 ])
 
-const profileGallery = []
+const profileGallery = ref([])
 
 defineEmits(['openPost'])
 
-onMounted(() => {
+onMounted(async () => {
   profileStore.fetchPersonalInfo()
+  await fetchUserPosts()
 })
+
+async function fetchUserPosts() {
+  try {
+    const { data } = await api.get('/posts', {
+      params: {
+        authorId: authStore.user?.id
+      }
+    })
+    const postStore = usePostStore()
+    profileGallery.value = (data.posts || []).map(p => ({
+      post: postStore.mapPost(p),
+      image: p.imageUrl,
+      title: p.title
+    }))
+  } catch (e) {
+    console.error('Failed to fetch user posts:', e)
+  }
+}
 </script>
 
 <template>
   <section class="mx-auto w-full max-w-5xl space-y-4">
-    <article class="overflow-hidden rounded-3xl bg-surface-container-low shadow-sm ring-1 ring-white/5">
+    <article class="overflow-hidden rounded-3xl bg-surface-container-low ring-1 ring-white/5">
       <div
           class="h-24 bg-[radial-gradient(circle_at_20%_20%,var(--fs-primary-container),transparent_32%),linear-gradient(135deg,var(--fs-surface-container-high),var(--fs-surface-container-low))] sm:h-32"></div>
 
@@ -94,10 +115,10 @@ onMounted(() => {
               <div>
                 <div class="flex flex-wrap items-center gap-2">
                   <h2 class="font-display text-2xl font-black tracking-tighter text-on-surface sm:text-3xl">
-                    {{ profileHandle }}
+                    {{ profileStore.profileForm.name }}
                   </h2>
                 </div>
-                <p class="mt-1 text-base font-black text-on-surface">{{ profileStore.profileForm.name }}</p>
+                <p class="mt-2 text-base text-on-surface font-thin">{{  profileHandle}}</p>
               </div>
 
               <RouterLink

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { Markdown } from 'tiptap-markdown'
@@ -15,15 +15,14 @@ import {
   HashtagIcon,
 } from '@heroicons/vue/20/solid'
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: ''
-  },
-  placeholder: {
-    type: String,
-    default: 'Write something...'
-  }
+interface Props {
+  modelValue?: string
+  placeholder?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: '',
+  placeholder: 'Write something...'
 })
 
 const emit = defineEmits(['update:modelValue', 'uploadImage'])

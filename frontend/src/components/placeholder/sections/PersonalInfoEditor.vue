@@ -1,25 +1,23 @@
-<script setup>
+<script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-defineProps({
-  editingField: {
-    type: Object,
-    required: true
-  },
-  editValue: {
-    type: String,
-    required: true
-  },
-  profileSaveError: {
-    type: String,
-    default: ''
-  },
-  isSavingProfile: {
-    type: Boolean,
-    default: false
-  }
+export interface EditingField {
+  label: string
+  placeholder?: string
+  inputType?: string
+  field?: string
+}
+
+withDefaults(defineProps<{
+  editingField: EditingField
+  editValue: string
+  profileSaveError?: string
+  isSavingProfile?: boolean
+}>(), {
+  profileSaveError: '',
+  isSavingProfile: false
 })
 
 defineEmits(['update:editValue', 'close', 'save'])

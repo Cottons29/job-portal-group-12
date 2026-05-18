@@ -1,13 +1,14 @@
-<script setup>
-defineProps({
-  closeLabel: {
-    type: String,
-    default: 'Close'
-  },
-  maxWidth: {
-    type: String,
-    default: 'max-w-4xl'
-  }
+<script setup lang="ts">
+interface Props {
+  closeLabel?: string
+  maxWidth?: string
+  hideCloseButton?: boolean
+}
+
+withDefaults(defineProps<Props>(), {
+  closeLabel: 'Close',
+  maxWidth: 'max-w-4xl',
+  hideCloseButton: false
 })
 
 defineEmits(['close'])
@@ -19,7 +20,7 @@ defineEmits(['close'])
       @click.self="$emit('close')"
   >
     <div :class="['mx-auto w-full', maxWidth]">
-      <div class="mb-3 flex justify-end">
+      <div v-if="!hideCloseButton" class="mb-3 flex justify-end">
         <button
             class="grid opacity-40 h-10 w-10 offset place-items-center rounded-full bg-surface-container-low text-2xl font-black text-on-surface-variant shadow-xl ring-1 ring-white/10 transition hover:opacity-100 hover:text-on-surface"
             type="button"

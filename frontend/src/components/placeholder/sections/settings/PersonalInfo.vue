@@ -3,7 +3,7 @@ import { computed, onMounted, ref, type Component } from "vue"
 import { useI18n } from "vue-i18n"
 import { useProfileStore } from "@/stores/profile"
 import { useAuthStore } from "@/stores/auth"
-import api from "@/lib/api"
+import api, {API_BASE} from "@/lib/api"
 import {
   AcademicCapIcon,
   BriefcaseIcon,
@@ -34,6 +34,32 @@ export interface PersonalInfoRow {
 const isEditing = ref(false)
 const editingRow = ref<PersonalInfoRow | null>(null)
 const editValue = ref('')
+const selectedFile = ref<File | null>(null)
+const isDragging = ref(false)
+
+function onFileChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    selectedFile.value = target.files[0]
+  }
+}
+
+function onDragOver(event: DragEvent) {
+  event.preventDefault()
+  isDragging.value = true
+}
+
+function onDragLeave() {
+  isDragging.value = false
+}
+
+function onDrop(event: DragEvent) {
+  event.preventDefault()
+  isDragging.value = false
+  if (event.dataTransfer?.files && event.dataTransfer.files[0]) {
+    selectedFile.value = event.dataTransfer.files[0]
+  }
+}
 
 const personalInfoRows = computed<PersonalInfoRow[]>(() => {
   const profile = profileStore.profileForm
@@ -47,7 +73,7 @@ const personalInfoRows = computed<PersonalInfoRow[]>(() => {
       icon: CameraIcon,
       avatar: profile.avatar || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
       placeholder: t('settings.personal.profilePicturePlaceholder'),
-      inputType: 'url',
+      inputType: 'file',
     },
     {
        label: isEmployer ? t('settings.personal.companyName') : t('settings.personal.name'),
@@ -135,15 +161,24 @@ const personalInfoRows = computed<PersonalInfoRow[]>(() => {
 function openEditor(row: PersonalInfoRow) {
   editingRow.value = row
   editValue.value = profileStore.profileForm[row.field] || ''
+  selectedFile.value = null
   isEditing.value = true
 }
 
 async function saveEdit() {
   if (!editingRow.value) return
-  const success = await profileStore.savePersonalInfoEdit(editingRow.value.field, editValue.value)
+
+  const valueToSave = editingRow.value.inputType === 'file' ? selectedFile.value : editValue.value
+  if (editingRow.value.inputType === 'file' && !valueToSave) {
+    isEditing.value = false
+    return
+  }
+
+  const success = await profileStore.savePersonalInfoEdit(editingRow.value.field, valueToSave)
   if (success) {
     isEditing.value = false
     editingRow.value = null
+    selectedFile.value = null
   }
 }
 
@@ -189,7 +224,7 @@ onMounted(() => {
             v-if="row.avatar"
             :alt="row.label"
             class="h-10 w-10 rounded-full object-cover ring-2 ring-surface-container-low"
-            :src="row.avatar"
+            :src="row.avatar.replace(`files`, `api/files`)"
         />
         <span class="text-lg font-black text-on-surface-variant/70">›</span>
       </article>
@@ -198,12 +233,39 @@ onMounted(() => {
       <div class="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl">
         <h3 class="font-display text-xl font-black text-on-surface">{{ editingRow?.label }}</h3>
         <input
+            v-if="editingRow?.inputType !== 'file'"
             v-model="editValue"
             :type="editingRow?.inputType || 'text'"
             :placeholder="editingRow?.placeholder"
             class="mt-4 w-full rounded-2xl bg-surface-container-low px-4 py-3 text-sm font-bold text-on-surface outline-none focus:ring-2 focus:ring-primary"
             @keydown.enter="saveEdit"
         />
+        <div v-else class="mt-4">
+          <input
+              type="file"
+              accept="image/*"
+              class="hidden"
+              id="avatar-upload"
+              @change="onFileChange"
+          />
+          <label
+              for="avatar-upload"
+              :class="[
+                'flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 transition',
+                isDragging 
+                  ? 'border-primary bg-primary/10' 
+                  : 'border-surface-container-high hover:bg-surface-container-low'
+              ]"
+              @dragover.prevent="onDragOver"
+              @dragleave.prevent="onDragLeave"
+              @drop.prevent="onDrop"
+          >
+            <CameraIcon :class="['h-10 w-10 transition-colors', isDragging ? 'text-primary' : 'text-on-surface-variant']"/>
+            <p :class="['mt-2 text-sm font-bold transition-colors', isDragging ? 'text-primary' : 'text-on-surface-variant']">
+              {{ selectedFile ? selectedFile.name : 'Click or drag image to upload' }}
+            </p>
+          </label>
+        </div>
         <p v-if="profileStore.profileSaveError" class="mt-2 text-xs font-bold text-red-300">
           {{ profileStore.profileSaveError }}
         </p>

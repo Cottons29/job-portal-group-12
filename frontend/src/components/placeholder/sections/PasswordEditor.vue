@@ -1,21 +1,21 @@
-<script setup>
+<script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-defineProps({
-  passwordForm: {
-    type: Object,
-    required: true
-  },
-  passwordError: {
-    type: String,
-    default: ''
-  },
-  passwordLoading: {
-    type: Boolean,
-    default: false
-  }
+export interface PasswordForm {
+  current: string
+  next: string
+  confirm: string
+}
+
+withDefaults(defineProps<{
+  passwordForm: PasswordForm
+  passwordError?: string
+  passwordLoading?: boolean
+}>(), {
+  passwordError: '',
+  passwordLoading: false
 })
 
 defineEmits(['close', 'submit'])

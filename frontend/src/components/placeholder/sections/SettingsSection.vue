@@ -16,12 +16,9 @@ import {useI18n} from "vue-i18n";
 
 const {t, locale} = useI18n()
 
-defineProps({
-  currentLocale: {
-    type: String,
-    required: true
-  }
-});
+defineProps<{
+  currentLocale: string
+}>()
 
 const activeSettingsSection = ref('personal')
 

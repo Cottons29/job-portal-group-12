@@ -12,15 +12,11 @@
   </span>
 </template>
 
-<script setup>
-defineProps({
-  showLabels: {
-    type: Boolean,
-    required: true,
-  },
-  desktopOnly: {
-    type: Boolean,
-    default: false,
-  },
+<script setup lang="ts">
+withDefaults(defineProps<{
+  showLabels: boolean
+  desktopOnly?: boolean
+}>(), {
+  desktopOnly: false
 })
 </script>
