@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { PlusIcon } from '@heroicons/vue/24/solid'
+import { resolveUrl } from '@/lib/api'
 
 const props = defineProps({
   stories: {
@@ -54,7 +55,7 @@ function handleUserStoryClick() {
     <article class="flex min-w-21 flex-col items-center gap-1.5 cursor-pointer group" @click="handleUserStoryClick">
       <div :class="['relative mx-auto rounded-full p-0.5 ring-2 transition-all duration-300 group-hover:ring-primary', currentUserStoryGroup ? 'ring-primary' : 'ring-dashed ring-primary/50']">
         <div class="grid h-17 w-17 place-items-center overflow-hidden rounded-full bg-surface-container-lowest">
-          <img v-if="userAvatar" :src="userAvatar.replace('files', 'api/files')" class="h-full w-full object-cover" alt="Your story" />
+          <img v-if="userAvatar" :src="userAvatar" class="h-full w-full object-cover" alt="Your story" />
           <span v-else class="text-lg font-black text-primary">{{ userInitials }}</span>
         </div>
         <div
@@ -81,14 +82,14 @@ function handleUserStoryClick() {
           <!-- Photo story thumbnail -->
           <img
             v-if="storyGroup.stories?.[0]?.mediaUrl"
-            :src="storyGroup.stories[0].mediaUrl"
+            :src="resolveUrl(storyGroup.stories[0].mediaUrl)"
             class="h-full w-full object-cover"
             :alt="storyGroup.name"
           />
           <!-- Avatar -->
           <img
             v-else-if="storyGroup.avatar"
-            :src="storyGroup.avatar"
+            :src="resolveUrl(storyGroup.avatar)"
             class="h-full w-full object-cover"
             :alt="storyGroup.name"
           />

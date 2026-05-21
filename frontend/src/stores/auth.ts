@@ -7,7 +7,7 @@ import api from '@/lib/api'
 import {encryptPayload} from '@/lib/payloadEncryption'
 
 type AuthMode = 'login' | 'signup'
-type UserRole = 'student' | 'employer'
+type UserRole = 'student' | 'employer' | 'admin' | 'ADMIN'
 
 interface AuthUserPayload {
     id: string
@@ -154,8 +154,6 @@ export const useAuthStore = defineStore('auth', () => {
             // ── Post-login redirect logic ──
             if (!data.user.email) {
                 await router.push('/secure-account')
-            } else if (!data.user.profileCompleted) {
-                await router.push('/onboarding')
             } else {
                 await router.push('/home')
             }
@@ -186,8 +184,6 @@ export const useAuthStore = defineStore('auth', () => {
 
             if (!data.user.email) {
                 await router.push('/secure-account')
-            } else if (!data.user.profileCompleted) {
-                await router.push('/onboarding')
             } else {
                 await router.push('/home')
             }

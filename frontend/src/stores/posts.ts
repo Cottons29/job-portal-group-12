@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import api, { resolveUrl } from '@/lib/api'
 import { isAxiosError } from 'axios'
 import { marked } from 'marked'
+import { useAuthStore } from './auth'
 
 export const usePostStore = defineStore('posts', () => {
   const posts = ref([])
@@ -112,9 +113,14 @@ export const usePostStore = defineStore('posts', () => {
       Object.assign(selectedPost.value, patch)
     }
   }
-  // @ts-ignore
   async function handlePostApply(postId) {
     if (appliedPostIds.value.has(postId)) return
+
+    const authStore = useAuthStore()
+    if (!authStore.user?.profileCompleted) {
+      alert('Profile Setup Required: Please complete your profile in Settings first to apply for jobs.')
+      return
+    }
 
     try {
       await api.post(`/posts/${postId}/apply`)

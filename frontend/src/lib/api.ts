@@ -27,8 +27,16 @@ api.interceptors.request.use((config) => {
 export function resolveUrl(path?: string): string {
     if (!path) return ''
     if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) return path
+    
+    let targetPath = path
+    if (targetPath.startsWith('/files/')) {
+        targetPath = '/api' + targetPath
+    } else if (targetPath.startsWith('files/')) {
+        targetPath = 'api/' + targetPath
+    }
+
     const base = baseURL.replace(/\/api$/, '')
-    return `${base}${path.startsWith('/') ? '' : '/'}${path}`
+    return `${base}${targetPath.startsWith('/') ? '' : '/'}${targetPath}`
 }
 
 export default api

@@ -178,6 +178,8 @@ const english_lang: AppLanguage = {
     followers: 'Followers',
     following: 'Following',
     noBio: 'No bio provided',
+    highlights: 'Highlights',
+    tagged: 'Tagged',
   },
   dashboardPages: {
     home: {

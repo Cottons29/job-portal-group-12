@@ -15,7 +15,7 @@ import { SheepFileService } from '../../common/sheep-file.service';
     TypeOrmModule.forFeature([User]),
     MulterModule.register({
       storage: memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 },
+      limits: { fileSize: 10 * 1024 * 1024 },
     }),
   ],
   controllers: [

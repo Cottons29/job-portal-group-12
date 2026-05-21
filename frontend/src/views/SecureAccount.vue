@@ -61,11 +61,7 @@ const handleVerifyOtp = async () => {
     }
     
     // Route completion correctly
-    if (authStore.needsOnboarding) {
-      router.push(authStore.user?.role?.toLowerCase() === 'employer' ? '/onboarding/employer' : '/onboarding/student')
-    } else {
-      router.push('/home')
-    }
+    router.push('/home')
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Invalid or expired code. Please try again.'
   } finally {

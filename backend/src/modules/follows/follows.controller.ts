@@ -30,4 +30,22 @@ export class FollowsController {
     const following = await this.followsService.getFollowing(req.user.sub);
     return { following };
   }
+
+  @Get('suggestions')
+  async getSuggestions(@Req() req: any) {
+    const suggestions = await this.followsService.getSuggestions(req.user.sub);
+    return { suggestions };
+  }
+
+  @Get(':userId/followers')
+  async getUserFollowers(@Param('userId') userId: string) {
+    const followers = await this.followsService.getFollowers(userId);
+    return { followers };
+  }
+
+  @Get(':userId/following')
+  async getUserFollowing(@Param('userId') userId: string) {
+    const following = await this.followsService.getFollowing(userId);
+    return { following };
+  }
 }

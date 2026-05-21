@@ -1,12 +1,12 @@
 <script setup>
 import { computed, onMounted, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { PlusCircleIcon, BriefcaseIcon, BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
+import { PlusCircleIcon, BriefcaseIcon, BuildingStorefrontIcon, ChatBubbleOvalLeftEllipsisIcon } from '@heroicons/vue/24/outline'
 import { usePostStore } from '@/stores/posts'
 import { useAuthStore } from '@/stores/auth'
 import { useProfileStore } from '@/stores/profile'
 import { useStoryStore } from '@/stores/stories'
-import { resolveUrl } from '@/lib/api'
+import api, { resolveUrl } from '@/lib/api'
 import StoryStrip from '../StoryStrip.vue'
 import ComposeCard from '../ComposeCard.vue'
 import PostCard from '../PostCard.vue'
@@ -24,25 +24,92 @@ const storyStore = useStoryStore()
 const isAddStoryModalOpen = ref(false)
 const selectedStoryGroup = ref(null)
 
-const composeActions = computed(() => [
-  {label: t('home.post'), icon: PlusCircleIcon, color: 'text-[#1a4fa3]'},
-  {label: t('home.jobAlert'), icon: BriefcaseIcon, color: 'text-[#246b36]'},
-  {label: t('home.company'), icon: BuildingStorefrontIcon, color: 'text-[#8a4a11]'},
-])
+const composeActions = computed(() => {
+  const isEmployer = auth.user?.role?.toLowerCase() === 'employer'
+  if (isEmployer) {
+    return [
+      {label: t('home.post') || 'Post Update', icon: PlusCircleIcon, color: 'text-[#1a4fa3]', to: '/create'},
+      {label: t('navbar.forEmployers') || 'Post a Job', icon: BriefcaseIcon, color: 'text-[#246b36]', to: '/create'},
+      {label: t('settings.personal.companyName') || 'My Company', icon: BuildingStorefrontIcon, color: 'text-[#8a4a11]', to: '/profile'},
+    ]
+  } else {
+    return [
+      {label: t('home.post') || 'Post', icon: PlusCircleIcon, color: 'text-[#1a4fa3]', to: '/create'},
+      {label: t('navbar.browseJobs') || 'Find Jobs', icon: BriefcaseIcon, color: 'text-[#246b36]', to: '/search'},
+      {label: t('sidebar.messages') || 'Messages', icon: ChatBubbleOvalLeftEllipsisIcon, color: 'text-[#8a4a11]', to: '/messages'},
+    ]
+  }
+})
 
-const focusCards = computed(() => [
-  {label: t('home.savedJobs'), value: '8', desc: 'Three saved roles close in the next 48 hours.'},
-  {label: t('home.applications'), value: '5', desc: 'Two employers viewed your student profile today.'},
-  {label: t('home.profileStrength'), value: '86%', desc: 'Add availability to improve match ranking.'},
-])
+const userInitials = computed(() => {
+  const name = profileStore.profileForm.name || profileStore.profileForm.companyName || auth.user?.phone || 'ME'
+  return name.charAt(0).toUpperCase()
+})
+
+const focusCards = computed(() => {
+  if (profileStore.focusStats && profileStore.focusStats.length > 0) {
+    return profileStore.focusStats.map(stat => {
+      let label = stat.label
+      if (stat.label === 'Saved jobs') label = t('home.savedJobs')
+      else if (stat.label === 'Applications') label = stat.label // Keep dynamic backend string for Applications
+      else if (stat.label === 'Profile strength') label = t('home.profileStrength')
+      return {
+        label,
+        value: stat.value,
+        desc: stat.desc
+      }
+    })
+  }
+
+  return [
+    {label: t('home.savedJobs'), value: '0', desc: 'No saved roles closing soon.'},
+    {label: t('home.applications'), value: '0', desc: 'No profile views today.'},
+    {label: t('home.profileStrength'), value: '0%', desc: 'Complete your profile details to stand out.'},
+  ]
+})
 
 
 
-const suggestions = [
-  {name: 'Sokha Recruiter', role: 'Hospitality roles near BKK1', bg: 'bg-[#8fd99b]', text: 'text-[#246b36]'},
-  {name: 'Dara Mentor', role: 'RUPP alumni · Product design', bg: 'bg-[#d7b7ff]', text: 'text-[#6a39b8]'},
-  {name: 'Smart Careers', role: 'Internships and campus events', bg: 'bg-[#8ccaff]', text: 'text-[#235d84]'},
-]
+const suggestions = ref([])
+const loadingSuggestions = ref(false)
+
+async function fetchSuggestions() {
+  loadingSuggestions.value = true
+  try {
+    const res = await api.get('/follows/suggestions')
+    suggestions.value = (res.data.suggestions || []).map((u, idx) => {
+      const isEmp = u.role?.toLowerCase() === 'employer'
+      const name = isEmp ? u.companyName : u.fullName
+      const role = isEmp ? 'Employer' : (u.university || 'Student')
+      
+      const bgs = ['bg-[#8fd99b]', 'bg-[#d7b7ff]', 'bg-[#8ccaff]', 'bg-[#f8a9dc]', 'bg-[#facc15]']
+      const texts = ['text-[#246b36]', 'text-[#6a39b8]', 'text-[#235d84]', 'text-[#9b1f70]', 'text-[#8a6d05]']
+      
+      return {
+        id: u.id,
+        name: name || u.phone || 'User',
+        role: role,
+        avatar: u.profileImageUrl || u.logoUrl || '',
+        bg: bgs[idx % bgs.length],
+        text: texts[idx % texts.length]
+      }
+    })
+  } catch (err) {
+    console.error('Failed to fetch suggestions:', err)
+  } finally {
+    loadingSuggestions.value = false
+  }
+}
+
+async function handleConnect(userId) {
+  try {
+    await api.post(`/follows/toggle/${userId}`)
+    suggestions.value = suggestions.value.filter(s => s.id !== userId)
+    profileStore.fetchPersonalInfo()
+  } catch (err) {
+    console.error('Failed to toggle follow:', err)
+  }
+}
 
 defineEmits(['open-post', 'apply', 'view-applicants', 'engagement-change'])
 
@@ -51,6 +118,7 @@ onMounted(() => {
   postStore.fetchAppliedPosts()
   profileStore.fetchPersonalInfo()
   storyStore.fetchStories()
+  fetchSuggestions()
 })
 </script>
 
@@ -60,12 +128,16 @@ onMounted(() => {
       <StoryStrip
         :stories="storyStore.stories"
         :user-avatar="resolveUrl(profileStore.profileForm.avatar)"
-        :user-initials="profileStore.profileForm.fullName?.charAt(0).toUpperCase() || 'ME'"
+        :user-initials="userInitials"
         :current-user-id="auth.user?.id"
         @add-story="isAddStoryModalOpen = true"
         @view-story="selectedStoryGroup = $event"
       />
-      <ComposeCard :actions="composeActions" :imageUrl="profileStore.profileForm.avatar.replace(`files`, `api/files`)"/>
+      <ComposeCard 
+        :actions="composeActions" 
+        :imageUrl="resolveUrl(profileStore.profileForm.avatar)"
+        :initials="userInitials"
+      />
       <p v-if="postStore.postsError" class="rounded-2xl bg-red-500/10 px-4 py-3 text-xs font-bold text-red-300">
         {{ postStore.postsError }}
       </p>
@@ -96,7 +168,7 @@ onMounted(() => {
 
     <aside class="space-y-6 xl:sticky xl:top-28 xl:h-fit">
       <FocusPanel :cards="focusCards"/>
-      <SuggestionsPanel :suggestions="suggestions"/>
+      <SuggestionsPanel :suggestions="suggestions" @connect="handleConnect"/>
     </aside>
 
     <AddStoryModal

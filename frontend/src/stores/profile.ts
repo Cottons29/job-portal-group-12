@@ -28,7 +28,8 @@ export const useProfileStore = defineStore('profile', () => {
     industry: '',
     address: '',
     website: '',
-    companyDescription: ''
+    companyDescription: '',
+    isVerified: false
   })
 
   const isSavingProfile = ref(false)
@@ -57,12 +58,28 @@ export const useProfileStore = defineStore('profile', () => {
     profileForm.currency = profile?.currency || 'USD'
     if (Array.isArray(profile?.skills)) profileForm.skills = profile.skills
     if (profile?.availability) profileForm.availability = profile.availability
+    profileForm.isVerified = !!profile?.isVerified
 
     profileForm.companyName = profile?.companyName || ''
     profileForm.industry = profile?.industry || ''
     profileForm.address = profile?.address || ''
     profileForm.website = profile?.website || ''
     profileForm.companyDescription = profile?.companyDescription || ''
+  }
+
+  const focusStats = ref<any[]>([])
+  const focusStatsLoading = ref(false)
+
+  async function fetchFocusStats() {
+    focusStatsLoading.value = true
+    try {
+      const { data } = await api.get('/profile/focus-stats')
+      focusStats.value = data.stats || []
+    } catch (error) {
+      console.error('Failed to fetch focus stats:', error)
+    } finally {
+      focusStatsLoading.value = false
+    }
   }
 
   async function fetchPersonalInfo() {
@@ -76,6 +93,7 @@ export const useProfileStore = defineStore('profile', () => {
       ])
 
       applyProfileData(profileData.profile, accountUser)
+      await fetchFocusStats()
     } catch (error) {
       profileLoadError.value = isAxiosError(error) ? error.response?.data?.message || error.message : 'Failed to load personal info.'
     }
@@ -157,9 +175,11 @@ export const useProfileStore = defineStore('profile', () => {
     selectedUserProfile.value = null
 
     try {
-      const [profileRes, postsRes] = await Promise.all([
+      const [profileRes, postsRes, followersRes, followingRes] = await Promise.all([
         api.get(`/profile/${userId}`),
-        api.get('/posts', { params: { authorId: userId, limit: 12 } })
+        api.get('/posts', { params: { authorId: userId, limit: 12 } }),
+        api.get(`/follows/${userId}/followers`),
+        api.get(`/follows/${userId}/following`),
       ])
 
       const profile = profileRes.data.profile
@@ -168,6 +188,7 @@ export const useProfileStore = defineStore('profile', () => {
       if (profile) {
         //@ts-ignore
         selectedUserProfile.value = {
+          id: profile.id,
           name: profile.fullName || profile.companyName || 'User',
           user_name: profile.user?.user_name,
           avatar: resolveUrl(profile.profileImageUrl || profile.logoUrl),
@@ -175,6 +196,8 @@ export const useProfileStore = defineStore('profile', () => {
           education: profile.university ? `${profile.university} - ${profile.major}` : profile.industry,
           category: profile.yearLevel ? `Year ${profile.yearLevel}` : profile.address,
           postCount: postsRes.data.total || 0,
+          followersCount: followersRes.data.followers?.length || 0,
+          followingCount: followingRes.data.following?.length || 0,
           posts: (postsRes.data.posts || []).map(postStore.mapPost)
         }
       } else {
@@ -202,6 +225,8 @@ export const useProfileStore = defineStore('profile', () => {
     selectedUserProfile,
     isProfileLoading,
     isProfileModalOpen,
+    focusStats,
+    fetchFocusStats,
     fetchPersonalInfo,
     savePersonalInfoEdit,
     showUserProfile,

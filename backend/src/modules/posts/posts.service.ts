@@ -340,6 +340,9 @@ export class PostsService {
   }
 
   private serializeComment(comment: PostComment) {
+    const isEmp = comment.author.role?.toLowerCase() === 'employer';
+    const name = isEmp ? comment.author.companyName : comment.author.fullName;
+    const avatar = isEmp ? comment.author.logoUrl : comment.author.profileImageUrl;
     return {
       id: comment.id,
       content: comment.content,
@@ -348,6 +351,8 @@ export class PostsService {
         id: comment.author.id,
         user_name: comment.author.user_name,
         phone: comment.author.phone,
+        name: name || comment.author.phone,
+        avatar: this.toRelativePath(avatar),
       },
     };
   }

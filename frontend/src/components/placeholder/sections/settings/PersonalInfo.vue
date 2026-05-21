@@ -3,7 +3,7 @@ import { computed, onMounted, ref, type Component } from "vue"
 import { useI18n } from "vue-i18n"
 import { useProfileStore } from "@/stores/profile"
 import { useAuthStore } from "@/stores/auth"
-import api, {API_BASE} from "@/lib/api"
+import api, { API_BASE, resolveUrl } from "@/lib/api"
 import {
   AcademicCapIcon,
   BriefcaseIcon,
@@ -16,6 +16,21 @@ import {
   IdentificationIcon,
   BuildingStorefrontIcon
 } from '@heroicons/vue/24/outline'
+
+function getAvatarUrl(avatar: any): string {
+  if (!avatar) return 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'
+  if (avatar instanceof File) {
+    try {
+      return URL.createObjectURL(avatar)
+    } catch {
+      return 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'
+    }
+  }
+  if (typeof avatar !== 'string') {
+    return 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'
+  }
+  return resolveUrl(avatar)
+}
 
 const { t } = useI18n()
 const profileStore = useProfileStore()
@@ -36,11 +51,30 @@ const editingRow = ref<PersonalInfoRow | null>(null)
 const editValue = ref('')
 const selectedFile = ref<File | null>(null)
 const isDragging = ref(false)
+const previewUrl = ref<string | null>(null)
+
+function handleFileSelection(file: File) {
+  const maxSize = 10 * 1024 * 1024 // 10MB
+  if (file.size > maxSize) {
+    profileStore.profileSaveError = 'File too large (exceeds 10MB limit)'
+    selectedFile.value = null
+    previewUrl.value = null
+    return
+  }
+  
+  profileStore.profileSaveError = ''
+  selectedFile.value = file
+  
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value)
+  }
+  previewUrl.value = URL.createObjectURL(file)
+}
 
 function onFileChange(event: Event) {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
-    selectedFile.value = target.files[0]
+    handleFileSelection(target.files[0])
   }
 }
 
@@ -57,7 +91,7 @@ function onDrop(event: DragEvent) {
   event.preventDefault()
   isDragging.value = false
   if (event.dataTransfer?.files && event.dataTransfer.files[0]) {
-    selectedFile.value = event.dataTransfer.files[0]
+    handleFileSelection(event.dataTransfer.files[0])
   }
 }
 
@@ -162,6 +196,10 @@ function openEditor(row: PersonalInfoRow) {
   editingRow.value = row
   editValue.value = profileStore.profileForm[row.field] || ''
   selectedFile.value = null
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value)
+    previewUrl.value = null
+  }
   isEditing.value = true
 }
 
@@ -170,15 +208,65 @@ async function saveEdit() {
 
   const valueToSave = editingRow.value.inputType === 'file' ? selectedFile.value : editValue.value
   if (editingRow.value.inputType === 'file' && !valueToSave) {
+    if (previewUrl.value) {
+      URL.revokeObjectURL(previewUrl.value)
+      previewUrl.value = null
+    }
     isEditing.value = false
     return
   }
 
   const success = await profileStore.savePersonalInfoEdit(editingRow.value.field, valueToSave)
   if (success) {
+    if (previewUrl.value) {
+      URL.revokeObjectURL(previewUrl.value)
+      previewUrl.value = null
+    }
     isEditing.value = false
     editingRow.value = null
     selectedFile.value = null
+  }
+}
+
+function closeEditor() {
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value)
+    previewUrl.value = null
+  }
+  isEditing.value = false
+  profileStore.profileSaveError = ''
+}
+
+const isStudent = computed(() => authStore.user?.role?.toLowerCase() === 'student')
+const isEmployer = computed(() => authStore.user?.role?.toLowerCase() === 'employer')
+
+const missingRequiredFields = computed(() => {
+  const missing: string[] = []
+  const profile = profileStore.profileForm
+  if (isStudent.value) {
+    if (!profile.name || !profile.name.trim()) missing.push('Full Name')
+    if (!profile.university || !profile.university.trim()) missing.push('University')
+    if (!profile.major || !profile.major.trim()) missing.push('Major')
+  } else if (isEmployer.value) {
+    if (!profile.companyName || !profile.companyName.trim()) missing.push('Company Name')
+    if (!profile.industry || !profile.industry.trim()) missing.push('Industry')
+    if (!profile.address || !profile.address.trim()) missing.push('Address')
+  }
+  return missing
+})
+
+async function submitProfileSetup() {
+  if (missingRequiredFields.value.length > 0) {
+    alert('Please fill in the following required fields to complete setup: ' + missingRequiredFields.value.join(', '))
+    return
+  }
+
+  const success = await profileStore.savePersonalInfoEdit('', '')
+  if (success) {
+    alert('Profile setup completed successfully!')
+    await authStore.refreshUser()
+  } else {
+    alert('Failed to save profile. Please try again.')
   }
 }
 
@@ -192,6 +280,26 @@ onMounted(() => {
     <h2 class="mb-4 text-center font-display text-xl font-black tracking-[-0.04em] text-on-surface sm:text-2xl">
       {{ $t('settings.personalInfo') }}
     </h2>
+
+    <!-- Profile Setup Warning Banner -->
+    <div v-if="!authStore.user?.profileCompleted" class="mb-6 rounded-[1.25rem] bg-amber-500/10 border border-amber-500/20 p-5 flex flex-col gap-3">
+      <div class="flex items-start gap-3">
+        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-500/20 text-amber-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+        </span>
+        <div class="flex-1">
+          <h4 class="text-sm font-black text-on-surface leading-tight">Profile Setup Incomplete</h4>
+          <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">
+            Please fill out your profile details to unlock platform features (job applications, posting, messaging).
+          </p>
+          <p v-if="missingRequiredFields.length > 0" class="text-xs text-amber-600/90 font-bold mt-2">
+            Remaining fields: {{ missingRequiredFields.join(', ') }}
+          </p>
+        </div>
+      </div>
+    </div>
 
     <div class="overflow-hidden rounded-[1.25rem] bg-surface-container-low ring-1 ring-white/5">
       <article
@@ -220,14 +328,26 @@ onMounted(() => {
           </p>
         </div>
         <img
-
             v-if="row.avatar"
             :alt="row.label"
             class="h-10 w-10 rounded-full object-cover ring-2 ring-surface-container-low"
-            :src="row.avatar.replace(`files`, `api/files`)"
+            :src="getAvatarUrl(row.avatar)"
         />
         <span class="text-lg font-black text-on-surface-variant/70">›</span>
       </article>
+    </div>
+
+    <!-- Profile Setup Action Button -->
+    <div v-if="!authStore.user?.profileCompleted" class="mt-6">
+      <button 
+        @click="submitProfileSetup"
+        class="w-full flex items-center justify-center gap-2 rounded-2xl bg-primary text-on-primary py-3.5 text-sm font-bold shadow-sm hover:bg-primary/95 transition duration-300"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        Submit Profile Setup
+      </button>
     </div>
     <div v-if="isEditing" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div class="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl">
@@ -251,7 +371,7 @@ onMounted(() => {
           <label
               for="avatar-upload"
               :class="[
-                'flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 transition',
+                'flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 transition aspect-video max-h-48 overflow-hidden relative',
                 isDragging 
                   ? 'border-primary bg-primary/10' 
                   : 'border-surface-container-high hover:bg-surface-container-low'
@@ -260,11 +380,23 @@ onMounted(() => {
               @dragleave.prevent="onDragLeave"
               @drop.prevent="onDrop"
           >
-            <CameraIcon :class="['h-10 w-10 transition-colors', isDragging ? 'text-primary' : 'text-on-surface-variant']"/>
-            <p :class="['mt-2 text-sm font-bold transition-colors', isDragging ? 'text-primary' : 'text-on-surface-variant']">
-              {{ selectedFile ? selectedFile.name : 'Click or drag image to upload' }}
-            </p>
+            <template v-if="previewUrl">
+              <img :src="previewUrl" class="h-full w-full object-cover rounded-xl" />
+              <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                <CameraIcon class="h-8 w-8 text-white" />
+                <span class="text-white text-xs font-black ml-2">Change Image</span>
+              </div>
+            </template>
+            <template v-else>
+              <CameraIcon :class="['h-10 w-10 transition-colors', isDragging ? 'text-primary' : 'text-on-surface-variant']"/>
+              <p :class="['mt-2 text-sm font-bold text-center transition-colors px-4', isDragging ? 'text-primary' : 'text-on-surface-variant']">
+                Click or drag image to upload
+              </p>
+            </template>
           </label>
+          <p v-if="selectedFile" class="mt-2 text-xs font-bold text-on-surface-variant text-center">
+            Selected: <span class="text-primary font-black">{{ selectedFile.name }}</span> ({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)
+          </p>
         </div>
         <p v-if="profileStore.profileSaveError" class="mt-2 text-xs font-bold text-red-300">
           {{ profileStore.profileSaveError }}
@@ -272,7 +404,7 @@ onMounted(() => {
         <div class="mt-6 flex justify-end gap-3">
           <button
               class="rounded-full px-5 py-2 text-sm font-black text-on-surface-variant transition hover:bg-surface-container-high"
-              @click="isEditing = false"
+              @click="closeEditor"
           >
             Cancel
           </button>

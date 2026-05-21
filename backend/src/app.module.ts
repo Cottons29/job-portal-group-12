@@ -9,7 +9,9 @@ import { AdminModule } from './modules/admin/admin.module';
 import { UserModule } from './modules/user/user.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
-import {StoriesModule} from "./modules/stories/stories.module";
+import { StoriesModule } from "./modules/stories/stories.module";
+import { FollowsModule } from "./modules/follows/follows.module";
+import { MessagesModule } from "./modules/messages/messages.module";
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import {StoriesModule} from "./modules/stories/stories.module";
     PostsModule,
     ApplicationsModule,
     StoriesModule,
+    FollowsModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

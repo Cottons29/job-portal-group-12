@@ -48,10 +48,24 @@ export class FollowsService {
     return count > 0;
   }
 
+  async getSuggestions(userId: string): Promise<User[]> {
+    const followingList = await this.followRepository.find({
+      where: { follower: { id: userId } },
+      relations: ['following'],
+    });
+    const followedIds = followingList.map(f => f.following.id);
+    followedIds.push(userId);
+
+    const query = this.userRepository.createQueryBuilder('user')
+      .where('user.id NOT IN (:...ids)', { ids: followedIds });
+
+    return query.take(5).getMany();
+  }
+
   async getFollowers(userId: string): Promise<User[]> {
     const follows = await this.followRepository.find({
       where: { following: { id: userId } },
-      relations: ['follower', 'follower.studentProfile', 'follower.employerProfile'],
+      relations: ['follower'],
     });
     return follows.map(f => f.follower);
   }
@@ -59,7 +73,7 @@ export class FollowsService {
   async getFollowing(userId: string): Promise<User[]> {
     const follows = await this.followRepository.find({
       where: { follower: { id: userId } },
-      relations: ['following', 'following.studentProfile', 'following.employerProfile'],
+      relations: ['following'],
     });
     return follows.map(f => f.following);
   }

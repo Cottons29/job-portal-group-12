@@ -8,9 +8,9 @@ import { UploadController } from './upload.controller';
 @Module({
   imports: [
     MulterModule.register({
-      storage: memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
-    }),
+       storage: memoryStorage(),
+       limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+     }),
   ],
   controllers: [UploadController],
   providers: [SheepFileService],

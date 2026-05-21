@@ -172,23 +172,12 @@ router.beforeEach(async (to) => {
 
         // Prevent navigating back to secure-account when not needed
         if (to.path === '/secure-account' && !authStore.needsEmailRecovery) {
-            return '/onboarding'
-        }
-
-        // 3. If they have an email but needsOnboarding is true
-        if (authStore.needsOnboarding) {
-            // Must allow them into the onboarding flow, otherwise redirect
-            if (!to.path.startsWith('/onboarding')) {
-                return authStore.user?.role?.toLowerCase() === 'employer' 
-                    ? '/onboarding/employer' 
-                    : '/onboarding/student'
-            }
-            return true
-        }
-
-        // Prevent going back to onboarding if already complete
-        if (to.path.startsWith('/onboarding') && !authStore.needsOnboarding) {
             return '/home'
+        }
+
+        // Redirect any onboarding routes to settings
+        if (to.path.startsWith('/onboarding')) {
+            return '/settings'
         }
 
         // Auto-redirect authenticated users away from root or auth pages

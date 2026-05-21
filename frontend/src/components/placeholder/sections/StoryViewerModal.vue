@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import BaseModal from './BaseModal.vue'
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/vue/24/solid'
+import { resolveUrl } from '@/lib/api'
 
 const props = defineProps({
   storyGroup: {
@@ -60,7 +61,7 @@ onUnmounted(() => {
       <!-- Header -->
       <div class="absolute top-4 left-4 right-4 z-20 flex items-center gap-3">
         <div class="h-10 w-10 overflow-hidden rounded-full ring-2 ring-white/50 bg-surface-container-low">
-          <img v-if="storyGroup.avatar" :src="storyGroup.avatar.replace('files', 'api/files')" class="h-full w-full object-cover"  alt=""/>
+          <img v-if="storyGroup.avatar" :src="resolveUrl(storyGroup.avatar)" class="h-full w-full object-cover"  alt=""/>
           <div v-else class="grid h-full w-full place-items-center bg-primary text-sm font-black text-white">
             {{ storyGroup.name?.charAt(0).toUpperCase() }}
           </div>
@@ -80,7 +81,7 @@ onUnmounted(() => {
       <div class="h-full w-full flex items-center justify-center">
         <img
           v-if="storyGroup.stories[currentIndex].type === 'photo'"
-          :src="storyGroup.stories[currentIndex].mediaUrl.replace('files', 'api/files')"
+          :src="resolveUrl(storyGroup.stories[currentIndex].mediaUrl)"
           class="h-full w-full object-cover"
         />
         <div

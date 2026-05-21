@@ -30,6 +30,13 @@ export class ProfileController {
     return { profile };
   }
 
+  @Get('focus-stats')
+  async getFocusStats(@Req() req: any) {
+    const userId = req.user.sub;
+    const stats = await this.profileService.getFocusStats(userId);
+    return { stats };
+  }
+
   @Get(':id')
   async getProfile(@Req() req: any) {
     const userId = req.params.id;

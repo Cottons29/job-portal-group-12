@@ -16,6 +16,9 @@ export default defineConfig({
       launchEditor: 'idea'
     })
   ],
+  server: {
+    host: true // Exposes the server on all addresses (including LAN)
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

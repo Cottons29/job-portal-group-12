@@ -1,8 +1,10 @@
 <script lang="ts" setup>
   import {useI18n} from 'vue-i18n'
-  import {computed} from 'vue'
+  import {computed, ref, watch} from 'vue'
   import BaseModal from './BaseModal.vue'
   import type {UserProfile} from '@/types/profile'
+  import api, { resolveUrl } from '@/lib/api'
+  import { useAuthStore } from '@/stores/auth'
 
   const {t} = useI18n()
 
@@ -10,8 +12,14 @@
     user: UserProfile
   }>()
 
-
   defineEmits(['close', 'openPost'])
+
+  const authStore = useAuthStore()
+  const isFollowing = ref(false)
+  const isSelf = computed(() => authStore.user?.id === props.user?.id)
+
+  const followersCount = ref(0)
+  const followingCount = ref(0)
 
   const initials = computed(() => {
     if (!props.user?.name) return '?'
@@ -25,9 +33,43 @@
 
   const profileStats = computed(() => [
     {label: t('profilePage.posts'), value: props.user?.postCount || 0},
-    {label: t('profilePage.followers'), value: '1.2K'},
-    {label: t('profilePage.following'), value: '450'}
+    {label: t('profilePage.followers') || 'Connections', value: followersCount.value},
+    {label: t('profilePage.following') || 'Following', value: followingCount.value}
   ])
+
+  async function checkFollowStatus() {
+    if (isSelf.value || !props.user?.id) return
+    try {
+      const res = await api.get(`/follows/status/${props.user.id}`)
+      isFollowing.value = res.data.followed
+    } catch (err) {
+      console.error('Failed to check follow status:', err)
+    }
+  }
+
+  async function handleConnectToggle() {
+    if (isSelf.value || !props.user?.id) return
+    try {
+      const res = await api.post(`/follows/toggle/${props.user.id}`)
+      isFollowing.value = res.data.followed
+      
+      if (res.data.followed) {
+        followersCount.value++
+      } else {
+        followersCount.value = Math.max(0, followersCount.value - 1)
+      }
+    } catch (err) {
+      console.error('Failed to toggle follow status:', err)
+    }
+  }
+
+  watch(() => props.user, (newVal) => {
+    if (newVal) {
+      followersCount.value = newVal.followersCount || 0
+      followingCount.value = newVal.followingCount || 0
+      checkFollowStatus()
+    }
+  }, { immediate: true })
 
   console.log('User profile:', props.user)
 </script>
@@ -45,7 +87,7 @@
               class="-mt-16 grid h-32 w-32 place-items-center overflow-hidden rounded-full bg-surface p-1 shadow-xl ring-4 ring-surface-container-low sm:h-44 sm:w-44 lg:-mt-20">
             <img
                 v-if="user.avatar"
-                :src="user.avatar.replace(`files`, `api/files`)"
+                :src="resolveUrl(user.avatar)"
                 :alt="`${user.name} profile photo`"
                 class="h-full w-full rounded-full object-cover"
             />
@@ -64,6 +106,18 @@
               </h2>
               <p class="mt-1 text-xl font-black text-on-surface">{{ user.name }}</p>
             </div>
+            <button
+              v-if="!isSelf && user.id"
+              @click="handleConnectToggle"
+              :class="[
+                'rounded-full px-6 py-2.5 text-sm font-black transition cursor-pointer shadow-sm',
+                isFollowing 
+                  ? 'bg-surface-container-high text-on-surface hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 border border-transparent' 
+                  : 'bg-primary text-on-primary hover:opacity-90'
+              ]"
+            >
+              {{ isFollowing ? 'Connected' : 'Connect' }}
+            </button>
           </div>
 
           <dl class="mt-6 grid grid-cols-3 gap-3 text-center sm:max-w-lg sm:text-left">

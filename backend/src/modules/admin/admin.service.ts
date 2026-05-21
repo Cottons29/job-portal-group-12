@@ -18,6 +18,13 @@ export class AdminService {
     });
   }
 
+  async getVerifiedEmployers(): Promise<User[]> {
+    return await this.userRepo.find({
+      where: { role: UserRole.EMPLOYER, isVerified: true },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async approveEmployer(id: string): Promise<void> {
     const employer = await this.userRepo.findOne({
       where: { id, role: UserRole.EMPLOYER },
@@ -37,5 +44,38 @@ export class AdminService {
       throw new NotFoundException('Employer not found');
     }
     await this.userRepo.delete(id);
+  }
+
+  async revokeEmployer(id: string): Promise<void> {
+    const employer = await this.userRepo.findOne({
+      where: { id, role: UserRole.EMPLOYER },
+    });
+    if (!employer) {
+      throw new NotFoundException('Employer not found');
+    }
+    employer.isVerified = false;
+    await this.userRepo.save(employer);
+  }
+
+  async getAdminStats() {
+    const totalStudents = await this.userRepo.count({
+      where: { role: UserRole.STUDENT },
+    });
+    const totalEmployers = await this.userRepo.count({
+      where: { role: UserRole.EMPLOYER },
+    });
+    const verifiedEmployers = await this.userRepo.count({
+      where: { role: UserRole.EMPLOYER, isVerified: true },
+    });
+    const pendingEmployers = await this.userRepo.count({
+      where: { role: UserRole.EMPLOYER, isVerified: false },
+    });
+
+    return {
+      totalStudents,
+      totalEmployers,
+      verifiedEmployers,
+      pendingEmployers,
+    };
   }
 }

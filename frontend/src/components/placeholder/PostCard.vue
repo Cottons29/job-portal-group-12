@@ -10,9 +10,9 @@
           ]"
           @click.stop="$emit('show-profile', localPost.authorId)"
       >
-        <img
+         <img
             v-if="localPost.authorAvatar"
-            :src="localPost.authorAvatar.replace(`files`, `api/files`)"
+            :src="resolveUrl(localPost.authorAvatar)"
             class="h-full w-full object-cover"
             alt="Profile Image"
         />
@@ -160,26 +160,36 @@
       <li
           v-for="c in comments"
           :key="c.id"
-          class="rounded-xl bg-surface-container-low/80 px-3 py-2 text-sm text-on-surface"
+          class="rounded-xl bg-surface-container-low/80 p-3 text-sm text-on-surface"
       >
-        <div class="flex items-start justify-between gap-2">
-          <div>
-            <p class="text-xs font-black text-primary">
-              {{ c.author?.user_name || c.author?.phone || 'Member' }}
-            </p>
-            <p class="mt-1 whitespace-pre-wrap text-on-surface-variant">{{ c.content }}</p>
-            <p class="mt-1 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/80">
-              {{ formatCommentTime(c.createdAt) }}
-            </p>
+        <div class="flex items-start gap-3">
+          <div class="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-surface-container-high">
+            <img v-if="c.author?.avatar" :src="resolveUrl(c.author.avatar)" class="h-full w-full object-cover" alt="Avatar" />
+            <div v-else class="grid h-full w-full place-items-center bg-[#d7b7ff] text-xs font-black text-[#6a39b8]">
+              {{ (c.author?.name || '?').charAt(0).toUpperCase() }}
+            </div>
           </div>
-          <button
-              v-if="userId && c.author?.id === userId"
-              type="button"
-              class="shrink-0 text-xs font-black text-red-400 hover:underline"
-              @click="removeComment(c.id)"
-          >
-            Delete
-          </button>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <p class="text-xs font-black text-on-surface hover:underline cursor-pointer" @click="$emit('show-profile', c.author?.id)">
+                  {{ c.author?.name || c.author?.user_name || 'Member' }}
+                </p>
+                <p class="mt-1 whitespace-pre-wrap text-[13px] text-on-surface-variant font-semibold">{{ c.content }}</p>
+                <p class="mt-1 text-[9px] font-bold uppercase tracking-wider text-on-surface-variant/80">
+                  {{ formatCommentTime(c.createdAt) }}
+                </p>
+              </div>
+              <button
+                  v-if="userId && c.author?.id === userId"
+                  type="button"
+                  class="shrink-0 text-xs font-black text-red-400 hover:underline"
+                  @click="removeComment(c.id)"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       </li>
       <li v-if="!comments.length" class="text-sm font-semibold text-on-surface-variant">No comments yet.</li>
@@ -242,7 +252,7 @@
     UserGroupIcon,
   } from '@heroicons/vue/24/outline'
   import {BookmarkIcon as BookmarkIconSolid, HeartIcon as HeartIconSolid} from '@heroicons/vue/24/solid'
-  import api from '@/lib/api'
+  import api, { resolveUrl } from '@/lib/api'
   import {isAxiosError} from 'axios'
   import type {Post, PostComment} from '@/types/profile'
   import {usePostStore} from '@/stores/posts'
