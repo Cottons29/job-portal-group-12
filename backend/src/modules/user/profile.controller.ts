@@ -46,11 +46,20 @@ export class ProfileController {
 
   @Post('student/setup')
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(FileInterceptor('cvFile'))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'cvFile', maxCount: 1 },
+      { name: 'idCardFile', maxCount: 1 },
+    ]),
+  )
   async setupStudent(
     @Req() req: any,
     @Body() body: any,
-    @UploadedFile() file: Express.Multer.File | undefined,
+    @UploadedFiles()
+    files: {
+      cvFile?: Express.Multer.File[];
+      idCardFile?: Express.Multer.File[];
+    },
   ) {
     const userId = req.user.sub;
     let role = req.user.role;
@@ -63,7 +72,16 @@ export class ProfileController {
     if (role !== UserRole.STUDENT) {
       throw new BadRequestException('Only students can setup a student profile');
     }
-    return this.profileService.updateStudentProfile(userId, body, file);
+
+    const cvFile = files?.cvFile?.[0];
+    const idCardFile = files?.idCardFile?.[0];
+
+    return this.profileService.updateStudentProfile(
+      userId,
+      body,
+      cvFile,
+      idCardFile,
+    );
   }
 
   @Post('employer/setup')

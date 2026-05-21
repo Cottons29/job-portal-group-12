@@ -49,6 +49,18 @@ function handleFileSelect(e) {
   if (file) profile.setCvFile(file)
 }
 
+// ── ID Card upload ──
+const isIdDragging = ref(false)
+function handleIdDrop(e) {
+  isIdDragging.value = false
+  const file = e.dataTransfer?.files?.[0]
+  if (file) profile.setIdCardFile(file)
+}
+function handleIdSelect(e) {
+  const file = e.target.files?.[0]
+  if (file) profile.setIdCardFile(file)
+}
+
 // ── Form submission ──
 const isSaving = ref(false)
 const saveError = ref('')
@@ -74,12 +86,14 @@ async function handleSave() {
     if (profile.cvFile) {
       formData.append('cvFile', profile.cvFile)
     }
+    if (profile.idCardFile) {
+      formData.append('idCardFile', profile.idCardFile)
+    }
 
     const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
     await axios.post(`${API_BASE}/profile/student/setup`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${authStore.token}`,
       },
     })
@@ -139,31 +153,30 @@ function getSkillColor(index) {
             First<span class="text-primary">Step</span> Profile Setup
           </template>
           <template v-else>
-            Finalize Your Profile
-          </template>
-        </h1>
-        <p class="mt-3 text-on-surface-variant text-sm md:text-[15px] max-w-lg mx-auto leading-relaxed">
-          <template v-if="profile.currentStep === 1">
-            Let's build your professional foundation. Tell us about your academic journey and your growing skill set.
-          </template>
-          <template v-else>
-            Tell us more about your preferences to match you with the perfect opportunities.
-          </template>
-        </p>
-      </div>
+              Finalize Your Student Verification
+            </template>
+          </h1>
+          <p class="mt-3 text-on-surface-variant text-sm md:text-[15px] max-w-lg mx-auto leading-relaxed">
+            <template v-if="profile.currentStep === 1">
+              Let's build your academic profile first. After this step, you will upload your student ID for admin verification.
+            </template>
+            <template v-else>
+              Upload your student ID document and optional CV to complete verification and access student-only features.
+            </template>
+          </p>
+        </div>
 
-      <!-- FORM CONTENT -->
-      <Transition
-        enter-active-class="transition-all duration-400 ease-out"
-        enter-from-class="opacity-0 translate-y-6"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition-all duration-200 ease-in"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 -translate-y-6"
-        mode="out-in"
-      >
-        <!-- ═══════ STEP 1: Academic Info ═══════ -->
-        <div v-if="profile.currentStep === 1" key="step1" class="max-w-3xl mx-auto">
+        <Transition
+          enter-active-class="transition-all duration-400 ease-out"
+          enter-from-class="opacity-0 translate-y-6"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-6"
+          mode="out-in"
+        >
+          <!-- ═══════ STEP 1: Academic Info ═══════ -->
+          <div v-if="profile.currentStep === 1" key="step1" class="max-w-3xl mx-auto">
           <div class="rounded-[2rem] bg-surface-container-lowest p-8 md:p-12 border border-outline-variant/30 shadow-[0_18px_48px_rgba(0,0,0,0.28)]">
             <!-- Full Name -->
             <div class="mb-6">
@@ -305,7 +318,7 @@ function getSkillColor(index) {
                 class="inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-bold text-surface-container-lowest transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-black/30 disabled:shadow-none"
                 :class="!profile.step1Valid ? 'bg-surface-container-high opacity-100 shadow-transparent text-on-surface-variant' : 'bg-primary hover:bg-[#a8c7fa]'"
               >
-                Next Step
+                Continue to ID Upload
                 <ArrowRightIcon class="w-4 h-4" />
               </button>
             </div>
@@ -321,10 +334,11 @@ function getSkillColor(index) {
         <!-- ═══════ STEP 2: Career & CV ═══════ -->
         <div v-else key="step2" class="max-w-4xl mx-auto w-full">
           <!-- Back button -> Optional? No Back button in image, but helpful for UX. Adding as a subtle top left link -->
-          <div class="mb-4">
+          <div class="mb-4 flex flex-col gap-2">
              <button @click="profile.prevStep()" class="text-xs font-bold text-on-surface-variant hover:text-primary flex items-center gap-1 cursor-pointer transition-colors">
                <ArrowLeftIcon class="w-3 h-3" /> Back
              </button>
+             <div class="text-sm font-semibold text-on-surface-variant">Step 2 of 2: Upload your student ID for verification</div>
           </div>
 
           <div class="space-y-6">
@@ -398,7 +412,51 @@ function getSkillColor(index) {
               </div>
             </div>
 
-            <!-- Row 3: Upload CV Card -->
+              <!-- Row 3: Upload ID Card -->
+              <div class="rounded-[2rem] bg-surface-container-lowest p-6 md:p-10 border border-outline-variant/30 shadow-[0_18px_48px_rgba(0,0,0,0.28)]">
+                <h3 class="text-base font-bold text-on-surface mb-6">Upload ID / Student Card (for verification)</h3>
+                <div
+                  :class="[
+                    'relative rounded-3xl p-8 text-center transition-all duration-300 cursor-pointer border-[1.5px] border-dashed',
+                    isIdDragging
+                      ? 'border-primary bg-primary/10'
+                      : 'border-outline-variant bg-surface-container hover:border-primary'
+                  ]"
+                  @dragover.prevent="isIdDragging = true"
+                  @dragleave="isIdDragging = false"
+                  @drop.prevent="handleIdDrop"
+                  @click="$refs.idInput.click()"
+                >
+                  <input ref="idInput" type="file" accept=".pdf,image/*" class="hidden" @change="handleIdSelect" />
+                  <template v-if="!profile.idCardFileName">
+                    <div class="mx-auto w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center mb-4">
+                      <DocumentTextIcon class="w-6 h-6 text-primary font-bold" />
+                    </div>
+                    <p class="text-[14px] font-bold text-on-surface mb-1">
+                      Upload a photo or PDF of your student ID
+                    </p>
+                    <p class="text-[11px] text-on-surface-variant mb-4">
+                      This helps admins verify your student status.
+                    </p>
+                    <p class="text-xs font-bold text-primary underline underline-offset-4 decoration-primary/30 hover:decoration-primary transition-colors">
+                      Or Browse Files
+                    </p>
+                  </template>
+                  <template v-else>
+                    <div class="mx-auto w-12 h-12 rounded-full bg-green-950/50 flex items-center justify-center mb-4">
+                      <CheckCircleIcon class="w-7 h-7 text-green-300" />
+                    </div>
+                    <p class="text-[14px] font-bold text-on-surface mb-1">
+                      {{ profile.idCardFileName }}
+                    </p>
+                    <p class="text-[11px] text-on-surface-variant mb-4">
+                      Click to replace file
+                    </p>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Row 4: Upload CV Card -->
             <div class="rounded-[2rem] bg-surface-container-lowest p-6 md:p-10 border border-outline-variant/30 shadow-[0_18px_48px_rgba(0,0,0,0.28)]">
               <h3 class="text-base font-bold text-on-surface mb-6">Upload Your CV</h3>
               <div

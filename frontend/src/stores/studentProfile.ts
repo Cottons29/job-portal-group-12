@@ -56,6 +56,8 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
   const currency = ref<Currency>('USD')
   const cvFile = ref<File | null>(null)
   const cvFileName = ref('')
+  const idCardFile = ref<File | null>(null)
+  const idCardFileName = ref('')
 
   // ── Save state ──
   const isSaving = ref(false)
@@ -105,6 +107,11 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
     cvFileName.value = file ? file.name : ''
   }
 
+  function setIdCardFile(file: File | null) {
+    idCardFile.value = file
+    idCardFileName.value = file ? file.name : ''
+  }
+
   /**
    * Persist the full onboarding form to the backend.
    *
@@ -133,7 +140,10 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
       formData.append('skills', JSON.stringify(skills.value))
       formData.append('availability', JSON.stringify(availability.value))
       if (cvFile.value) {
-        formData.append('cv', cvFile.value)
+        formData.append('cvFile', cvFile.value)
+      }
+      if (idCardFile.value) {
+        formData.append('idCardFile', idCardFile.value)
       }
 
       const { data } = await api.post<StudentProfileResponse>('/profile/student/setup', formData)
@@ -160,6 +170,8 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
     currency.value = 'USD'
     cvFile.value = null
     cvFileName.value = ''
+    idCardFile.value = null
+    idCardFileName.value = ''
     isSaving.value = false
     saveError.value = ''
   }
@@ -179,6 +191,8 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
     currency,
     cvFile,
     cvFileName,
+    idCardFile,
+    idCardFileName,
     isSaving,
     saveError,
     step1Valid,
@@ -189,6 +203,7 @@ export const useStudentProfileStore = defineStore('studentProfile', () => {
     removeSkill,
     toggleCurrency,
     setCvFile,
+    setIdCardFile,
     saveProfile,
     resetForm,
   }

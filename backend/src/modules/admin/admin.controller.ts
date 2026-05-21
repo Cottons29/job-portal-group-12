@@ -37,4 +37,32 @@ export class AdminController {
     await this.adminService.revokeEmployer(id);
     return { success: true, message: 'Employer verification status revoked' };
   }
+
+  @Get('students/pending')
+  async getPendingStudents() {
+    return this.adminService.getPendingStudents();
+  }
+
+  @Get('students/verified')
+  async getVerifiedStudents() {
+    return this.adminService.getVerifiedStudents();
+  }
+
+  @Patch('students/:id/approve')
+  async approveStudent(@Param('id') id: string) {
+    await this.adminService.approveStudent(id);
+    return { success: true, message: 'Student approved' };
+  }
+
+  @Delete('students/:id/reject')
+  async rejectStudent(@Param('id') id: string) {
+    await this.adminService.rejectStudent(id);
+    return { success: true, message: 'Student rejected and deleted' };
+  }
+
+  @Patch('students/:id/revoke')
+  async revokeStudent(@Param('id') id: string) {
+    await this.adminService.revokeStudent(id);
+    return { success: true, message: 'Student verification status revoked' };
+  }
 }
