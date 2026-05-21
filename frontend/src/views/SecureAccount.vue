@@ -48,20 +48,25 @@ const handleVerifyOtp = async () => {
   try {
     const { data } = await api.post('/auth/verify-otp',
       await encryptPayload({
-        email: email.value, 
+        email: email.value,
         code: otp.value,
-        userId: authStore.user?.id 
-      })
+        userId: authStore.user?.id,
+      }),
     )
-    
+
     if (data.user) {
       authStore.setUser(data.user)
     } else if (authStore.user) {
       await authStore.refreshUser()
     }
-    
-    // Route completion correctly
-    router.push('/home')
+
+    // If the user still needs onboarding, send them to the proper onboarding route.
+    if (authStore.needsOnboarding) {
+      const rolePath = authStore.user?.role?.toLowerCase() === 'employer' ? 'employer' : 'student'
+      router.push(`/onboarding/${rolePath}`)
+    } else {
+      router.push('/home')
+    }
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Invalid or expired code. Please try again.'
   } finally {

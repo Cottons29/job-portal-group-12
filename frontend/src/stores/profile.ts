@@ -29,7 +29,9 @@ export const useProfileStore = defineStore('profile', () => {
     address: '',
     website: '',
     companyDescription: '',
-    isVerified: false
+    isVerified: false,
+    isStudentVerified: false,
+    idCardUrl: ''
   })
 
   const isSavingProfile = ref(false)
@@ -59,6 +61,8 @@ export const useProfileStore = defineStore('profile', () => {
     if (Array.isArray(profile?.skills)) profileForm.skills = profile.skills
     if (profile?.availability) profileForm.availability = profile.availability
     profileForm.isVerified = !!profile?.isVerified
+    profileForm.isStudentVerified = !!profile?.isStudentVerified
+    profileForm.idCardUrl = profile?.idCardUrl || ''
 
     profileForm.companyName = profile?.companyName || ''
     profileForm.industry = profile?.industry || ''

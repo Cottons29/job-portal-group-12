@@ -57,6 +57,7 @@ export class ProfileService {
     userId: string,
     data: any,
     cvFile?: Express.Multer.File,
+    idCardFile?: Express.Multer.File,
     avatarFile?: Express.Multer.File,
   ): Promise<User> {
     const user = await this.getProfile(userId);
@@ -106,6 +107,14 @@ export class ProfileService {
     if (cvFile) {
       const uploadedFile = await this.sheepFileService.upload(cvFile);
       user.cvUrl = this.toRelativePath(uploadedFile.url);
+    }
+
+    if (idCardFile) {
+      const uploadedFile = await this.sheepFileService.upload(idCardFile);
+      user.idCardUrl = this.toRelativePath(uploadedFile.url);
+
+      // When user uploads ID card for verification, reset verification flag
+      user.isStudentVerified = false;
     }
 
     if (avatarFile) {

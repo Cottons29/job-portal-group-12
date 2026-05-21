@@ -75,6 +75,12 @@ export class User {
   @Column({ nullable: true })
   profileImageUrl?: string;
 
+  @Column({ nullable: true })
+  idCardUrl?: string;
+
+  @Column({ default: false })
+  isStudentVerified: boolean;
+
   @Column('text', {
     array: true,
     default: () => 'ARRAY[]::text[]',

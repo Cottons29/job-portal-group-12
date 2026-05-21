@@ -86,10 +86,9 @@
             </p>
           </template>
           <template v-else-if="activeTab === 'pending'">
-            <h2 class="text-3xl font-display font-bold text-blue-600 mb-2">Pending Employers</h2>
+            <h2 class="text-3xl font-display font-bold text-blue-600 mb-2">Pending {{ currentEntity === 'employer' ? 'Employers' : 'Students' }}</h2>
             <p class="text-slate-500 text-sm leading-relaxed">
-              Review and approve new employer registrations to grant access to the talent pool. Ensure all submitted
-              Business Patents are valid.
+              Review and approve new {{ currentEntity === 'employer' ? 'employer registrations. Ensure business patents are valid.' : 'student ID submissions for verification.' }}
             </p>
           </template>
           <template v-else-if="activeTab === 'verified'">
@@ -108,6 +107,11 @@
 
         <!-- Search & Filter (Visible for lists) -->
         <div v-if="activeTab === 'pending' || activeTab === 'verified'" class="flex items-center gap-3 flex-shrink-0">
+          <div class="inline-flex rounded-lg bg-white p-1 border border-slate-100">
+            <button @click="currentEntity = 'employer'" :class="['px-3 py-1 rounded-md text-sm font-semibold', currentEntity === 'employer' ? 'bg-blue-600 text-white' : 'text-slate-600']">Employers</button>
+            <button @click="currentEntity = 'student'" :class="['px-3 py-1 rounded-md text-sm font-semibold', currentEntity === 'student' ? 'bg-blue-600 text-white' : 'text-slate-600']">Students</button>
+          </div>
+
           <div
               class="relative bg-white rounded-xl shadow-sm border border-slate-100 flex items-center px-3 py-2 w-64 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <MagnifyingGlassIcon class="w-5 h-5 text-slate-400"/>
@@ -174,7 +178,7 @@
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
-                  <button @click="openModal(employer)"
+                  <button @click="openModal(employer, 'employer')"
                           class="bg-white border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
                     Review
                   </button>
@@ -224,48 +228,60 @@
           <table class="w-full text-left">
             <thead>
             <tr class="text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-              <th class="px-6 py-5">Company Details</th>
+              <th class="px-6 py-5">{{ currentEntity === 'employer' ? 'Company Details' : 'Student Details' }}</th>
               <th class="px-6 py-5">Date Applied</th>
               <th class="px-6 py-5">Status</th>
               <th class="px-6 py-5 text-right font-bold">Actions</th>
             </tr>
             </thead>
             <tbody class="divide-y divide-slate-50">
-            <tr v-if="filteredPendingEmployers.length === 0">
+            <tr v-if="filteredPendingList.length === 0">
               <td colspan="4" class="px-6 py-12 text-center text-slate-400 text-sm">
                 No pending registrations found.
               </td>
             </tr>
-            <tr v-for="employer in filteredPendingEmployers" :key="employer.id"
+            <tr v-for="item in filteredPendingList" :key="item.id"
                 class="hover:bg-slate-50/50 transition-colors group">
               <td class="px-6 py-4">
                 <div class="flex items-center gap-4">
                   <div
                       class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100/80 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
-                    <BuildingOfficeIcon class="w-6 h-6"/>
+                    </div>
+                  <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-slate-800">{{ currentEntity === 'employer' ? item.companyName : item.fullName }}</span>
+                      <span v-if="currentEntity === 'student' && item.status !== 'Verified'" class="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Not Verified</span>
+                    </div>
+                    <span class="text-xs text-slate-400 font-semibold">{{ currentEntity === 'employer' ? item.industry : item.university }}</span>
+                    <template v-if="currentEntity === 'employer'">
+                      <BuildingOfficeIcon class="w-6 h-6"/>
+                    </template>
+                    <template v-else>
+                      <UsersIcon class="w-6 h-6"/>
+                    </template>
                   </div>
                   <div class="flex flex-col">
-                    <span class="font-bold text-slate-800">{{ employer.companyName }}</span>
-                    <span class="text-xs text-slate-400 font-semibold">{{ employer.industry }}</span>
+                    <span class="font-bold text-slate-800">{{ currentEntity === 'employer' ? item.companyName : item.fullName }}</span>
+                    <span class="text-xs text-slate-400 font-semibold">{{ currentEntity === 'employer' ? item.industry : item.university }}</span>
                   </div>
                 </div>
               </td>
               <td class="px-6 py-4 text-sm text-slate-600 font-medium">
-                {{ employer.appliedDate }}
+                {{ item.appliedDate }}
               </td>
               <td class="px-6 py-4">
-                <span v-if="employer.status === 'Pending Review'"
+                <span v-if="item.status === 'Pending Review' || item.status === 'Pending Verification'"
                       class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
-                  Pending Review
+                  {{ item.status }}
                 </span>
-                <span v-else-if="employer.status === 'Action Required'"
+                <span v-else-if="item.status === 'Action Required'"
                       class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700">
                   Action Required
                 </span>
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="flex justify-end gap-2">
-                  <button @click="openModal(employer)"
+                  <button @click="openModal(item, currentEntity)"
                           class="w-9 h-9 rounded-xl flex items-center justify-center bg-blue-50/50 text-blue-600 hover:bg-blue-50 transition-colors focus:outline-none">
                     <EyeIcon class="w-4.5 h-4.5"/>
                   </button>
@@ -289,42 +305,53 @@
             </tr>
             </thead>
             <tbody class="divide-y divide-slate-50">
-            <tr v-if="filteredVerifiedEmployers.length === 0">
+            <tr v-if="filteredVerifiedList.length === 0">
               <td colspan="3" class="px-6 py-12 text-center text-slate-400 text-sm">
-                No verified companies found.
+                No verified {{ currentEntity === 'employer' ? 'companies' : 'students' }} found.
               </td>
             </tr>
-            <tr v-for="employer in filteredVerifiedEmployers" :key="employer.id"
+            <tr v-for="item in filteredVerifiedList" :key="item.id"
                 class="hover:bg-slate-50/50 transition-colors group">
               <td class="px-6 py-4">
                 <div class="flex items-center gap-4">
                   <div
                       class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100/80 flex items-center justify-center text-slate-400 group-hover:bg-green-50 group-hover:text-green-500 transition-colors">
-                    <BuildingOfficeIcon class="w-6 h-6"/>
+                    <template v-if="currentEntity === 'employer'">
+                      <BuildingOfficeIcon class="w-6 h-6"/>
+                    </template>
+                    <template v-else>
+                      <UsersIcon class="w-6 h-6"/>
+                    </template>
                   </div>
                   <div class="flex flex-col">
-                    <span class="font-bold text-slate-800">{{ employer.companyName }}</span>
-                    <span class="text-xs text-slate-400 font-semibold">{{ employer.industry }}</span>
+                    <span class="font-bold text-slate-800">{{ currentEntity === 'employer' ? item.companyName : item.fullName }}</span>
+                    <span class="text-xs text-slate-400 font-semibold">{{ currentEntity === 'employer' ? item.industry : item.university }}</span>
                   </div>
                 </div>
               </td>
               <td class="px-6 py-4">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700">
+                <span v-if="currentEntity === 'employer'"
+                      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700">
                   <ShieldCheckIcon class="w-4 h-4" />
                   Verified SME
+                </span>
+                <span v-else
+                      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700">
+                  <ShieldCheckIcon class="w-4 h-4" />
+                  Verified Student
                 </span>
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="flex justify-end gap-2">
-                  <button @click="openModal(employer)"
+                  <button @click="openModal(item, currentEntity)"
                           class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
-                    View Patent
+                    {{ currentEntity === 'employer' ? 'View Patent' : 'View ID' }}
                   </button>
-                  <button @click="revokeEmployer(employer.id)"
+                  <button @click="revokeSelected(item.id)"
                           class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 transition-colors">
                     Revoke Status
                   </button>
-                  <button @click="deleteEmployerDirectly(employer.id)"
+                  <button v-if="currentEntity === 'employer'" @click="deleteEmployerDirectly(item.id)"
                           class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-red-50 hover:bg-red-100 text-red-600 transition-colors">
                     Delete SME
                   </button>
@@ -377,16 +404,18 @@
 
     </main>
 
-    <!-- PatentViewerModal -->
+    <!-- Document Review Modal (Employer / Student) -->
     <Transition name="modal">
-      <div v-if="selectedEmployer"
+      <div v-if="selectedItem"
            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
         <div class="bg-white w-full max-w-3xl rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
           <!-- Modal Header -->
           <div class="flex items-center justify-between p-6 pb-4">
             <div>
-              <h2 class="text-xl font-display font-bold text-slate-800">Review SME Documentation</h2>
-              <p class="text-sm text-slate-500 mt-1 font-semibold">{{ selectedEmployer.companyName }} ({{ selectedEmployer.industry }})</p>
+              <h2 class="text-xl font-display font-bold text-slate-800">Review {{ selectedEntity === 'employer' ? 'SME Documentation' : 'Student ID' }}</h2>
+              <p class="text-sm text-slate-500 mt-1 font-semibold">
+                {{ selectedEntity === 'employer' ? `${selectedItem.companyName} (${selectedItem.industry})` : `${selectedItem.fullName} — ${selectedItem.university}` }}
+              </p>
             </div>
             <button @click="closeModal"
                     class="text-slate-400 hover:text-slate-700 transition-colors p-2 rounded-full hover:bg-slate-100">
@@ -396,33 +425,55 @@
             </button>
           </div>
 
-          <!-- Modal Body (Patent Image / File) -->
+          <!-- Modal Body (Document Image / File) -->
           <div class="p-6 bg-slate-50/50 flex-1 overflow-y-auto min-h-[300px] flex items-center justify-center">
-            <!-- Render Real uploaded Patent file if it exists -->
-            <div v-if="selectedEmployer.patentUrl && selectedEmployer.patentUrl !== 'No document uploaded'"
+            <div v-if="(selectedEntity === 'employer' ? selectedItem.patentUrl : selectedItem.idCardUrl)"
                  class="w-full bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col items-center justify-center p-4">
-              <template v-if="isImage(selectedEmployer.patentUrl)">
-                <img :src="resolveUrl(selectedEmployer.patentUrl)" class="max-w-full h-auto object-contain max-h-[50vh] rounded-lg shadow-sm" alt="Business Patent" />
-              </template>
-              <template v-else>
-                <div class="flex flex-col items-center text-center p-8">
-                  <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
+              <template v-if="selectedEntity === 'employer'">
+                <template v-if="isImage(selectedItem.patentUrl)">
+                  <img :src="resolveUrl(selectedItem.patentUrl)" class="max-w-full h-auto object-contain max-h-[50vh] rounded-lg shadow-sm" alt="Business Patent" />
+                </template>
+                <template v-else>
+                  <div class="flex flex-col items-center text-center p-8">
+                    <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-4">
+                      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                    </div>
+                    <span class="text-lg font-bold text-slate-800">Business Patent File (PDF/Doc)</span>
+                    <p class="text-sm text-slate-400 font-semibold mt-1">This document is not an image and cannot be viewed in the browser directly.</p>
+                    <a :href="resolveUrl(selectedItem.patentUrl)" target="_blank" download class="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors inline-flex items-center gap-2">
+                      <ArrowDownTrayIcon class="w-4 h-4 text-white" />
+                      Download Patent
+                    </a>
                   </div>
-                  <span class="text-lg font-bold text-slate-800">Business Patent File (PDF/Doc)</span>
-                  <p class="text-sm text-slate-400 font-semibold mt-1">This document is not an image and cannot be viewed in the browser directly.</p>
-                  <a :href="resolveUrl(selectedEmployer.patentUrl)" target="_blank" download class="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors inline-flex items-center gap-2">
-                    <ArrowDownTrayIcon class="w-4 h-4 text-white" />
-                    Download Patent
-                  </a>
-                </div>
+                </template>
+              </template>
+
+              <template v-else>
+                <template v-if="isImage(selectedItem.idCardUrl)">
+                  <img :src="resolveUrl(selectedItem.idCardUrl)" class="max-w-full h-auto object-contain max-h-[50vh] rounded-lg shadow-sm" alt="Student ID" />
+                </template>
+                <template v-else>
+                  <div class="flex flex-col items-center text-center p-8">
+                    <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-4">
+                      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                    </div>
+                    <span class="text-lg font-bold text-slate-800">ID Document (PDF/Doc)</span>
+                    <p class="text-sm text-slate-400 font-semibold mt-1">This document is not an image and cannot be viewed in the browser directly.</p>
+                    <a :href="resolveUrl(selectedItem.idCardUrl)" target="_blank" download class="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors inline-flex items-center gap-2">
+                      <ArrowDownTrayIcon class="w-4 h-4 text-white" />
+                      Download ID Document
+                    </a>
+                  </div>
+                </template>
               </template>
             </div>
-            
-            <!-- Mock Placeholder only if truly no document uploaded -->
+
             <div v-else
                 class="w-full bg-white rounded-xl shadow-sm flex flex-col items-center justify-center border border-slate-100 p-8">
               <div class="flex flex-col items-center text-center p-8">
@@ -433,41 +484,67 @@
                   </svg>
                 </div>
                 <span class="text-lg font-bold text-slate-800">No Document Uploaded</span>
-                <span class="text-xs font-semibold text-slate-400 mt-2 max-w-sm">The company did not upload a business patent file during profile setup.</span>
+                <span class="text-xs font-semibold text-slate-400 mt-2 max-w-sm">No document was uploaded for this submission.</span>
               </div>
             </div>
           </div>
 
           <!-- Modal Footer (Actions) -->
           <div class="p-6 flex gap-4 bg-white border-t border-slate-50">
-            <!-- If the employer is already verified, we show "Revoke" option -->
-            <template v-if="isVerifiedSme(selectedEmployer)">
-              <button @click="revokeEmployer(selectedEmployer.id)"
-                      class="flex-grow bg-amber-500 hover:bg-amber-600 text-white py-3.5 rounded-xl font-bold transition-colors shadow-sm flex items-center justify-center gap-2">
-                Revoke Verification Status
-              </button>
-              <button @click="rejectEmployer"
-                      class="flex-1 bg-transparent border border-red-200 text-red-600 hover:bg-red-50 py-3.5 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
-                Delete SME Account
-              </button>
+            <template v-if="selectedEntity === 'employer'">
+              <template v-if="isVerifiedSme(selectedItem)">
+                <button @click="revokeSelected(selectedItem.id)"
+                        class="flex-grow bg-amber-500 hover:bg-amber-600 text-white py-3.5 rounded-xl font-bold transition-colors shadow-sm flex items-center justify-center gap-2">
+                  Revoke Verification Status
+                </button>
+                <button @click="rejectSelected"
+                        class="flex-1 bg-transparent border border-red-200 text-red-600 hover:bg-red-50 py-3.5 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
+                  Delete SME Account
+                </button>
+              </template>
+              <template v-else>
+                <button @click="approveSelected"
+                        class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3.5 rounded-xl font-bold transition-colors shadow-sm flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Approve Employer
+                </button>
+                <button @click="rejectSelected"
+                        class="flex-1 bg-transparent border-2 border-red-100 text-red-600 hover:bg-red-50 py-3.5 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                  Reject & Delete
+                </button>
+              </template>
             </template>
-            <!-- Otherwise, we show standard approve / reject controls -->
+
             <template v-else>
-              <button @click="approveEmployer"
-                      class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3.5 rounded-xl font-bold transition-colors shadow-sm flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Approve Employer
-              </button>
-              <button @click="rejectEmployer"
-                      class="flex-1 bg-transparent border-2 border-red-100 text-red-600 hover:bg-red-50 py-3.5 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-                Reject & Delete
-              </button>
+              <template v-if="verifiedStudentsList.some(s => s.id === selectedItem.id)">
+                <button @click="revokeSelected(selectedItem.id)"
+                        class="flex-grow bg-amber-500 hover:bg-amber-600 text-white py-3.5 rounded-xl font-bold transition-colors shadow-sm flex items-center justify-center gap-2">
+                  Revoke Student Verification
+                </button>
+              </template>
+              <template v-else>
+                <button @click="approveSelected"
+                        class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3.5 rounded-xl font-bold transition-colors shadow-sm flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Approve Student
+                </button>
+                <button @click="rejectSelected"
+                        class="flex-1 bg-transparent border-2 border-red-100 text-red-600 hover:bg-red-50 py-3.5 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                  Reject Student
+                </button>
+              </template>
             </template>
           </div>
         </div>
@@ -502,9 +579,13 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const activeTab = ref('dashboard') // 'dashboard' | 'pending' | 'verified' | 'stats'
+const currentEntity = ref('employer') // 'employer' | 'student'
 const pendingEmployers = ref([])
+const pendingStudents = ref([])
 const verifiedEmployersList = ref([])
-const selectedEmployer = ref(null)
+const verifiedStudentsList = ref([])
+const selectedItem = ref(null)
+const selectedEntity = ref('employer')
 const searchQuery = ref('')
 
 const stats = ref({
@@ -536,23 +617,39 @@ const studentRatioPercent = computed(() => {
   return Math.round((stats.value.totalStudents / sum) * 100)
 })
 
-// Search filters
-const filteredPendingEmployers = computed(() => {
-  if (!searchQuery.value.trim()) return pendingEmployers.value
-  const q = searchQuery.value.toLowerCase()
-  return pendingEmployers.value.filter(emp =>
-    emp.companyName?.toLowerCase().includes(q) ||
-    emp.industry?.toLowerCase().includes(q)
-  )
+// Search filters and generic filtered lists
+const filteredPendingList = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (currentEntity.value === 'employer') {
+    if (!q) return pendingEmployers.value
+    return pendingEmployers.value.filter(emp =>
+      emp.companyName?.toLowerCase().includes(q) ||
+      emp.industry?.toLowerCase().includes(q)
+    )
+  } else {
+    if (!q) return pendingStudents.value
+    return pendingStudents.value.filter(s =>
+      s.fullName?.toLowerCase().includes(q) ||
+      s.university?.toLowerCase().includes(q)
+    )
+  }
 })
 
-const filteredVerifiedEmployers = computed(() => {
-  if (!searchQuery.value.trim()) return verifiedEmployersList.value
-  const q = searchQuery.value.toLowerCase()
-  return verifiedEmployersList.value.filter(emp =>
-    emp.companyName?.toLowerCase().includes(q) ||
-    emp.industry?.toLowerCase().includes(q)
-  )
+const filteredVerifiedList = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (currentEntity.value === 'employer') {
+    if (!q) return verifiedEmployersList.value
+    return verifiedEmployersList.value.filter(emp =>
+      emp.companyName?.toLowerCase().includes(q) ||
+      emp.industry?.toLowerCase().includes(q)
+    )
+  } else {
+    if (!q) return verifiedStudentsList.value
+    return verifiedStudentsList.value.filter(s =>
+      s.fullName?.toLowerCase().includes(q) ||
+      s.university?.toLowerCase().includes(q)
+    )
+  }
 })
 
 const isVerifiedSme = (employer) => {
@@ -589,6 +686,33 @@ const fetchPendingEmployers = async () => {
   }
 }
 
+const fetchPendingStudents = async () => {
+  try {
+    const response = await api.get('/admin/students/pending')
+    pendingStudents.value = response.data.map(s => {
+      const applied = new Date(s.createdAt)
+      const diffTime = Math.abs(new Date() - applied)
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+      return {
+        id: s.id,
+        fullName: s.fullName || 'Unnamed Student',
+        university: s.university || 'Unknown',
+        appliedDate: new Intl.DateTimeFormat('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }).format(applied),
+        createdAt: s.createdAt,
+        status: diffDays > 3 ? 'Action Required' : 'Pending Verification',
+        idCardUrl: s.idCardUrl || ''
+      }
+    })
+  } catch (error) {
+    console.error('Failed to fetch pending students:', error)
+  }
+}
+
 const fetchVerifiedEmployers = async () => {
   try {
     const response = await api.get('/admin/employers/verified')
@@ -611,6 +735,26 @@ const fetchVerifiedEmployers = async () => {
   }
 }
 
+const fetchVerifiedStudents = async () => {
+  try {
+    const response = await api.get('/admin/students/verified')
+    verifiedStudentsList.value = response.data.map(s => ({
+      id: s.id,
+      fullName: s.fullName || 'Unnamed Student',
+      university: s.university || 'Unknown',
+      appliedDate: new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }).format(new Date(s.createdAt)),
+      createdAt: s.createdAt,
+      idCardUrl: s.idCardUrl || ''
+    }))
+  } catch (error) {
+    console.error('Failed to fetch verified students:', error)
+  }
+}
+
 const fetchStats = async () => {
   try {
     const response = await api.get('/admin/stats')
@@ -624,6 +768,8 @@ const loadData = async () => {
   await Promise.all([
     fetchPendingEmployers(),
     fetchVerifiedEmployers(),
+    fetchPendingStudents(),
+    fetchVerifiedStudents(),
     fetchStats()
   ])
 }
@@ -632,48 +778,63 @@ onMounted(() => {
   loadData()
 })
 
-const openModal = (employer) => {
-  selectedEmployer.value = employer
+const openModal = (item, entity = 'employer') => {
+  selectedItem.value = item
+  selectedEntity.value = entity
 }
 
 const closeModal = () => {
-  selectedEmployer.value = null
+  selectedItem.value = null
+  selectedEntity.value = 'employer'
 }
 
-const approveEmployer = async () => {
-  if (!selectedEmployer.value) return
+const approveSelected = async () => {
+  if (!selectedItem.value) return
   try {
-    await api.patch(`/admin/employers/${selectedEmployer.value.id}/approve`)
+    if (selectedEntity.value === 'employer') {
+      await api.patch(`/admin/employers/${selectedItem.value.id}/approve`)
+    } else {
+      await api.patch(`/admin/students/${selectedItem.value.id}/approve`)
+    }
+
     closeModal()
     await loadData()
   } catch (error) {
-    console.error('Failed to approve employer:', error)
-    alert('An error occurred while approving the employer.')
+    console.error('Failed to approve:', error)
+    alert('An error occurred while approving.')
   }
 }
 
-const rejectEmployer = async () => {
-  if (!selectedEmployer.value) return
+const rejectSelected = async () => {
+  if (!selectedItem.value) return
   try {
-    await api.delete(`/admin/employers/${selectedEmployer.value.id}/reject`)
+    if (selectedEntity.value === 'employer') {
+      await api.delete(`/admin/employers/${selectedItem.value.id}/reject`)
+    } else {
+      await api.delete(`/admin/students/${selectedItem.value.id}/reject`)
+    }
     closeModal()
     await loadData()
   } catch (error) {
-    console.error('Failed to reject employer:', error)
-    alert('An error occurred while rejecting the employer.')
+    console.error('Failed to reject:', error)
+    alert('An error occurred while rejecting.')
   }
 }
 
-const revokeEmployer = async (employerId) => {
+const revokeSelected = async (id) => {
   try {
-    await api.patch(`/admin/employers/${employerId}/revoke`)
-    if (selectedEmployer.value && selectedEmployer.value.id === employerId) {
+    if (selectedEntity.value === 'employer') {
+      await api.patch(`/admin/employers/${id}/revoke`)
+    } else {
+      await api.patch(`/admin/students/${id}/revoke`)
+    }
+    if (selectedItem.value && selectedItem.value.id === id) {
       closeModal()
     }
     await loadData()
   } catch (error) {
-    console.error('Failed to revoke employer:', error)
-    alert('An error occurred while revoking the employer.')
+    console.error('Failed to revoke:', error)
+    alert('An error occurred while revoking.')
   }
 }
 

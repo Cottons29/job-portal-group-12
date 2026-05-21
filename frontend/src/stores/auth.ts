@@ -154,6 +154,8 @@ export const useAuthStore = defineStore('auth', () => {
             // ── Post-login redirect logic ──
             if (!data.user.email) {
                 await router.push('/secure-account')
+            } else if (!data.user.profileCompleted) {
+                await router.push('/onboarding')
             } else {
                 await router.push('/home')
             }
@@ -184,6 +186,8 @@ export const useAuthStore = defineStore('auth', () => {
 
             if (!data.user.email) {
                 await router.push('/secure-account')
+            } else if (!data.user.profileCompleted) {
+                await router.push('/onboarding')
             } else {
                 await router.push('/home')
             }

@@ -175,7 +175,17 @@ router.beforeEach(async (to) => {
             return '/home'
         }
 
-        // Redirect any onboarding routes to settings
+        // Allow unfinished profiles to access onboarding
+        if (authStore.needsOnboarding) {
+            if (to.path.startsWith('/onboarding')) {
+                return true
+            }
+            if (to.meta.requiresAuth && to.path !== '/secure-account') {
+                return '/onboarding'
+            }
+        }
+
+        // Redirect completed users away from onboarding routes
         if (to.path.startsWith('/onboarding')) {
             return '/settings'
         }

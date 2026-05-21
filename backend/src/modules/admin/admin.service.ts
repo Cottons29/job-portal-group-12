@@ -57,6 +57,47 @@ export class AdminService {
     await this.userRepo.save(employer);
   }
 
+  // --- Student verification management ---
+  async getPendingStudents(): Promise<User[]> {
+    return await this.userRepo.find({
+      where: { role: UserRole.STUDENT, isStudentVerified: false },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async approveStudent(id: string): Promise<void> {
+    const student = await this.userRepo.findOne({ where: { id, role: UserRole.STUDENT } });
+    if (!student) {
+      throw new NotFoundException('Student not found');
+    }
+    student.isStudentVerified = true;
+    await this.userRepo.save(student);
+  }
+
+  async rejectStudent(id: string): Promise<void> {
+    const student = await this.userRepo.findOne({ where: { id, role: UserRole.STUDENT } });
+    if (!student) {
+      throw new NotFoundException('Student not found');
+    }
+    await this.userRepo.delete(id);
+  }
+
+  async revokeStudent(id: string): Promise<void> {
+    const student = await this.userRepo.findOne({ where: { id, role: UserRole.STUDENT } });
+    if (!student) {
+      throw new NotFoundException('Student not found');
+    }
+    student.isStudentVerified = false;
+    await this.userRepo.save(student);
+  }
+
+  async getVerifiedStudents(): Promise<User[]> {
+    return await this.userRepo.find({
+      where: { role: UserRole.STUDENT, isStudentVerified: true },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async getAdminStats() {
     const totalStudents = await this.userRepo.count({
       where: { role: UserRole.STUDENT },

@@ -260,6 +260,27 @@ async function fetchTaggedPosts() {
                   >
                     ★ Verified
                   </span>
+                  <span
+                    v-else-if="!isEmployer && profileStore.profileForm.isStudentVerified"
+                    class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-700 ring-1 ring-emerald-500/20"
+                    title="Student Verified"
+                  >
+                    ✓ Verified Student
+                  </span>
+                  <span
+                    v-else-if="!isEmployer && profileStore.profileForm.idCardUrl"
+                    class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-700 ring-1 ring-amber-500/20"
+                    title="Student verification is pending"
+                  >
+                    ⏳ Verification Pending
+                  </span>
+                  <span
+                    v-else-if="!isEmployer"
+                    class="inline-flex items-center gap-1 rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-700 ring-1 ring-slate-300"
+                    title="Student is not yet verified"
+                  >
+                    ✕ Not Verified
+                  </span>
                 </div>
                 <p class="mt-2 text-base text-on-surface font-thin">{{ profileHandle }}</p>
               </div>
