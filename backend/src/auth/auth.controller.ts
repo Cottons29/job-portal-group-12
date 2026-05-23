@@ -198,6 +198,66 @@ export class AuthController {
     );
     return { message: 'Email forcefully secured', user };
   }
+  @Post('forgot-password')
+  async forgotPassword(@Body() encryptedBody: EncryptedPayloadDto,@Req() req:Request){
+    const body =await this.payloadEncryptionService.decrypt<{
+     email:string
+    }>(encryptedBody)
+    await this.authService.sendForgotPasswordOtp(body.email)
+    console.log("this is body after decryted", body)
+     return { message: 'Verification code for forgot password sent to email.' };
+
+  }
+  @Post('verify-reset-otp')
+async verifyResetOtp(
+  @Body() encryptedBody:
+    EncryptedPayloadDto,
+) {
+
+  const body =
+    await this.payloadEncryptionService
+      .decrypt<{
+        email: string
+        code: string
+      }>(encryptedBody)
+
+  await this.authService.verifyResetOtp(
+    body.email,
+    body.code,
+  )
+
+  return {
+    message:
+      'OTP verified successfully'
+  }
+}
+  @Post('reset-password')
+  async resetPassword(
+    @Body() encryptedBody:
+      EncryptedPayloadDto,
+  ) {
+
+    const body =
+      await this.payloadEncryptionService
+        .decrypt<{
+          email: string
+          code: string
+          newPassword: string
+        }>(encryptedBody);
+
+    await this.authService
+      .resetPassword(
+        body.email,
+        body.code,
+        body.newPassword,
+      );
+
+    return {
+      message:
+        'Password reset successful'
+    };
+  }
+
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)

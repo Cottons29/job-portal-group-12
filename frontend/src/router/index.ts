@@ -22,6 +22,16 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/AuthView.vue'),
     },
     {
+        path:'/forgot-password',
+        name:'forgot-password',
+        component:() => import('@/views/ForgotPassword.vue')
+    },
+    {
+        path:'/reset-password',
+        name:'reset-password',
+        component:()=>import('@/views/ResetPasswor.vue')
+    },
+    {
         path: '/about-us',
         name: 'about-us',
         component: () => import('@/views/AboutUs.vue'),
