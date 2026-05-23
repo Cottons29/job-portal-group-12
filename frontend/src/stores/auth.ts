@@ -236,12 +236,37 @@ export const useAuthStore = defineStore('auth', () => {
             isLoading.value = false
         }
     }
+    // user forgot password, enter their email and nodmailer send 6 digit code
+    async function forgotPassword(email: string) {
+        const encryptedPayload =
+            await encryptPayload({
+            email
+            })
+
+        return api.post(
+            '/auth/forgot-password',
+            encryptedPayload
+        )
+    }
+    async function verifyResetOtp(data: {
+        email: string
+        code: string
+    }) {
+
+    const encryptedPayload =
+        await encryptPayload(data)
+
+    return api.post(
+        '/auth/verify-reset-otp',
+        encryptedPayload
+    )
+    }
 
     async function logout(router: Router) {
         try {
             await api.post('/auth/logout')
         } catch (err) {
-            // Local logout should still succeed even if the backend is unavailable.
+            // Local logout should still succeed even  if the backend is unavailable.
         }
 
         setUser(null)
@@ -250,6 +275,20 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.removeItem('fs_token')
         resetForm()
         await router.push('/auth')
+    }
+    async function resetPassword(data: {
+        email: string
+        code: string
+        newPassword: string
+    }) {
+
+    const encryptedPayload =
+        await encryptPayload(data)
+
+    return api.post(
+        '/auth/reset-password',
+        encryptedPayload
+    )
     }
 
     return {
@@ -276,6 +315,10 @@ export const useAuthStore = defineStore('auth', () => {
         login,
         loginWithPasskey,
         register,
+
+        forgotPassword,
+        verifyResetOtp,
+        resetPassword,
         logout,
     }
 })

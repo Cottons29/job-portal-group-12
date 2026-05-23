@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
@@ -179,6 +180,78 @@ export class AuthService {
     user.password = await bcrypt.hash(newPassword, 10);
     await this.userRepository.save(user);
   }
+  async resetPassword(
+  email: string,
+  code: string,
+  newPassword: string,
+) {
+
+  const otp =
+    this.otps.find(
+      (o) =>
+        o.email === email &&
+        o.code === code
+    );
+
+  if (!otp) {
+    throw new BadRequestException(
+      'Invalid OTP'
+    );
+  }
+
+  if (Date.now() > otp.expiresAt) {
+    throw new BadRequestException(
+      'OTP expired'
+    );
+  }
+
+  const user =
+    await this.userRepository.findOne({
+      where: { email }
+    });
+  if (!user) {
+    throw new NotFoundException(
+      'User not found'
+    )
+  }  
+
+  user.password =
+    await bcrypt.hash(
+      newPassword,
+      10,
+    );
+
+  await this.userRepository.save(user);
+
+  this.otps =
+    this.otps.filter(
+      (o) => o.email !== email
+    );
+  }
+  async verifyResetOtp(
+  email: string,
+  code: string,
+  ) {
+
+  const otp =
+    this.otps.find(
+      (o) =>
+        o.email === email &&
+        o.code === code
+    )
+
+  if (!otp) {
+    throw new BadRequestException(
+      'Invalid OTP'
+    )
+  }
+
+  if (Date.now() > otp.expiresAt) {
+    throw new BadRequestException(
+      'OTP expired'
+    )
+  }
+}
 
   async listPasskeys(userId: string) {
     return await this.passkeyRepository.find({
@@ -381,6 +454,58 @@ export class AuthService {
       throw new BadRequestException('Could not dispatch email via Gmail SMTP.');
     }
   }
+  async sendForgotPasswordOtp(
+  email: string,
+): Promise<void> {
+
+  const user =
+    await this.userRepository.findOne({
+      where: { email }
+    });
+
+  if (!user) {
+    throw new NotFoundException(
+      'No account found with this email.'
+    );
+  }
+
+  const code =
+    Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
+  const expiresAt =
+    Date.now() + 10 * 60 * 1000;
+
+  this.otps =
+    this.otps.filter(
+      (o) => o.email !== email
+    );
+
+  this.otps.push({
+    email,
+    code,
+    expiresAt,
+  });
+
+  await this.transporter.sendMail({
+    from:
+      `"FirstStep Security"
+       <${process.env.GMAIL_USER}>`,
+
+    to: email,
+
+    subject: 'Reset Password OTP',
+
+    html: `
+      <h2>Password Reset</h2>
+
+      <p>Your OTP code:</p>
+
+      <h1>${code}</h1>
+    `,
+  });
+}
 
   async verifyOtpAndAttachEmail(userId: string, email: string, code: string) {
     const record = this.otps.find((o) => o.email === email && o.code === code);

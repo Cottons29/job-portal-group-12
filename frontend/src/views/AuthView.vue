@@ -26,6 +26,9 @@ function handleSubmit() {
   } else {
     auth.login(router)
   }
+}// go to forgot password page 
+function goToForgotPassword() {
+  router.push('/forgot-password')
 }
 </script>
 
@@ -228,7 +231,7 @@ function handleSubmit() {
 
           <!-- Forgot Password (login only) -->
           <div v-if="!isSignUp" class="flex justify-end">
-            <button type="button" class="text-xs font-semibold text-primary-container hover:text-primary transition-colors cursor-pointer">
+            <button @click="goToForgotPassword"  type="button" class="text-xs font-semibold text-primary-container hover:text-primary transition-colors cursor-pointer">
               {{ t('auth.forgotPassword') }}
             </button>
           </div>
