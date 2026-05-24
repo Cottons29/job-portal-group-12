@@ -4,4 +4,12 @@ export class CreatePostDto {
   content: string;
 
   imageUrl?: string;
+
+  isJob?: boolean;
+
+  salary?: string;
+
+  location?: string;
+
+  jobType?: string;
 }

@@ -151,6 +151,10 @@ export class PostsService {
       content,
       imageUrl: this.toRelativePath(dto.imageUrl?.trim() || undefined),
       author,
+      isJob: Boolean(dto.isJob),
+      salary: dto.salary?.trim() || undefined,
+      location: dto.location?.trim() || undefined,
+      jobType: dto.jobType?.trim() || undefined,
     });
 
     const saved = await this.postsRepository.save(post);
@@ -363,6 +367,10 @@ export class PostsService {
       title: post.title,
       content: post.content,
       imageUrl: this.toRelativePath(post.imageUrl),
+      isJob: post.isJob,
+      salary: post.salary,
+      location: post.location,
+      jobType: post.jobType,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       author: post.author,

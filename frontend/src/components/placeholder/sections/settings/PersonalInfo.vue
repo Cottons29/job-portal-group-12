@@ -14,7 +14,8 @@ import {
   SparklesIcon,
   UserCircleIcon,
   IdentificationIcon,
-  BuildingStorefrontIcon
+  BuildingStorefrontIcon,
+  ShieldCheckIcon
 } from '@heroicons/vue/24/outline'
 
 function getAvatarUrl(avatar: any): string {
@@ -160,6 +161,20 @@ const personalInfoRows = computed<PersonalInfoRow[]>(() => {
       placeholder: t('settings.personal.majorPlaceholder'),
       inputType: 'text',
     },
+    {
+      label: 'Student ID Verification',
+      field: 'idCardFile',
+      values: [
+        profileStore.profileForm.isStudentVerified
+          ? '✓ Verified Student'
+          : profileStore.profileForm.idCardUrl
+            ? '⏳ Verification Pending Review'
+            : '✗ Not Verified (Click to upload Student ID Card)'
+      ],
+      icon: ShieldCheckIcon,
+      placeholder: 'Upload your Student ID Card (PDF/Image)',
+      inputType: 'file',
+    }
   ]
 
   const employerRows: PersonalInfoRow[] = [
@@ -187,6 +202,20 @@ const personalInfoRows = computed<PersonalInfoRow[]>(() => {
       placeholder: t('settings.personal.websitePlaceholder'),
       inputType: 'url',
     },
+    {
+      label: 'Business Patent Verification',
+      field: 'patentFile',
+      values: [
+        profileStore.profileForm.isVerified
+          ? '✓ Verified Business / SME'
+          : profileStore.profileForm.patentUrl
+            ? '⏳ Verification Pending Review'
+            : '✗ Not Verified (Click to upload Business Patent)'
+      ],
+      icon: ShieldCheckIcon,
+      placeholder: 'Upload your Business Patent / Document (PDF/Image)',
+      inputType: 'file',
+    }
   ]
 
   return isEmployer ? [...baseRows, ...employerRows] : [...baseRows, ...studentRows]
@@ -363,7 +392,7 @@ onMounted(() => {
         <div v-else class="mt-4">
           <input
               type="file"
-              accept="image/*"
+              :accept="editingRow?.field === 'avatar' ? 'image/*' : 'image/*,.pdf'"
               class="hidden"
               id="avatar-upload"
               @change="onFileChange"
@@ -380,17 +409,24 @@ onMounted(() => {
               @dragleave.prevent="onDragLeave"
               @drop.prevent="onDrop"
           >
-            <template v-if="previewUrl">
+            <template v-if="previewUrl && editingRow?.field === 'avatar'">
               <img :src="previewUrl" class="h-full w-full object-cover rounded-xl" />
               <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                 <CameraIcon class="h-8 w-8 text-white" />
                 <span class="text-white text-xs font-black ml-2">Change Image</span>
               </div>
             </template>
+            <template v-else-if="selectedFile">
+              <div class="flex flex-col items-center text-center p-4">
+                <ShieldCheckIcon class="h-10 w-10 text-emerald-500 mb-2" />
+                <span class="text-xs font-black text-on-surface truncate max-w-[200px]">{{ selectedFile.name }}</span>
+                <span class="text-[10px] text-on-surface-variant/80 mt-1">Ready to upload</span>
+              </div>
+            </template>
             <template v-else>
-              <CameraIcon :class="['h-10 w-10 transition-colors', isDragging ? 'text-primary' : 'text-on-surface-variant']"/>
+              <component :is="editingRow?.field === 'avatar' ? CameraIcon : ShieldCheckIcon" :class="['h-10 w-10 transition-colors', isDragging ? 'text-primary' : 'text-on-surface-variant']"/>
               <p :class="['mt-2 text-sm font-bold text-center transition-colors px-4', isDragging ? 'text-primary' : 'text-on-surface-variant']">
-                Click or drag image to upload
+                {{ editingRow?.field === 'avatar' ? 'Click or drag image to upload' : 'Click or drag verification document (PDF/Image) to upload' }}
               </p>
             </template>
           </label>

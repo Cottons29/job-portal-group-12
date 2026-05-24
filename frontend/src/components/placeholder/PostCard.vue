@@ -1,12 +1,12 @@
 <template>
-<div class="rounded-[1.25rem] bg-surface-container-lowest p-5">
-  <div class="mb-5 flex items-start justify-between gap-4">
+<div class="rounded-3xl border border-on-surface/5 bg-surface-container-lowest p-6 shadow-sm">
+  <div class="mb-4 flex items-start justify-between gap-4">
     <div class="flex items-center gap-3">
       <div
           :class="[
-            post.logoBg,
-            post.logoText,
-            'grid h-12 w-12 cursor-pointer place-items-center overflow-hidden rounded-full text-sm font-black transition hover:opacity-80',
+            post.logoBg || 'bg-[#aecbfa]',
+            post.logoText || 'text-[#1a4fa3]',
+            'grid h-10 w-10 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-full text-xs font-black transition hover:opacity-80',
           ]"
           @click.stop="$emit('show-profile', localPost.authorId)"
       >
@@ -16,25 +16,42 @@
             class="h-full w-full object-cover"
             alt="Profile Image"
         />
-        <span v-else>{{ localPost.company.charAt(0) }}</span>
+        <span v-else>{{ localPost.company?.charAt(0) }}</span>
       </div>
       <div class="cursor-pointer" @click.stop="$emit('show-profile', localPost.authorId)">
-        <p class="font-black text-on-surface hover:underline">{{ localPost.company }}</p>
-        <p class="text-xs font-bold text-on-surface-variant">{{ localPost.meta }}</p>
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <p class="text-sm font-black text-on-surface hover:underline">{{ localPost.company }}</p>
+          <span
+            v-if="localPost.isVerified"
+            class="inline-flex items-center gap-0.5 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-amber-600 ring-1 ring-amber-500/20"
+            title="Verified Employer / SME"
+          >
+            ★ Verified
+          </span>
+          <span
+            v-else-if="localPost.isStudentVerified"
+            class="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-emerald-700 ring-1 ring-emerald-500/20"
+            title="Verified Student"
+          >
+            ✓ Verified
+          </span>
+        </div>
+        <p class="text-[10px] font-bold text-on-surface-variant/70">{{ localPost.meta }}</p>
       </div>
     </div>
-    <EllipsisHorizontalIcon class="h-6 w-6 text-on-surface-variant"/>
+    <button type="button" class="text-on-surface-variant hover:text-on-surface">
+      <EllipsisHorizontalIcon class="h-5 w-5"/>
+    </button>
   </div>
 
   <div
       :class="[
-
-        'rounded-[1.25rem] p-5',
-        { 'cursor-pointer transition-opacity hover:opacity-90': !full },
+        'space-y-3',
+        { 'cursor-pointer': !full },
       ]"
       @click="!full && $emit('open', localPost)"
   >
-    <p v-if="localPost.badge" class="text-xs font-black uppercase tracking-[0.2em] text-primary">
+    <p v-if="localPost.badge" class="text-xs font-black uppercase tracking-[0.18em] text-primary">
       {{
         localPost.badge === 'Hiring now'
             ? $t('home.hiringNow')
@@ -43,104 +60,106 @@
                 : localPost.badge
       }}
     </p>
-    <h2 class="mt-3 font-display text-3xl font-black tracking-[-0.04em] text-on-surface">{{ localPost.title }}</h2>
-    <div :class="['relative mt-3 max-w-2xl', { 'post-preview': !full }]">
+    <h2 class="font-display text-2xl font-black tracking-[-0.03em] text-on-surface leading-tight">{{ localPost.title }}</h2>
+    <div v-if="localPost.isJob" class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-black">
+      <span v-if="localPost.salary" class="text-[13px] font-black text-primary">{{ localPost.salary }}</span>
+      <span v-if="localPost.location" class="text-on-surface-variant/70">• {{ localPost.location }}</span>
+      <span v-if="localPost.jobType" class="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-primary">{{ localPost.jobType }}</span>
+    </div>
+    <div :class="['relative max-w-2xl text-sm font-bold leading-relaxed text-on-surface-variant', { 'post-preview': !full }]">
       <div class="post-markdown prose prose-sm text-on-surface-variant" v-html="localPost.descHtml || localPost.desc"/>
-      <div v-if="!full" class="post-preview__fade pointer-events-none absolute inset-x-0 bottom-0 h-16"/>
+      <div v-if="!full" class="post-preview__fade pointer-events-none absolute inset-x-0 bottom-0 h-10"/>
     </div>
     <button
         v-if="!full"
-        class="mt-3 rounded-full bg-surface-container-lowest/80 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-primary transition hover:bg-surface-container-lowest"
+        class="text-xs font-black uppercase tracking-[0.12em] text-primary hover:underline transition"
         type="button"
         @click.stop="$emit('open', localPost)"
     >
-      Read full post
+      Read Full Post
     </button>
     <img
         v-if="localPost.imageUrl && full"
         :src="localPost.imageUrl"
         :alt="localPost.title"
-        class="mt-5 max-h-96 w-full rounded-2xl object-cover"
+        class="mt-4 max-h-96 w-full rounded-2xl object-cover"
     />
-    <div class="mt-6 flex flex-wrap gap-2">
+    <div v-if="localPost.tags?.length" class="mt-4 flex flex-wrap gap-2">
         <span
             v-for="tag in localPost.tags"
             :key="tag"
-            class="rounded-full bg-surface-container-lowest/80 px-3 py-1.5 text-xs font-black text-primary"
+            class="rounded-full bg-surface-container px-2.5 py-1 text-xs font-black text-primary"
         >
           {{ tag }}
         </span>
     </div>
   </div>
 
-  <div class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/60 pt-4">
-    <div class="flex flex-wrap items-center gap-2">
+  <div class="mt-5 border-t border-on-surface/5 pt-4 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex flex-wrap items-center gap-1.5">
       <button
           type="button"
-          class="flex items-center gap-1.5 rounded-full bg-surface-container-low px-3 py-2 text-xs font-black text-primary transition hover:bg-tertiary-fixed disabled:opacity-40"
+          class="flex items-center gap-1.5 rounded-full bg-primary/5 px-3 py-1.5 text-xs font-black text-primary transition hover:bg-primary/10 disabled:opacity-40"
           aria-label="Like post"
           @click.stop="toggleLike"
       >
-        <HeartIconSolid v-if="localPost.likedByMe" class="h-5 w-5 text-red-500"/>
-        <HeartIcon v-else class="h-5 w-5"/>
+        <HeartIconSolid v-if="localPost.likedByMe" class="h-4 w-4 text-red-500"/>
+        <HeartIcon v-else class="h-4 w-4"/>
         <span>{{ localPost.likeCount ?? 0 }}</span>
       </button>
 
       <button
           type="button"
-          class="flex items-center gap-1.5 rounded-full bg-surface-container-low px-3 py-2 text-xs font-black text-primary transition hover:bg-tertiary-fixed disabled:opacity-40"
-
+          class="flex items-center gap-1.5 rounded-full bg-primary/5 px-3 py-1.5 text-xs font-black text-primary transition hover:bg-primary/10 disabled:opacity-40"
           aria-label="Comments"
           @click.stop="toggleComments"
       >
-        <ChatBubbleOvalLeftEllipsisIcon class="h-5 w-5"/>
+        <ChatBubbleOvalLeftEllipsisIcon class="h-4 w-4"/>
         <span>{{ localPost.commentCount ?? 0 }}</span>
       </button>
 
       <button
           type="button"
-          class="flex items-center gap-1.5 rounded-full bg-surface-container-low px-3 py-2 text-xs font-black text-primary transition hover:bg-tertiary-fixed disabled:opacity-40"
-
+          class="flex items-center gap-1.5 rounded-full bg-primary/5 px-3 py-1.5 text-xs font-black text-primary transition hover:bg-primary/10 disabled:opacity-40"
           aria-label="Share post"
           @click.stop="sharePost"
       >
-        <ArrowUpOnSquareIcon class="h-5 w-5"/>
+        <ArrowUpOnSquareIcon class="h-4 w-4"/>
         <span>{{ localPost.shareCount ?? 0 }}</span>
       </button>
 
       <button
           type="button"
-          class="flex items-center gap-1.5 rounded-full bg-surface-container-low px-3 py-2 text-xs font-black text-primary transition hover:bg-tertiary-fixed disabled:opacity-40"
+          class="flex items-center gap-1.5 rounded-full bg-primary/5 px-3 py-1.5 text-xs font-black text-primary transition hover:bg-primary/10 disabled:opacity-40"
           aria-label="Save post"
           @click.stop="toggleBookmark"
       >
-        <BookmarkIconSolid v-if="localPost.bookmarkedByMe" class="h-5 w-5 text-amber-600"/>
-        <BookmarkIcon v-else class="h-5 w-5"/>
+        <BookmarkIconSolid v-if="localPost.bookmarkedByMe" class="h-4 w-4 text-amber-600"/>
+        <BookmarkIcon v-else class="h-4 w-4"/>
         <span>{{ localPost.bookmarkCount ?? 0 }}</span>
       </button>
     </div>
 
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="flex items-center gap-2">
       <button
-
-          v-if="userRole?.toLowerCase() === 'student' && userId && userId !== localPost.authorId && !appliedPostIds?.has(localPost.id)"
-          class="rounded-full border-2 border-transparent bg-primary px-5 py-2.5 text-sm font-black text-on-primary transition hover:border-primary hover:bg-primary-container hover:text-primary"
+          v-if="userRole?.toLowerCase() === 'student' && userId && userId !== localPost.authorId && localPost.isJob && !appliedPostIds?.has(localPost.id)"
+          class="rounded-full bg-[#002f87] px-6 py-2 text-xs font-black text-white hover:bg-opacity-95 shadow-[0_4px_12px_rgba(0,47,135,0.2)] transition duration-150"
           type="button"
           @click.stop="$emit('apply', localPost)"
       >
-        {{ $t('home.applyNow') }}
+        Apply now
       </button>
       <button
-          v-else-if="userRole?.toLowerCase() === 'student' && userId && userId !== localPost.authorId && appliedPostIds?.has(localPost.id)"
-          class="flex cursor-default items-center gap-2 rounded-full border-2 border-transparent bg-[#8fd99b]/20 px-5 py-2.5 text-sm font-black text-[#1f6c3b]"
+          v-else-if="userRole?.toLowerCase() === 'student' && userId && userId !== localPost.authorId && localPost.isJob && appliedPostIds?.has(localPost.id)"
+          class="flex cursor-default items-center gap-1.5 rounded-full bg-[#8fd99b]/25 px-5 py-2 text-xs font-black text-[#1f6c3b]"
           type="button"
       >
         <CheckCircleIcon class="h-4 w-4"/>
         Applied
       </button>
       <button
-          v-else-if="userRole?.toLowerCase() === 'employer' && userId === localPost.authorId"
-          class="flex items-center gap-2 rounded-full border-2 border-transparent bg-primary px-5 py-2.5 text-sm font-black text-on-primary transition hover:border-primary hover:bg-primary-container hover:text-primary"
+          v-else-if="userRole?.toLowerCase() === 'employer' && userId === localPost.authorId && localPost.isJob"
+          class="flex items-center gap-1.5 rounded-full bg-[#002f87] px-5 py-2 text-xs font-black text-white hover:bg-opacity-95 transition duration-150"
           type="button"
           @click.stop="$emit('view-applicants', localPost)"
       >

@@ -29,6 +29,18 @@ export class PostEntity {
   @Column({ nullable: true })
   imageUrl?: string;
 
+  @Column({ default: false })
+  isJob: boolean;
+
+  @Column({ nullable: true })
+  salary?: string;
+
+  @Column({ nullable: true })
+  location?: string;
+
+  @Column({ nullable: true })
+  jobType?: string;
+
   @ManyToOne(() => User, { eager: true, nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'author_id' })
   author: User;

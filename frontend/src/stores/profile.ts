@@ -31,7 +31,10 @@ export const useProfileStore = defineStore('profile', () => {
     companyDescription: '',
     isVerified: false,
     isStudentVerified: false,
-    idCardUrl: ''
+    idCardUrl: '',
+    patentUrl: '',
+    idCardFile: null as File | null,
+    patentFile: null as File | null,
   })
 
   const isSavingProfile = ref(false)
@@ -63,6 +66,7 @@ export const useProfileStore = defineStore('profile', () => {
     profileForm.isVerified = !!profile?.isVerified
     profileForm.isStudentVerified = !!profile?.isStudentVerified
     profileForm.idCardUrl = profile?.idCardUrl || ''
+    profileForm.patentUrl = profile?.patentUrl || ''
 
     profileForm.companyName = profile?.companyName || ''
     profileForm.industry = profile?.industry || ''
@@ -123,6 +127,12 @@ export const useProfileStore = defineStore('profile', () => {
       } else {
         formData.append('logoUrl', profileForm.avatar || '')
       }
+
+      if (profileForm.patentFile instanceof File) {
+        formData.append('patentFile', profileForm.patentFile)
+      } else {
+        formData.append('patentUrl', profileForm.patentUrl || '')
+      }
     } else {
       formData.append('fullName', profileForm.name || 'Student User')
       formData.append('gender', profileForm.gender || '')
@@ -142,6 +152,12 @@ export const useProfileStore = defineStore('profile', () => {
       formData.append('currency', profileForm.currency || 'USD')
       formData.append('skills', JSON.stringify(profileForm.skills || []))
       formData.append('availability', JSON.stringify(profileForm.availability || null))
+
+      if (profileForm.idCardFile instanceof File) {
+        formData.append('idCardFile', profileForm.idCardFile)
+      } else {
+        formData.append('idCardUrl', profileForm.idCardUrl || '')
+      }
     }
     return formData
   }
@@ -202,7 +218,9 @@ export const useProfileStore = defineStore('profile', () => {
           postCount: postsRes.data.total || 0,
           followersCount: followersRes.data.followers?.length || 0,
           followingCount: followingRes.data.following?.length || 0,
-          posts: (postsRes.data.posts || []).map(postStore.mapPost)
+          posts: (postsRes.data.posts || []).map(postStore.mapPost),
+          isVerified: Boolean(profile.isVerified),
+          isStudentVerified: Boolean(profile.isStudentVerified),
         }
       } else {
         //@ts-ignore

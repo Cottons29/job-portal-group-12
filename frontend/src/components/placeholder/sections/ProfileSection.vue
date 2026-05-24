@@ -212,6 +212,10 @@ async function fetchTaggedPosts() {
       profileTagged.value = (data.applications || [])
         .filter(app => app.post)
         .map(app => ({
+          id: app.id,
+          status: app.status,
+          coverLetter: app.coverLetter,
+          createdAt: app.createdAt,
           post: postStore.mapPost(app.post),
           image: app.post.imageUrl,
           title: app.post.title
@@ -379,7 +383,70 @@ async function fetchTaggedPosts() {
       </button>
     </nav>
 
-    <section class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+    <!-- Applications List for Students -->
+    <div v-if="activeTab === 'tagged' && !isEmployer" class="space-y-4">
+      <div v-if="filteredGallery.length === 0" class="flex flex-col items-center justify-center py-16 text-center px-4 bg-surface-container-low rounded-3xl border border-on-surface/5">
+        <div class="grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary mb-3">
+          <component :is="emptyStateIcon" class="h-8 w-8 text-primary" />
+        </div>
+        <h3 class="font-display text-lg font-black text-on-surface">{{ emptyStateTitle }}</h3>
+        <p class="mt-1 text-xs text-on-surface-variant/70 max-w-xs leading-relaxed">{{ emptyStateDesc }}</p>
+      </div>
+
+      <div
+        v-else
+        v-for="app in filteredGallery"
+        :key="app.id"
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-surface-container-low border border-on-surface/5 transition duration-150 hover:border-primary/20"
+      >
+        <div class="flex items-start gap-4">
+          <div class="h-12 w-12 shrink-0 grid place-items-center rounded-2xl bg-[#aecbfa] text-[#1a4fa3] font-black text-sm overflow-hidden">
+            <img v-if="app.post?.authorAvatar" :src="app.post.authorAvatar" class="h-full w-full object-cover" />
+            <span v-else>{{ app.post?.company?.charAt(0) || 'J' }}</span>
+          </div>
+          <div>
+            <h4 class="font-display text-lg font-black text-on-surface hover:underline cursor-pointer" @click="$emit('openPost', app.post)">
+              {{ app.post?.title || app.title }}
+            </h4>
+            <p class="text-xs font-bold text-on-surface-variant mt-0.5">
+              {{ app.post?.company }} • Applied on {{ new Date(app.createdAt).toLocaleDateString() }}
+            </p>
+            <div v-if="app.status === 'ACCEPTED'" class="mt-2 text-xs font-semibold text-[#1f6c3b] bg-[#8fd99b]/15 px-3 py-1.5 rounded-xl inline-block">
+              🎉 Congratulations! You got the job offer! Keep an eye on your inbox/messages.
+            </div>
+            <div v-else-if="app.status === 'REJECTED'" class="mt-2 text-xs font-semibold text-red-700 bg-red-500/10 px-3 py-1.5 rounded-xl inline-block">
+              Thank you for applying. The employer has decided to pursue other applicants for this role.
+            </div>
+            <div v-else-if="app.status === 'REVIEWED'" class="mt-2 text-xs font-semibold text-[#1a4fa3] bg-[#aecbfa]/15 px-3 py-1.5 rounded-xl inline-block">
+              Your application is currently under review by the hiring team.
+            </div>
+            <div v-else class="mt-2 text-xs font-semibold text-on-surface-variant/80 bg-surface-container-high px-3 py-1.5 rounded-xl inline-block">
+              Application submitted and pending initial employer review.
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 sm:self-center">
+          <span :class="[
+            'px-3 py-1 text-xs font-black uppercase tracking-wider rounded-full ring-1',
+            app.status === 'ACCEPTED' ? 'bg-[#8fd99b]/20 text-[#1f6c3b] ring-[#8fd99b]/35' :
+            app.status === 'REJECTED' ? 'bg-red-500/15 text-red-500 ring-red-500/25' :
+            app.status === 'REVIEWED' ? 'bg-primary/10 text-primary ring-primary/20' :
+            'bg-surface-container-highest text-on-surface-variant ring-on-surface/5'
+          ]">
+            {{ app.status }}
+          </span>
+          <button
+            type="button"
+            class="rounded-full bg-surface-container-high hover:bg-surface-container-highest px-4 py-2 text-xs font-black text-on-surface transition"
+            @click="$emit('openPost', app.post)"
+          >
+            View Job
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <section v-else class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
       <!-- Empty State -->
       <div v-if="filteredGallery.length === 0" class="col-span-full flex flex-col items-center justify-center py-16 text-center px-4 bg-surface-container-low rounded-3xl border border-on-surface/5">
         <div class="grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary mb-3">

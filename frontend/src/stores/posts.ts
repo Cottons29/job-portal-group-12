@@ -27,12 +27,16 @@ export const usePostStore = defineStore('posts', () => {
       authorId: author?.id,
       company: authorName,
       meta: createdAt ? createdAt.toLocaleString() : 'Just now',
-      badge: 'Community post',
+      badge: post.isJob ? (post.jobType || 'Job post') : 'Community post',
       title: post.title,
       desc: post.content,
       descHtml: renderMarkdown(post.content || ''),
       imageUrl: resolveUrl(post.imageUrl),
       authorAvatar: resolveUrl(authorAvatar),
+      isJob: Boolean(post.isJob),
+      salary: post.salary,
+      location: post.location,
+      jobType: post.jobType,
       tags: [],
       logoBg: 'bg-[#aecbfa]',
       logoText: 'text-[#1a4fa3]',
@@ -42,6 +46,8 @@ export const usePostStore = defineStore('posts', () => {
       bookmarkCount: post.bookmarkCount ?? 0,
       likedByMe: Boolean(post.likedByMe),
       bookmarkedByMe: Boolean(post.bookmarkedByMe),
+      isVerified: Boolean(author?.isVerified),
+      isStudentVerified: Boolean(author?.isStudentVerified),
     }
   }
   // @ts-ignore
@@ -113,7 +119,7 @@ export const usePostStore = defineStore('posts', () => {
       Object.assign(selectedPost.value, patch)
     }
   }
-  async function handlePostApply(postId, coverLetter = '') {
+  async function handlePostApply(postId, coverLetter = '', cvUrl = '') {
     if (appliedPostIds.value.has(postId)) return
 
     const authStore = useAuthStore()
@@ -123,7 +129,7 @@ export const usePostStore = defineStore('posts', () => {
     }
 
     try {
-      await api.post('/applications', { postId, coverLetter })
+      await api.post('/applications', { postId, coverLetter, cvUrl })
       appliedPostIds.value.add(postId)
     } catch (error) {
       console.error('Failed to apply for post:', error)

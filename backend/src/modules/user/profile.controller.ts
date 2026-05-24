@@ -132,6 +132,7 @@ export class ProfileController {
       { name: 'logoFile', maxCount: 1 },
       { name: 'patentFile', maxCount: 1 },
       { name: 'avatarFile', maxCount: 1 },
+      { name: 'idCardFile', maxCount: 1 },
     ]),
   )
   async updateProfile(
@@ -143,6 +144,7 @@ export class ProfileController {
       logoFile?: Express.Multer.File[];
       patentFile?: Express.Multer.File[];
       avatarFile?: Express.Multer.File[];
+      idCardFile?: Express.Multer.File[];
     },
   ) {
     const userId = req.user.sub;
@@ -158,6 +160,7 @@ export class ProfileController {
         userId,
         body,
         files?.cvFile?.[0],
+        files?.idCardFile?.[0],
         files?.avatarFile?.[0],
       );
     } else if (role === UserRole.EMPLOYER) {

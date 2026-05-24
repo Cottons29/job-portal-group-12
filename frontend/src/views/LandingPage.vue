@@ -81,26 +81,24 @@
                 <div class="mb-6 flex items-start justify-between gap-4">
                   <div>
                     <p class="text-xs font-black uppercase tracking-[0.22em] text-primary">Featured match</p>
-                    <h2 class="mt-2 font-display text-3xl font-black tracking-tight text-on-surface">Senior Barista &
-                      Shift Lead</h2>
+                    <h2 class="mt-2 font-display text-3xl font-black tracking-tight text-on-surface">{{ featuredJob.title }}</h2>
                   </div>
                   <span
-                      class="rounded-full bg-tertiary-fixed px-3 py-1 text-xs font-black text-on-surface">$18.50/hr</span>
+                      class="rounded-full bg-tertiary-fixed px-3 py-1 text-xs font-black text-on-surface">{{ featuredJob.wage }}</span>
                 </div>
 
                 <div class="mb-6 rounded-2xl bg-primary p-6 text-on-primary">
                   <div class="flex items-center gap-4">
                     <div
-                        class="grid h-14 w-14 place-items-center rounded-lg bg-gray-100/99 text-lg font-black backdrop-blur">
-                      B
+                        class="grid h-14 w-14 place-items-center rounded-lg bg-white/20 text-lg font-black backdrop-blur">
+                      {{ featuredJob.company.charAt(0) }}
                     </div>
                     <div>
-                      <p class="font-black">Brown Coffee</p>
-                      <p class="text-sm text-gray/50">BKK1, Phnom Penh · 5h ago</p>
+                      <p class="font-black">{{ featuredJob.company }}</p>
+                      <p class="text-sm text-white/70">{{ featuredJob.location }} · {{ featuredJob.time }}</p>
                     </div>
                   </div>
-                  <p class="mt-8 max-w-sm text-sm leading-6 text-gray/85">Lead weekend shifts, mentor junior staff, and
-                    build real customer-service experience while you study.</p>
+                  <p class="mt-8 max-w-sm text-sm leading-6 text-white/90">{{ featuredJob.desc }}</p>
                 </div>
 
                 <div class="grid grid-cols-3 gap-3">
@@ -228,6 +226,7 @@
 
                 <div class="mt-7 flex items-center gap-3">
                   <button
+                      @click="$router.push('/auth')"
                       class="flex-1 rounded-[0.625rem] border-2 border-transparent bg-primary px-4 py-3 text-sm font-black text-on-primary transition-colors hover:border-primary hover:bg-primary-container hover:text-primary">
                     Apply now
                   </button>
@@ -312,6 +311,8 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import api from '@/lib/api'
 import {
   MagnifyingGlassIcon,
   BriefcaseIcon,
@@ -334,7 +335,8 @@ const quickChips = [
   {label: 'Internships', bg: 'bg-[#ffc28e]', text: 'text-[#8a4a11]'},
 ]
 
-const partners = [
+// Mocked fallbacks
+const defaultPartners = [
   {name: 'Brown Coffee', status: 'Recently Active'},
   {name: 'Chip Mong', status: 'Featured SME'},
   {name: 'RUPP', status: 'University'},
@@ -344,7 +346,48 @@ const partners = [
   {name: 'Foodpanda', status: 'Recently Active'},
 ]
 
-const stats = [
+const defaultJobs = [
+  {
+    company: 'Brown Coffee',
+    location: 'BKK1, Phnom Penh',
+    time: '5h ago',
+    title: 'Senior Barista & Shift Lead',
+    wage: '$18.50/hr',
+    desc: 'Lead weekend shifts and train new junior staff in coffee preparation and customer service.'
+  },
+  {
+    company: 'RUPP Writing Center',
+    location: 'Toul Kork, Phnom Penh',
+    time: '1d ago',
+    title: 'Peer Writing Consultant',
+    wage: '$15.00/hr',
+    desc: 'Assist undergraduate students with essay structure, grammar, and academic writing techniques.'
+  },
+  {
+    company: 'Chip Mong Supermarket',
+    location: 'Sen Sok, Phnom Penh',
+    time: '2d ago',
+    title: 'Logistics & Inventory Associate',
+    wage: '$16.00/hr',
+    desc: 'Manage stock room organization, track incoming deliveries, and support floor replenishment.'
+  },
+]
+
+const defaultFeatured = {
+  title: 'Senior Barista & Shift Lead',
+  wage: '$18.50/hr',
+  company: 'Brown Coffee',
+  location: 'BKK1, Phnom Penh',
+  time: '5h ago',
+  desc: 'Lead weekend shifts, mentor junior staff, and build real customer-service experience while you study.'
+}
+
+// Reactive states
+const jobs = ref([...defaultJobs])
+const partners = ref([...defaultPartners])
+const featuredJob = ref(defaultFeatured)
+
+const stats = ref([
   {
     value: '50+',
     label: 'Trusted Employers',
@@ -372,7 +415,7 @@ const stats = [
     textColor: 'text-[#246b36]',
     labelColor: 'text-[#246b36]/80'
   },
-]
+])
 
 const categories = [
   {
@@ -431,38 +474,107 @@ const steps = [
   },
 ]
 
-const jobs = [
-  {
-    company: 'Brown Coffee',
-    location: 'BKK1, Phnom Penh',
-    time: '5h ago',
-    title: 'Senior Barista & Shift Lead',
-    wage: '$18.50/hr',
-    desc: 'Lead weekend shifts and train new junior staff in coffee preparation and customer service.'
-  },
-  {
-    company: 'RUPP Writing Center',
-    location: 'Toul Kork, Phnom Penh',
-    time: '1d ago',
-    title: 'Peer Writing Consultant',
-    wage: '$15.00/hr',
-    desc: 'Assist undergraduate students with essay structure, grammar, and academic writing techniques.'
-  },
-  {
-    company: 'Chip Mong Supermarket',
-    location: 'Sen Sok, Phnom Penh',
-    time: '2d ago',
-    title: 'Logistics & Inventory Associate',
-    wage: '$16.00/hr',
-    desc: 'Manage stock room organization, track incoming deliveries, and support floor replenishment.'
-  },
-]
-
 const roleGaps = [
   {role: 'English-Khmer Translators'},
   {role: 'Data Entry Specialists'},
   {role: 'Social Media Management'},
 ]
+
+function formatRelativeTime(dateString) {
+  try {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    if (diffHours < 1) return 'Just now'
+    if (diffHours < 24) return `${diffHours}h ago`
+    const diffDays = Math.floor(diffHours / 24)
+    return `${diffDays}d ago`
+  } catch (e) {
+    return '1d ago'
+  }
+}
+
+onMounted(async () => {
+  try {
+    const postsRes = await api.get('/posts?limit=50')
+    const allPosts = postsRes.data?.posts || []
+    const activeJobs = allPosts.filter(p => p.isJob)
+
+    if (activeJobs.length > 0) {
+      jobs.value = activeJobs.slice(0, 3).map(p => ({
+        company: p.company || p.author?.user_name || 'Employer',
+        location: p.location || 'Phnom Penh',
+        time: formatRelativeTime(p.createdAt),
+        title: p.title,
+        wage: p.salary || 'Competitive',
+        desc: p.content?.substring(0, 120) + (p.content?.length > 120 ? '...' : '')
+      }))
+
+      if (jobs.value.length < 3) {
+        jobs.value = [...jobs.value, ...defaultJobs.slice(jobs.value.length)]
+      }
+
+      const latestJob = activeJobs[0]
+      featuredJob.value = {
+        title: latestJob.title,
+        wage: latestJob.salary || 'Competitive',
+        company: latestJob.company || latestJob.author?.user_name || 'Employer',
+        location: latestJob.location || 'Phnom Penh',
+        time: formatRelativeTime(latestJob.createdAt),
+        desc: latestJob.content?.substring(0, 150) + (latestJob.content?.length > 150 ? '...' : '')
+      }
+    }
+
+    const usersRes = await api.get('/user')
+    const allUsers = usersRes.data || []
+    
+    const students = allUsers.filter(u => u.role === 'STUDENT')
+    const employers = allUsers.filter(u => u.role === 'EMPLOYER')
+
+    stats.value = [
+      {
+        value: `${Math.max(50, employers.length)}+`,
+        label: 'Trusted Employers',
+        icon: BuildingStorefrontIcon,
+        bg: 'bg-[#aecbfa]',
+        iconColor: 'text-[#1a4fa3]',
+        textColor: 'text-[#1a4fa3]',
+        labelColor: 'text-[#1a4fa3]/80'
+      },
+      {
+        value: `${Math.max(1200, students.length)}+`,
+        label: 'Active Students',
+        icon: AcademicCapIcon,
+        bg: 'bg-[#d7b7ff]',
+        iconColor: 'text-[#6a39b8]',
+        textColor: 'text-[#6a39b8]',
+        labelColor: 'text-[#6a39b8]/80'
+      },
+      {
+        value: `${Math.max(200, activeJobs.length)}+`,
+        label: 'Active Jobs',
+        icon: BriefcaseIcon,
+        bg: 'bg-[#8fd99b]',
+        iconColor: 'text-[#246b36]',
+        textColor: 'text-[#246b36]',
+        labelColor: 'text-[#246b36]/80'
+      },
+    ]
+
+    if (employers.length > 0) {
+      partners.value = employers.slice(0, 7).map(emp => ({
+        name: emp.user_name || 'Trusted SME',
+        status: 'Active Partner'
+      }))
+      if (partners.value.length < 5) {
+        partners.value = [...partners.value, ...defaultPartners.slice(partners.value.length)]
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load dynamic landing page data:', error)
+  }
+})
 </script>
 
 <style scoped>

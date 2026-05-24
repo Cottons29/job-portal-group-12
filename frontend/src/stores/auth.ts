@@ -16,6 +16,8 @@ interface AuthUserPayload {
     user_name?: string | null
     role?: UserRole
     profileCompleted: boolean
+    fullName?: string | null
+    cvUrl?: string | null
 }
 
 interface SafeAuthUser {
@@ -25,6 +27,8 @@ interface SafeAuthUser {
     user_name: string | null
     role: UserRole | null
     profileCompleted: boolean
+    fullName: string | null
+    cvUrl: string | null
 }
 
 interface AuthResponse {
@@ -54,6 +58,8 @@ function toSafeAuthUser(userPayload: AuthUserPayload | SafeAuthUserUpdate): Safe
         user_name: userPayload.user_name ?? null,
         role: userPayload.role ?? null,
         profileCompleted: userPayload.profileCompleted ?? false,
+        fullName: userPayload.fullName ?? null,
+        cvUrl: userPayload.cvUrl ?? null,
     }
 }
 
@@ -154,8 +160,6 @@ export const useAuthStore = defineStore('auth', () => {
             // ── Post-login redirect logic ──
             if (!data.user.email) {
                 await router.push('/secure-account')
-            } else if (!data.user.profileCompleted) {
-                await router.push('/onboarding')
             } else {
                 await router.push('/home')
             }
@@ -186,8 +190,6 @@ export const useAuthStore = defineStore('auth', () => {
 
             if (!data.user.email) {
                 await router.push('/secure-account')
-            } else if (!data.user.profileCompleted) {
-                await router.push('/onboarding')
             } else {
                 await router.push('/home')
             }

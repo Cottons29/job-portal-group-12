@@ -104,7 +104,23 @@
               <h2 class="font-display text-3xl font-black tracking-tighter text-on-surface sm:text-4xl">
                 {{ user.user_name ?? 'NotSet' }}
               </h2>
-              <p class="mt-1 text-xl font-black text-on-surface">{{ user.name }}</p>
+              <div class="mt-1 flex items-center gap-1.5 flex-wrap">
+                <p class="text-xl font-black text-on-surface">{{ user.name }}</p>
+                <span
+                  v-if="user.isVerified"
+                  class="inline-flex items-center gap-0.5 rounded-full bg-amber-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-600 ring-1 ring-amber-500/20"
+                  title="Verified Employer / SME"
+                >
+                  ★ Verified
+                </span>
+                <span
+                  v-else-if="user.isStudentVerified"
+                  class="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-700 ring-1 ring-emerald-500/20"
+                  title="Verified Student"
+                >
+                  ✓ Verified
+                </span>
+              </div>
             </div>
             <button
               v-if="!isSelf && user.id"

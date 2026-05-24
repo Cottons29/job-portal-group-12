@@ -282,11 +282,11 @@ function triggerApply(postOrId) {
   applicationSubmitError.value = ''
 }
 
-async function submitApplication({ postId, coverLetter }) {
+async function submitApplication({ postId, coverLetter, cvUrl }) {
   isSubmittingApplication.value = true
   applicationSubmitError.value = ''
   try {
-    await postStore.handlePostApply(postId, coverLetter)
+    await postStore.handlePostApply(postId, coverLetter, cvUrl)
     isApplyModalOpen.value = false
     selectedPostForApply.value = null
     postStore.selectedPost = null

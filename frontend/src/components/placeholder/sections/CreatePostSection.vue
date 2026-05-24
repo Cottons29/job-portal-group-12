@@ -8,8 +8,14 @@ import { usePostStore } from '@/stores/posts'
 import { marked } from 'marked'
 import { isAxiosError } from 'axios'
 
+import { useAuthStore } from '@/stores/auth'
+
 const { t } = useI18n()
 const postStore = usePostStore()
+const authStore = useAuthStore()
+
+const isEmployer = computed(() => authStore.user?.role?.toLowerCase() === 'employer')
+const postTypeSelected = ref('social') // 'social' or 'job'
 
 const isMarkdownMode = ref(false)
 const isPosting = ref(false)
@@ -20,6 +26,9 @@ const postMessage = ref('')
 const postForm = reactive({
   title: '',
   content: '',
+  salary: '',
+  location: '',
+  jobType: 'Full-time',
 })
 
 const postPhotoFile = ref(null)
@@ -153,16 +162,24 @@ async function submitPost() {
       imageUrl = await uploadPostImage(postPhotoFile.value)
     }
 
+    const isJobSelected = isEmployer.value && postTypeSelected.value === 'job'
     const { data } = await api.post('/posts', {
       title: postForm.title.trim(),
       content: postForm.content.trim(),
       imageUrl,
+      isJob: isJobSelected,
+      salary: isJobSelected ? postForm.salary.trim() : undefined,
+      location: isJobSelected ? postForm.location.trim() : undefined,
+      jobType: isJobSelected ? postForm.jobType : undefined,
     })
 
     postStore.posts = [postStore.mapPost(data.post), ...postStore.posts]
     postMessage.value = 'Post published and saved successfully.'
     postForm.title = ''
     postForm.content = ''
+    postForm.salary = ''
+    postForm.location = ''
+    postForm.jobType = 'Full-time'
     removePostPhoto()
   } catch (error) {
     postError.value = isAxiosError(error) ? error.response?.data?.message || error.message : 'Could not publish your post.'
@@ -190,6 +207,64 @@ async function submitPost() {
         >
           {{ isPosting ? t('createPost.publishing') : t('createPost.publishPost') }}
         </button>
+      </div>
+
+      <!-- Post Type Selection for Employers -->
+      <div v-if="isEmployer" class="flex rounded-2xl bg-surface-container-low p-1 max-w-[20rem]">
+        <button
+          type="button"
+          @click="postTypeSelected = 'social'"
+          :class="[
+            'flex-1 text-center py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all',
+            postTypeSelected === 'social' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+          ]"
+        >
+          Social Update
+        </button>
+        <button
+          type="button"
+          @click="postTypeSelected = 'job'"
+          :class="[
+            'flex-1 text-center py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all',
+            postTypeSelected === 'job' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+          ]"
+        >
+          Job Posting
+        </button>
+      </div>
+
+      <!-- Job Post Details -->
+      <div v-if="isEmployer && postTypeSelected === 'job'" class="grid gap-4 sm:grid-cols-3 bg-surface-container-low/50 p-4 rounded-2xl border border-on-surface/5">
+        <label class="block space-y-2">
+          <span class="text-xs font-black uppercase tracking-wider text-on-surface-variant">Salary / Rate</span>
+          <input
+            v-model="postForm.salary"
+            class="w-full rounded-xl bg-surface px-4 py-2.5 text-sm font-bold text-on-surface outline-none transition placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary"
+            placeholder="e.g. $18.50/hr"
+            type="text"
+          />
+        </label>
+        <label class="block space-y-2">
+          <span class="text-xs font-black uppercase tracking-wider text-on-surface-variant">Location</span>
+          <input
+            v-model="postForm.location"
+            class="w-full rounded-xl bg-surface px-4 py-2.5 text-sm font-bold text-on-surface outline-none transition placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary"
+            placeholder="e.g. BKK1, Phnom Penh"
+            type="text"
+          />
+        </label>
+        <label class="block space-y-2">
+          <span class="text-xs font-black uppercase tracking-wider text-on-surface-variant">Job Type</span>
+          <select
+            v-model="postForm.jobType"
+            class="w-full rounded-xl bg-surface px-4 py-2.5 text-sm font-bold text-on-surface outline-none transition focus:ring-2 focus:ring-primary appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23707070%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:0.65rem_auto] bg-[right_1rem_center] bg-no-repeat pr-10"
+          >
+            <option>Full-time</option>
+            <option>Part-time</option>
+            <option>Internship</option>
+            <option>Contract</option>
+          </select>
+        </label>
       </div>
 
       <label class="block space-y-2">
@@ -272,9 +347,14 @@ async function submitPost() {
 
     <aside class="space-y-5 xl:sticky xl:top-28 xl:h-fit">
       <article class="rounded-[2rem] bg-surface-container-low p-5 shadow-sm ring-1 ring-white/5">
-        <p class="text-xs font-black uppercase tracking-[0.18em] text-primary">{{ t('createPost.preview') }}</p>
+        <p class="text-xs font-black uppercase tracking-[0.18em] text-primary">{{ postTypeSelected === 'job' ? 'Job Preview' : t('createPost.preview') }}</p>
         <h2 class="mt-3 font-display text-2xl font-black tracking-[-0.04em] text-on-surface">
           {{ postForm.title || t('createPost.previewTitleFallback') }}</h2>
+        <div v-if="postTypeSelected === 'job'" class="mt-2 flex flex-wrap items-center gap-2 text-xs font-black text-primary">
+          <span v-if="postForm.salary" class="text-sm font-black">{{ postForm.salary }}</span>
+          <span v-if="postForm.location" class="text-on-surface-variant/80">• {{ postForm.location }}</span>
+          <span class="rounded-full bg-primary/10 px-2 py-0.5">{{ postForm.jobType }}</span>
+        </div>
         <img v-if="postPhotoPreview" :src="postPhotoPreview" :alt="postPhotoName || t('createPost.postPhotoPreviewAlt')"
              class="mt-4 max-h-64 w-full rounded-[1.25rem] object-cover"/>
         <div
