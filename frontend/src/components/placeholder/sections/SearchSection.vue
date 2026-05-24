@@ -14,7 +14,7 @@ const searchResults = ref([])
 const isSearching = ref(false)
 const searchError = ref('')
 
-defineEmits(['open-post', 'view-applicants'])
+defineEmits(['open-post', 'view-applicants', 'apply'])
 
 async function searchPosts() {
   if (!searchQuery.value.trim()) {
@@ -107,7 +107,7 @@ onMounted(() => {
           :user-id="auth.user?.id"
           :applied-post-ids="postStore.appliedPostIds"
           @open="$emit('open-post', $event)"
-          @apply="postStore.handlePostApply($event)"
+          @apply="$emit('apply', $event)"
           @view-applicants="$emit('view-applicants', $event)"
           @engagement-change="postStore.mergeEngagement($event)"
         />

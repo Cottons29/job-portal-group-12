@@ -45,6 +45,7 @@
         <HomeSection
             v-if="activePage === 'home'"
             @open-post="openPost"
+            @apply="triggerApply"
             @view-applicants="handleViewApplicants"
         />
 
@@ -81,6 +82,7 @@
         <SearchSection
             v-else-if="activePage === 'search'"
             @open-post="openPost"
+            @apply="triggerApply"
             @view-applicants="handleViewApplicants"
         />
 
@@ -104,7 +106,7 @@
                 :post="postStore.selectedPost"
                 :user-id="auth.user?.id"
                 :user-role="auth.user?.role"
-                @apply="postStore.handlePostApply($event)"
+                @apply="triggerApply"
                 @close="postStore.selectedPost = null"
                 @engagement-change="postStore.mergeEngagement($event)"
                 @view-applicants="handleViewApplicants"
@@ -134,6 +136,19 @@
             />
           </Transition>
         </Teleport>
+
+        <Teleport to="body">
+          <Transition name="modal">
+            <ApplyModal
+                v-if="isApplyModalOpen"
+                :post="selectedPostForApply"
+                :is-submitting="isSubmittingApplication"
+                :submit-error="applicationSubmitError"
+                @close="isApplyModalOpen = false"
+                @submit="submitApplication"
+            />
+          </Transition>
+        </Teleport>
       </main>
     </div>
   </div>
@@ -154,6 +169,7 @@ import NotificationsSection from '@/components/placeholder/sections/Notification
 import PostModal from '@/components/placeholder/sections/PostModal.vue'
 import ProfileModal from '@/components/placeholder/sections/ProfileModal.vue'
 import ApplicantsModal from '@/components/placeholder/sections/ApplicantsModal.vue'
+import ApplyModal from '@/components/placeholder/sections/ApplyModal.vue'
 import api from '@/lib/api'
 
 import {useThemeMode} from '@/composables/useThemeMode'
@@ -240,6 +256,46 @@ const pageContent = computed(() => {
 
 function openPost(post) {
   postStore.selectedPost = post
+}
+
+const isApplyModalOpen = ref(false)
+const selectedPostForApply = ref(null)
+const isSubmittingApplication = ref(false)
+const applicationSubmitError = ref('')
+
+function triggerApply(postOrId) {
+  const post = typeof postOrId === 'object' && postOrId !== null ? postOrId : null
+  const postId = post ? post.id : postOrId
+
+  if (!auth.user?.profileCompleted) {
+    alert('Profile Setup Required: Please complete your profile in Settings first to apply for jobs.')
+    return
+  }
+
+  if (post) {
+    selectedPostForApply.value = post
+  } else {
+    selectedPostForApply.value = postStore.posts.find(p => p.id === postId) || { id: postId, title: 'Job Post' }
+  }
+
+  isApplyModalOpen.value = true
+  applicationSubmitError.value = ''
+}
+
+async function submitApplication({ postId, coverLetter }) {
+  isSubmittingApplication.value = true
+  applicationSubmitError.value = ''
+  try {
+    await postStore.handlePostApply(postId, coverLetter)
+    isApplyModalOpen.value = false
+    selectedPostForApply.value = null
+    postStore.selectedPost = null
+  } catch (err) {
+    console.error(err)
+    applicationSubmitError.value = err.response?.data?.message || 'Failed to submit application.'
+  } finally {
+    isSubmittingApplication.value = false
+  }
 }
 
 const isApplicantsModalOpen = ref(false)

@@ -29,7 +29,7 @@ const routes: RouteRecordRaw[] = [
     {
         path:'/reset-password',
         name:'reset-password',
-        component:()=>import('@/views/ResetPasswor.vue')
+        component:()=>import('@/views/ForgotPassword.vue')
     },
     {
         path: '/about-us',

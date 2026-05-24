@@ -113,7 +113,7 @@ export const usePostStore = defineStore('posts', () => {
       Object.assign(selectedPost.value, patch)
     }
   }
-  async function handlePostApply(postId) {
+  async function handlePostApply(postId, coverLetter = '') {
     if (appliedPostIds.value.has(postId)) return
 
     const authStore = useAuthStore()
@@ -123,7 +123,7 @@ export const usePostStore = defineStore('posts', () => {
     }
 
     try {
-      await api.post(`/posts/${postId}/apply`)
+      await api.post('/applications', { postId, coverLetter })
       appliedPostIds.value.add(postId)
     } catch (error) {
       console.error('Failed to apply for post:', error)
