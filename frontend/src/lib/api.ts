@@ -30,9 +30,9 @@ export function resolveUrl(path?: string): string {
     
     let targetPath = path
     if (targetPath.startsWith('/files/')) {
-        targetPath = '/api' + targetPath
+        targetPath = '/api/upload' + targetPath
     } else if (targetPath.startsWith('files/')) {
-        targetPath = 'api/' + targetPath
+        targetPath = 'api/upload' + targetPath
     }
 
     const base = baseURL.replace(/\/api$/, '')
