@@ -94,8 +94,8 @@ function sanitizeMarkdownHtml(html) {
 async function uploadPostImage(file) {
   const formData = new FormData()
   formData.append('file', file)
-  const { data } = await api.post('/file-service/upload', formData)
-  return data.url
+  const { data } = await api.post('/upload/single', formData)
+  return data?.file?.url ?? data?.url
 }
 
 async function handleMarkdownImageUpload(event) {
