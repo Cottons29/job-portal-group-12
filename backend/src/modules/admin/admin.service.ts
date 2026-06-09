@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
+import { PostEntity } from '../posts/post.entity';
 import { UserRole } from '../../common/enums/user-role.enum';
 import { EmailService } from '../../common/email/email.service';
 
@@ -10,6 +11,8 @@ export class AdminService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(PostEntity)
+    private readonly postRepo: Repository<PostEntity>,
     private readonly emailService: EmailService,
   ) {}
 
@@ -144,11 +147,55 @@ export class AdminService {
       where: { role: UserRole.EMPLOYER, isVerified: false },
     });
 
+    const totalJobs = await this.postRepo.count({
+      where: { isJob: true, status: 'approved' },
+    });
+    const flaggedPosts = await this.postRepo.count({
+      where: { status: 'flagged' },
+    });
+
     return {
       totalStudents,
       totalEmployers,
       verifiedEmployers,
       pendingEmployers,
+      totalJobs,
+      flaggedPosts,
     };
+  }
+
+  // --- Post/Job Moderation management ---
+  async getFlaggedPosts(): Promise<PostEntity[]> {
+    return await this.postRepo.find({
+      where: { status: 'flagged' },
+      relations: ['author'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async approvePost(id: string): Promise<void> {
+    const post = await this.postRepo.findOne({ where: { id } });
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+    post.status = 'approved';
+    await this.postRepo.save(post);
+  }
+
+  async flagPost(id: string): Promise<void> {
+    const post = await this.postRepo.findOne({ where: { id } });
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+    post.status = 'flagged';
+    await this.postRepo.save(post);
+  }
+
+  async rejectPost(id: string): Promise<void> {
+    const post = await this.postRepo.findOne({ where: { id } });
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+    await this.postRepo.remove(post);
   }
 }

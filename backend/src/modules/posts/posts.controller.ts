@@ -41,6 +41,13 @@ export class PostsController {
     return this.postsService.recordShare(postId, req.user.sub);
   }
 
+  @UseGuards(AuthenticatedGuard)
+  @Post(':postId/flag')
+  @HttpCode(HttpStatus.OK)
+  async flagPost(@Req() req: any, @Param('postId') postId: string) {
+    return this.postsService.flagPost(postId, req.user.sub);
+  }
+
   @Get(':postId')
   async findOne(@Req() req: any, @Param('postId') postId: string) {
     return this.postsService.findOne(postId, req.user?.sub);

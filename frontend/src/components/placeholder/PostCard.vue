@@ -39,9 +39,28 @@
         <p class="text-[10px] font-bold text-on-surface-variant/70">{{ localPost.meta }}</p>
       </div>
     </div>
-    <button type="button" class="text-on-surface-variant hover:text-on-surface">
-      <EllipsisHorizontalIcon class="h-5 w-5"/>
-    </button>
+    <div class="relative">
+      <button
+          type="button"
+          class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-on-surface/5 transition"
+          @click.stop="showMenu = !showMenu"
+      >
+        <EllipsisHorizontalIcon class="h-5 w-5"/>
+      </button>
+      <div
+          v-if="showMenu"
+          class="absolute right-0 mt-1 w-36 rounded-xl bg-surface-container-lowest border border-on-surface/10 shadow-lg z-10 py-1"
+          @click.stop
+      >
+        <button
+            @click="flagPost"
+            class="w-full text-left px-4 py-2 text-xs font-black text-red-500 hover:bg-on-surface/5 flex items-center gap-2"
+        >
+          <FlagIcon class="h-4 w-4 shrink-0"/>
+          Report Post
+        </button>
+      </div>
+    </div>
   </div>
 
   <div
@@ -269,6 +288,7 @@
     EllipsisHorizontalIcon,
     HeartIcon,
     UserGroupIcon,
+    FlagIcon,
   } from '@heroicons/vue/24/outline'
   import {BookmarkIcon as BookmarkIconSolid, HeartIcon as HeartIconSolid} from '@heroicons/vue/24/solid'
   import api, { resolveUrl } from '@/lib/api'
@@ -303,6 +323,23 @@
   const commentsLoading = ref(false)
   const commentsError = ref('')
   const newComment = ref('')
+  const showMenu = ref(false)
+
+  async function flagPost() {
+    showMenu.value = false
+    if (socialBusy.value) return
+    socialError.value = ''
+    socialBusy.value = true
+    try {
+      await api.post(`/posts/${localPost.value.id}/flag`)
+      alert('Post reported successfully to admins.')
+    } catch (error) {
+      socialError.value = readErrorMessage(error, 'Could not flag post.')
+      alert(socialError.value)
+    } finally {
+      socialBusy.value = false
+    }
+  }
   const commentSubmitting = ref(false)
 
   const authorPosts = ref<Post[]>([])

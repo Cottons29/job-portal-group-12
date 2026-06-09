@@ -23,6 +23,7 @@ interface FindAllPostsOptions {
   q?: string;
   role?: string;
   authorId?: string;
+  status?: string;
 }
 
 type EngagementBundle = {
@@ -62,6 +63,15 @@ export class PostsService {
     );
 
     const whereCondition: Record<string, unknown>[] = [];
+    
+    let statusFilter: string | undefined = undefined;
+    if (options.status) {
+      if (options.status !== 'all') {
+        statusFilter = options.status;
+      }
+    } else if (!options.authorId) {
+      statusFilter = 'approved';
+    }
 
     if (options.q) {
       const q = `%${options.q}%`;
@@ -70,10 +80,11 @@ export class PostsService {
           ? { author: { role: options.role.toUpperCase() } }
           : {};
       const authorFilter = options.authorId ? { author: { id: options.authorId } } : {};
+      const statusFilterObj = statusFilter ? { status: statusFilter } : {};
 
       whereCondition.push(
-        { title: ILike(q), ...roleFilter, ...authorFilter },
-        { content: ILike(q), ...roleFilter, ...authorFilter },
+        { title: ILike(q), ...roleFilter, ...authorFilter, ...statusFilterObj },
+        { content: ILike(q), ...roleFilter, ...authorFilter, ...statusFilterObj },
       );
     } else {
       const condition: any = {};
@@ -83,7 +94,10 @@ export class PostsService {
       if (options.authorId) {
         condition.author = { ...condition.author, id: options.authorId };
       }
-      if (Object.keys(condition).length > 0) {
+      if (statusFilter) {
+        condition.status = statusFilter;
+      }
+      if (Object.keys(condition).length > 0 || statusFilter) {
         whereCondition.push(condition);
       }
     }
@@ -244,6 +258,14 @@ export class PostsService {
     return { shareCount };
   }
 
+  async flagPost(postId: string, userId: string) {
+    await this.requireUser(userId);
+    const post = await this.getPostWithAuthor(postId);
+    post.status = 'flagged';
+    await this.postsRepository.save(post);
+    return { success: true, message: 'Post flagged for moderation' };
+  }
+
   async listComments(postId: string) {
     await this.ensurePostExists(postId);
     const comments = await this.postCommentsRepository.find({
@@ -368,6 +390,7 @@ export class PostsService {
       content: post.content,
       imageUrl: this.toRelativePath(post.imageUrl),
       isJob: post.isJob,
+      status: post.status,
       salary: post.salary,
       location: post.location,
       jobType: post.jobType,

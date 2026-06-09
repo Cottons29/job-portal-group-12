@@ -1,7 +1,10 @@
-import { Controller, Get, Patch, Delete, Param } from '@nestjs/common';
+import { Controller, Get, Patch, Delete, Param, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
+import { AuthenticatedGuard } from '../../auth/authenticated.guard';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @Controller('admin')
+@UseGuards(AuthenticatedGuard, AdminGuard)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
@@ -64,5 +67,28 @@ export class AdminController {
   async revokeStudent(@Param('id') id: string) {
     await this.adminService.revokeStudent(id);
     return { success: true, message: 'Student verification status revoked' };
+  }
+
+  @Get('posts/flagged')
+  async getFlaggedPosts() {
+    return this.adminService.getFlaggedPosts();
+  }
+
+  @Patch('posts/:id/approve')
+  async approvePost(@Param('id') id: string) {
+    await this.adminService.approvePost(id);
+    return { success: true, message: 'Post approved' };
+  }
+
+  @Patch('posts/:id/flag')
+  async flagPost(@Param('id') id: string) {
+    await this.adminService.flagPost(id);
+    return { success: true, message: 'Post flagged' };
+  }
+
+  @Delete('posts/:id')
+  async rejectPost(@Param('id') id: string) {
+    await this.adminService.rejectPost(id);
+    return { success: true, message: 'Post deleted' };
   }
 }

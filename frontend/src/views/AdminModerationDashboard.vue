@@ -63,6 +63,16 @@
             <ChartBarIcon class="w-5 h-5" />
             System Stats
           </button>
+          <button
+              @click="activeTab = 'posts'; isSidebarOpen = false"
+              :class="[
+                'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-semibold w-full text-left',
+                activeTab === 'posts' ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600 hover:bg-slate-50'
+              ]"
+          >
+            <FlagIcon class="w-5 h-5" />
+            Flagged Posts
+          </button>
         </nav>
       </div>
 
@@ -129,6 +139,12 @@
               Analytics on platform balance, signups, and student-to-employer conversion ratios.
             </p>
           </template>
+          <template v-else-if="activeTab === 'posts'">
+            <h2 class="text-3xl font-display font-bold text-blue-600 mb-2">Flagged Posts & Jobs</h2>
+            <p class="text-slate-500 text-sm leading-relaxed">
+              Review posts that have been flagged by users. You can approve them to clear flags or permanently delete them.
+            </p>
+          </template>
         </div>
 
         <!-- Search & Filter (Visible for lists) -->
@@ -152,7 +168,7 @@
       </div>
 
       <!-- METRIC CARDS -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col justify-center">
           <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Students</span>
           <span class="text-3xl font-display font-bold text-slate-800">{{ stats.totalStudents }}</span>
@@ -172,8 +188,18 @@
           <span class="text-3xl font-display font-bold text-slate-800">{{ stats.pendingEmployers }}</span>
         </div>
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col justify-center">
-          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Verified SMEs</span>
-          <span class="text-3xl font-display font-bold text-green-600">{{ stats.verifiedEmployers }}</span>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Active Jobs</span>
+          <span class="text-3xl font-display font-bold text-blue-600">{{ stats.totalJobs || 0 }}</span>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col justify-center relative overflow-hidden group">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Flagged Posts</span>
+            <div v-if="stats.flaggedPosts > 0" class="flex items-center gap-1 text-red-500 bg-red-50 px-2 py-0.5 rounded-md">
+              <FlagIcon class="w-3.5 h-3.5"/>
+              <span class="text-[9px] font-bold uppercase tracking-wider">Alert</span>
+            </div>
+          </div>
+          <span :class="['text-3xl font-display font-bold', stats.flaggedPosts > 0 ? 'text-red-600' : 'text-slate-800']">{{ stats.flaggedPosts || 0 }}</span>
         </div>
       </div>
 
@@ -428,6 +454,61 @@
         </div>
       </div>
 
+      <!-- 5. FLAGGED POSTS LIST -->
+      <div v-if="activeTab === 'posts'" class="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+            <tr class="text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+              <th class="px-6 py-5">Post/Job Details</th>
+              <th class="px-6 py-5">Author</th>
+              <th class="px-6 py-5">Type</th>
+              <th class="px-6 py-5 text-right font-bold">Actions</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+            <tr v-if="flaggedPostsList.length === 0">
+              <td colspan="4" class="px-6 py-12 text-center text-slate-400 text-sm">
+                No flagged posts found.
+              </td>
+            </tr>
+            <tr v-for="post in flaggedPostsList" :key="post.id"
+                class="hover:bg-slate-50/50 transition-colors group">
+              <td class="px-6 py-4">
+                <div class="flex flex-col max-w-md">
+                  <span class="font-bold text-slate-800 text-sm truncate">{{ post.title }}</span>
+                  <span class="text-xs text-slate-400 font-semibold line-clamp-2 mt-1">{{ post.content }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-xs font-medium text-slate-600">
+                <div class="flex flex-col">
+                  <span class="font-bold text-slate-700">{{ post.author?.companyName || post.author?.fullName || 'Unknown' }}</span>
+                  <span class="text-[10px] text-slate-400 capitalize">{{ post.author?.role?.toLowerCase() }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span :class="['inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold', post.isJob ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-700']">
+                  {{ post.isJob ? 'Job Listing' : 'Social Post' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex justify-end gap-2">
+                  <button @click="approvePost(post.id)"
+                          class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-green-50 hover:bg-green-100 text-green-700 transition-colors">
+                    Approve / Dismiss Flag
+                  </button>
+                  <button @click="deletePost(post.id)"
+                          class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-red-50 hover:bg-red-100 text-red-600 transition-colors">
+                    Delete Post
+                  </button>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </main>
 
     <!-- Document Review Modal (Employer / Student) -->
@@ -587,31 +668,30 @@ import api, { resolveUrl } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth'
 import {
   MagnifyingGlassIcon,
-  AdjustmentsHorizontalIcon,
   ExclamationTriangleIcon,
   BuildingOfficeIcon,
   EyeIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   ArrowDownTrayIcon,
   ShieldCheckIcon,
   UsersIcon,
   ChartBarIcon,
   ArrowLeftOnRectangleIcon,
   HomeIcon,
-  Bars3Icon
+  Bars3Icon,
+  FlagIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
 const isSidebarOpen = ref(false)
-const activeTab = ref('dashboard') // 'dashboard' | 'pending' | 'verified' | 'stats'
+const activeTab = ref('dashboard') // 'dashboard' | 'pending' | 'verified' | 'stats' | 'posts'
 const currentEntity = ref('employer') // 'employer' | 'student'
 const pendingEmployers = ref([])
 const pendingStudents = ref([])
 const verifiedEmployersList = ref([])
 const verifiedStudentsList = ref([])
+const flaggedPostsList = ref([])
 const selectedItem = ref(null)
 const selectedEntity = ref('employer')
 const searchQuery = ref('')
@@ -621,6 +701,8 @@ const stats = ref({
   totalEmployers: 0,
   verifiedEmployers: 0,
   pendingEmployers: 0,
+  totalJobs: 0,
+  flaggedPosts: 0,
 })
 
 // Computations
@@ -792,12 +874,22 @@ const fetchStats = async () => {
   }
 }
 
+const fetchFlaggedPosts = async () => {
+  try {
+    const response = await api.get('/admin/posts/flagged')
+    flaggedPostsList.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch flagged posts:', error)
+  }
+}
+
 const loadData = async () => {
   await Promise.all([
     fetchPendingEmployers(),
     fetchVerifiedEmployers(),
     fetchPendingStudents(),
     fetchVerifiedStudents(),
+    fetchFlaggedPosts(),
     fetchStats()
   ])
 }
@@ -874,6 +966,27 @@ const deleteEmployerDirectly = async (employerId) => {
   } catch (error) {
     console.error('Failed to delete employer:', error)
     alert('An error occurred while deleting the employer.')
+  }
+}
+
+const approvePost = async (postId) => {
+  try {
+    await api.patch(`/admin/posts/${postId}/approve`)
+    await loadData()
+  } catch (error) {
+    console.error('Failed to approve post:', error)
+    alert('An error occurred while approving the post.')
+  }
+}
+
+const deletePost = async (postId) => {
+  if (!confirm('Are you sure you want to permanently delete this post?')) return
+  try {
+    await api.delete(`/admin/posts/${postId}`)
+    await loadData()
+  } catch (error) {
+    console.error('Failed to delete post:', error)
+    alert('An error occurred while deleting the post.')
   }
 }
 

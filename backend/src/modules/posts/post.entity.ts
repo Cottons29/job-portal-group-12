@@ -32,6 +32,9 @@ export class PostEntity {
   @Column({ default: false })
   isJob: boolean;
 
+  @Column({ default: 'approved' })
+  status: 'approved' | 'pending' | 'flagged' | 'removed';
+
   @Column({ nullable: true })
   salary?: string;
 
