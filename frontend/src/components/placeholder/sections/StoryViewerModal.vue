@@ -57,7 +57,7 @@ onUnmounted(() => {
 
 <template>
   <BaseModal close-label="Close story viewer" @close="$emit('close')" max-width="max-w-lg" hide-close-button>
-    <div class="relative overflow-hidden rounded-3xl  aspect-9/16">
+    <div class="relative overflow-hidden rounded-3xl aspect-[9/16]">
       <!-- Header -->
       <div class="absolute top-4 left-4 right-4 z-20 flex items-center gap-3">
         <div class="h-10 w-10 overflow-hidden rounded-full ring-2 ring-white/50 bg-surface-container-low">

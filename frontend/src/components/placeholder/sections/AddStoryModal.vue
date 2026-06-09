@@ -69,7 +69,7 @@ async function handleSubmit() {
           <!-- Preview Area -->
           <div class="w-full lg:w-1/2 mr-5">
             <div
-              class="relative flex aspect-12/16 w-full items-center justify-center overflow-hidden rounded-2xl transition-all duration-500 shadow-inner"
+              class="relative flex aspect-[12/16] w-full items-center justify-center overflow-hidden rounded-2xl transition-all duration-500 shadow-inner"
               :style="{ background: mediaPreview ? '#000' : bgColor }"
             >
               <img v-if="mediaPreview" :src="mediaPreview" class="h-full w-full object-cover" />

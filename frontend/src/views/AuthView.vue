@@ -41,11 +41,11 @@ function goToForgotPassword() {
 
       <div class="auth-page__form-content bg-surface-container-low p-8 rounded-3xl">
         <!-- Logo -->
-        <div class="mb-8">
+        <div class="mb-6 flex justify-center">
           <img
             src="/images/logo.png"
             alt="FirstStep Logo"
-            class="h-50 w-auto object-contain"
+            class="h-16 sm:h-20 w-auto object-contain"
           />
         </div>
 
