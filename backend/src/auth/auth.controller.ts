@@ -64,10 +64,12 @@ export class AuthController {
     const body = await this.payloadEncryptionService.decrypt<{
       phone: string;
       password: string;
+      role?: string;
     }>(encryptedBody);
     const { user, token } = await this.authService.validateUser(
       body.phone,
       body.password,
+      body.role,
     );
     req.session.userId = user.id;
     (req.session as any).userRole = user.role;

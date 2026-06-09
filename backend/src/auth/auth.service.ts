@@ -119,7 +119,7 @@ export class AuthService {
     return { user: this.sanitizeUser(user), token };
   }
 
-  async validateUser(phone: string, password: string) {
+  async validateUser(phone: string, password: string, requestedRole?: string) {
     const user = await this.userRepository.findOne({ where: { phone } });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -128,6 +128,14 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (requestedRole && user.role !== UserRole.ADMIN) {
+      const normalizedRequestedRole = requestedRole.toUpperCase();
+      const normalizedUserRole = user.role.toUpperCase();
+      if (normalizedUserRole !== normalizedRequestedRole) {
+        throw new UnauthorizedException('Invalid credentials for selected role');
+      }
     }
 
     const token = this.createToken(user);
