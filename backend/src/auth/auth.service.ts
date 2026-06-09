@@ -6,10 +6,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import * as nodemailer from 'nodemailer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { EmailService } from '../common/email/email.service';
 import {
   generateAuthenticationOptions,
   generateRegistrationOptions,
@@ -44,20 +44,13 @@ export class AuthService {
   private registrationChallenges = new Map<string, ChallengeRecord>();
   private authenticationChallenges = new Map<string, ChallengeRecord>();
 
-  private transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_PASS,
-    },
-  });
-
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(PasskeyCredential)
     private passkeyRepository: Repository<PasskeyCredential>,
     private jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
 
   private get rpName() {
@@ -435,21 +428,7 @@ export class AuthService {
     console.log(`ENV : ${process.env}`);
 
     try {
-      if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
-        await this.transporter.sendMail({
-          from: `"FirstStep Security" <${process.env.GMAIL_USER}>`,
-          to: email,
-          subject: 'FirstStep Security Authentication Code',
-          html: `<div style="font-family: sans-serif; padding: 20px; background-color: #f8fafc; border-radius: 12px;">
-                   <h2 style="color: #0f172a; margin-bottom: 20px;">Your Security Code</h2>
-                   <p style="color: #475569; font-size: 16px;">Please use the following 6-digit code to securely attach this email address to your FirstStep profile.</p>
-                   <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; display: inline-block; border: 1px solid #e2e8f0;">
-                     <strong style="color: #004ac6; font-size: 32px; letter-spacing: 6px;">${code}</strong>
-                   </div>
-                   <p style="color: #64748b; font-size: 14px;">This code will automatically expire in 10 minutes.</p>
-                 </div>`,
-        });
-      }
+      await this.emailService.sendOtpEmail(email, code);
     } catch (error) {
       throw new BadRequestException('Could not dispatch email via Gmail SMTP.');
     }
@@ -488,23 +467,7 @@ export class AuthService {
     expiresAt,
   });
 
-  await this.transporter.sendMail({
-    from:
-      `"FirstStep Security"
-       <${process.env.GMAIL_USER}>`,
-
-    to: email,
-
-    subject: 'Reset Password OTP',
-
-    html: `
-      <h2>Password Reset</h2>
-
-      <p>Your OTP code:</p>
-
-      <h1>${code}</h1>
-    `,
-  });
+  await this.emailService.sendResetOtpEmail(email, code);
 }
 
   async verifyOtpAndAttachEmail(userId: string, email: string, code: string) {

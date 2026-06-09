@@ -1,7 +1,19 @@
 <template>
-  <div class="flex h-screen bg-slate-50 font-sans text-slate-800 overflow-hidden">
+  <div class="flex h-screen bg-slate-50 font-sans text-slate-800 overflow-hidden relative">
+    <!-- Overlay for mobile sidebar -->
+    <div 
+      v-if="isSidebarOpen" 
+      @click="isSidebarOpen = false"
+      class="fixed inset-0 z-20 bg-slate-900/40 lg:hidden"
+    ></div>
+
     <!-- Sidebar -->
-    <aside class="w-64 bg-white shadow-sm flex flex-col justify-between flex-shrink-0 z-10 border-r border-slate-100">
+    <aside 
+      :class="[
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+        'fixed inset-y-0 left-0 w-64 bg-white shadow-md lg:shadow-none flex flex-col justify-between flex-shrink-0 z-30 border-r border-slate-100 transition-transform duration-300 ease-in-out lg:static lg:w-64'
+      ]"
+    >
       <div>
         <!-- Brand -->
         <div class="p-6">
@@ -12,7 +24,7 @@
         <!-- Navigation -->
         <nav class="mt-2 px-4 flex flex-col gap-1">
           <button
-              @click="activeTab = 'dashboard'"
+              @click="activeTab = 'dashboard'; isSidebarOpen = false"
               :class="[
                 'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-semibold w-full text-left',
                 activeTab === 'dashboard' ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600 hover:bg-slate-50'
@@ -22,7 +34,7 @@
             Dashboard
           </button>
           <button
-              @click="activeTab = 'pending'"
+              @click="activeTab = 'pending'; isSidebarOpen = false"
               :class="[
                 'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-semibold w-full text-left',
                 activeTab === 'pending' ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600 hover:bg-slate-50'
@@ -32,7 +44,7 @@
             Pending Employers
           </button>
           <button
-              @click="activeTab = 'verified'"
+              @click="activeTab = 'verified'; isSidebarOpen = false"
               :class="[
                 'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-semibold w-full text-left',
                 activeTab === 'verified' ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600 hover:bg-slate-50'
@@ -42,7 +54,7 @@
             Verified SMEs
           </button>
           <button
-              @click="activeTab = 'stats'"
+              @click="activeTab = 'stats'; isSidebarOpen = false"
               :class="[
                 'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-semibold w-full text-left',
                 activeTab === 'stats' ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600 hover:bg-slate-50'
@@ -57,14 +69,14 @@
       <!-- Bottom Links -->
       <div class="p-4 px-4 flex flex-col gap-1 mb-4 border-t border-slate-100/50">
         <button
-            @click="goHome"
+            @click="goHome; isSidebarOpen = false"
             class="flex items-center gap-3 px-4 py-2 rounded-xl text-slate-500 hover:bg-slate-50 transition-colors text-xs font-semibold w-full text-left"
         >
           <HomeIcon class="w-4 h-4" />
           Exit to Portal
         </button>
         <button
-            @click="handleLogout"
+            @click="handleLogout; isSidebarOpen = false"
             class="flex items-center gap-3 px-4 py-2 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors text-xs font-semibold w-full text-left"
         >
           <ArrowLeftOnRectangleIcon class="w-4 h-4" />
@@ -74,7 +86,21 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto p-8 lg:px-12 flex flex-col gap-8">
+    <main class="flex-1 overflow-y-auto p-4 sm:p-8 lg:px-12 flex flex-col gap-8">
+      <!-- Mobile header toggle -->
+      <div class="flex items-center gap-3 lg:hidden bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <button 
+          @click="isSidebarOpen = true"
+          class="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
+          aria-label="Open sidebar"
+        >
+          <Bars3Icon class="w-6 h-6" />
+        </button>
+        <div>
+          <h1 class="text-lg font-display font-extrabold text-blue-600">FirstStep</h1>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin Portal</p>
+        </div>
+      </div>
 
       <!-- HEADER SECTION -->
       <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
@@ -106,14 +132,14 @@
         </div>
 
         <!-- Search & Filter (Visible for lists) -->
-        <div v-if="activeTab === 'pending' || activeTab === 'verified'" class="flex items-center gap-3 flex-shrink-0">
-          <div class="inline-flex rounded-lg bg-white p-1 border border-slate-100">
-            <button @click="currentEntity = 'employer'" :class="['px-3 py-1 rounded-md text-sm font-semibold', currentEntity === 'employer' ? 'bg-blue-600 text-white' : 'text-slate-600']">Employers</button>
-            <button @click="currentEntity = 'student'" :class="['px-3 py-1 rounded-md text-sm font-semibold', currentEntity === 'student' ? 'bg-blue-600 text-white' : 'text-slate-600']">Students</button>
+        <div v-if="activeTab === 'pending' || activeTab === 'verified'" class="flex flex-col sm:flex-row sm:items-center gap-3 flex-shrink-0 w-full sm:w-auto">
+          <div class="inline-flex rounded-lg bg-white p-1 border border-slate-100 w-full sm:w-auto justify-center">
+            <button @click="currentEntity = 'employer'" :class="['px-3 py-1 rounded-md text-sm font-semibold flex-1 sm:flex-none', currentEntity === 'employer' ? 'bg-blue-600 text-white' : 'text-slate-600']">Employers</button>
+            <button @click="currentEntity = 'student'" :class="['px-3 py-1 rounded-md text-sm font-semibold flex-1 sm:flex-none', currentEntity === 'student' ? 'bg-blue-600 text-white' : 'text-slate-600']">Students</button>
           </div>
 
           <div
-              class="relative bg-white rounded-xl shadow-sm border border-slate-100 flex items-center px-3 py-2 w-64 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+              class="relative bg-white rounded-xl shadow-sm border border-slate-100 flex items-center px-3 py-2 w-full sm:w-64 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <MagnifyingGlassIcon class="w-5 h-5 text-slate-400"/>
             <input
                 v-model="searchQuery"
@@ -572,12 +598,14 @@ import {
   UsersIcon,
   ChartBarIcon,
   ArrowLeftOnRectangleIcon,
-  HomeIcon
+  HomeIcon,
+  Bars3Icon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
+const isSidebarOpen = ref(false)
 const activeTab = ref('dashboard') // 'dashboard' | 'pending' | 'verified' | 'stats'
 const currentEntity = ref('employer') // 'employer' | 'student'
 const pendingEmployers = ref([])

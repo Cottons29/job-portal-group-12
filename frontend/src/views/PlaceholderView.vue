@@ -16,6 +16,25 @@
                 ? 'px-4 pt-5 pb-4 sm:px-6 lg:h-[calc(100vh-1rem)] lg:overflow-hidden lg:px-8'
                 : 'px-4 pb-28 pt-5 sm:px-6 lg:h-screen lg:overflow-y-auto lg:px-8 lg:pb-10'
             ]">
+        <!-- Mobile Top Navbar -->
+        <div class="flex items-center justify-between lg:hidden mb-4 border-b border-outline-variant/30 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="grid h-8 w-8 place-items-center rounded-lg bg-primary text-xs font-black text-on-primary">FS</span>
+            <span class="font-display text-lg font-black tracking-tight text-on-surface">FirstStep</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Theme toggle -->
+            <button @click="toggleThemeMode" class="p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant transition" aria-label="Toggle theme">
+              <SunIcon v-if="appliedTheme === 'dark'" class="w-5 h-5 text-amber-400" />
+              <MoonIcon v-else class="w-5 h-5" />
+            </button>
+            <!-- Settings Link -->
+            <RouterLink to="/settings" class="p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant transition" aria-label="Settings">
+              <Cog6ToothIcon class="w-5 h-5" />
+            </RouterLink>
+          </div>
+        </div>
+
         <header class="stickyV -mx-4 mb-6 bg-surface/90 px-4 py-3 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -185,6 +204,9 @@ import {
   PlusCircleIcon,
   UserCircleIcon,
   ShieldCheckIcon,
+  Cog6ToothIcon,
+  SunIcon,
+  MoonIcon,
 } from '@heroicons/vue/24/outline'
 import MessagesSection from "@/components/placeholder/sections/MessagesSection.vue";
 

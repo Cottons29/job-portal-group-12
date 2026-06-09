@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 import { UserRole } from '../../common/enums/user-role.enum';
+import { EmailService } from '../../common/email/email.service';
 
 @Injectable()
 export class AdminService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    private readonly emailService: EmailService,
   ) {}
 
   async getPendingEmployers(): Promise<User[]> {
@@ -34,6 +36,14 @@ export class AdminService {
     }
     employer.isVerified = true;
     await this.userRepo.save(employer);
+
+    if (employer.email) {
+      await this.emailService.sendVerificationApprovedEmail(
+        employer.email,
+        employer.fullName || employer.companyName || 'Employer',
+        'EMPLOYER',
+      );
+    }
   }
 
   async rejectEmployer(id: string): Promise<void> {
@@ -42,6 +52,13 @@ export class AdminService {
     });
     if (!employer) {
       throw new NotFoundException('Employer not found');
+    }
+    if (employer.email) {
+      await this.emailService.sendVerificationRejectedEmail(
+        employer.email,
+        employer.fullName || employer.companyName || 'Employer',
+        'EMPLOYER',
+      );
     }
     await this.userRepo.delete(id);
   }
@@ -72,12 +89,27 @@ export class AdminService {
     }
     student.isStudentVerified = true;
     await this.userRepo.save(student);
+
+    if (student.email) {
+      await this.emailService.sendVerificationApprovedEmail(
+        student.email,
+        student.fullName || student.user_name || 'Student',
+        'STUDENT',
+      );
+    }
   }
 
   async rejectStudent(id: string): Promise<void> {
     const student = await this.userRepo.findOne({ where: { id, role: UserRole.STUDENT } });
     if (!student) {
       throw new NotFoundException('Student not found');
+    }
+    if (student.email) {
+      await this.emailService.sendVerificationRejectedEmail(
+        student.email,
+        student.fullName || student.user_name || 'Student',
+        'STUDENT',
+      );
     }
     await this.userRepo.delete(id);
   }

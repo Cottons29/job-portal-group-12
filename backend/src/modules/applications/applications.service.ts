@@ -13,6 +13,7 @@ import { PostEntity } from '../posts/post.entity';
 import { ApplicationStatus, JobApplication } from './job-application.entity';
 
 import { NotificationsService } from '../../notifications/notifications.service';
+import { EmailService } from '../../common/email/email.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -24,10 +25,14 @@ export class ApplicationsService {
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
     private readonly notificationsService: NotificationsService,
+    private readonly emailService: EmailService,
   ) {}
 
   async apply(studentId: string, postId: string, coverLetter?: string, cvUrl?: string) {
-    const post = await this.postsRepo.findOne({ where: { id: postId } });
+    const post = await this.postsRepo.findOne({
+      where: { id: postId },
+      relations: ['author'],
+    });
     if (!post) {
       throw new NotFoundException('Post not found.');
     }
@@ -67,6 +72,15 @@ export class ApplicationsService {
         post.author.id,
         `New job application received from ${student.user_name || 'a student'} for your post: "${post.title}"`,
       );
+
+      if (post.author.email) {
+        await this.emailService.sendApplicationSubmittedEmail(
+          post.author.email,
+          post.author.fullName || post.author.companyName || 'Employer',
+          student.fullName || student.user_name || 'A Student',
+          post.title,
+        );
+      }
     }
 
     return savedApp;
@@ -122,6 +136,16 @@ export class ApplicationsService {
         application.applicant.id,
         `Your job application status for "${application.post.title}" has been updated to: ${status}`,
       );
+
+      if (application.applicant.email) {
+        await this.emailService.sendApplicationStatusUpdatedEmail(
+          application.applicant.email,
+          application.applicant.fullName || application.applicant.user_name || 'Student',
+          application.post.title,
+          status,
+          application.post.author?.companyName || application.post.author?.fullName || 'Employer',
+        );
+      }
     }
 
     return savedApp;

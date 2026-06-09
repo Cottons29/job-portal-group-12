@@ -12,6 +12,7 @@ import { ApplicationsModule } from './modules/applications/applications.module';
 import { StoriesModule } from "./modules/stories/stories.module";
 import { FollowsModule } from "./modules/follows/follows.module";
 import { MessagesModule } from "./modules/messages/messages.module";
+import { EmailModule } from './common/email/email.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { MessagesModule } from "./modules/messages/messages.module";
       autoLoadEntities: true,
       synchronize: true,
     }),
+    EmailModule,
     AuthModule,
     UploadModule,
     NotificationsModule,

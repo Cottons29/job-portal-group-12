@@ -111,13 +111,13 @@ defineEmits<{
 
 <template>
   <div class="grid gap-10 md:grid-cols-[15rem_minmax(0,1fr)] md:justify-start lg:gap-30 xl:grid-cols-[15rem_minmax(0,0.78fr)]">
-    <aside class="space-y-2 md:sticky md:top-28 md:h-fit">
+    <aside class="flex overflow-x-auto gap-2 pb-2 md:flex-col md:space-y-2 md:overflow-visible no-scrollbar shrink-0 md:sticky md:top-28 md:h-fit">
       <button
           v-for="item in settingsMenuItems"
           :key="item.label"
           :class="[
               item.active ? 'bg-surface-container-high text-on-surface' : 'text-on-surface-variant hover:bg-surface-container-low',
-              'flex w-full items-center gap-3 rounded-full px-3 py-2.5 text-left text-sm font-black transition'
+              'flex items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-black transition shrink-0 md:w-full'
           ]"
           type="button"
           @click="() => {activeSettingsSection = item.section}"
