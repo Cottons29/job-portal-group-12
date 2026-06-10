@@ -213,10 +213,10 @@ export const useAuthStore = defineStore('auth', () => {
             return
         }
 
-        if (password.value.length < 6) {
-            error.value = 'Password must be at least 6 characters.'
-            return
-        }
+        // if (password.value.length < 6) {
+        //     error.value = 'Password must be at least 6 characters.'
+        //     return
+        // }
 
         isLoading.value = true
         try {
