@@ -6,7 +6,7 @@ import { useProfileStore } from '@/stores/profile'
 import { useAuthStore } from '@/stores/auth'
 import api, { resolveUrl } from '@/lib/api'
 import { usePostStore } from '@/stores/posts'
-import { ChatBubbleOvalLeftEllipsisIcon, SparklesIcon, TagIcon } from '@heroicons/vue/24/outline'
+import {CheckCircleIcon, BriefcaseIcon,ClockIcon,ChatBubbleOvalLeftEllipsisIcon, SparklesIcon, TagIcon } from '@heroicons/vue/24/outline'
 
 const { t } = useI18n()
 const profileStore = useProfileStore()
@@ -280,22 +280,41 @@ async function fetchTaggedPosts() {
                     class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-700 ring-1 ring-emerald-500/20"
                     title="Student Verified"
                   >
-                    ✓ Verified Student
+                    <!-- Heroicon added here -->
+                    <CheckCircleIcon class="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                    <span>Verified Student</span>
                   </span>
-                  <span
+
+                 <span
                     v-else-if="!isEmployer && profileStore.profileForm.idCardUrl"
                     class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-700 ring-1 ring-amber-500/20"
                     title="Student verification is pending"
                   >
-                    ⏳ Verification Pending
+                    <!-- Heroicon component matching the amber theme -->
+                    <ClockIcon class="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                    <span>Verification Pending</span>
                   </span>
-                  <span
-                    v-else-if="!isEmployer"
-                    class="inline-flex items-center gap-1 rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-700 ring-1 ring-slate-300"
-                    title="Student is not yet verified"
-                  >
-                    ✕ Not Verified
-                  </span>
+
+                <span
+                  v-if="isEmployer && profileStore.profileForm.isVerified"
+                  class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-500 ring-1 ring-amber-500/20"
+                  title="Verified Employer"
+                >
+                  <!-- Heroicon added here matching the amber styling -->
+                  <BriefcaseIcon class="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>Verified</span>
+                </span>
+             <span
+              v-if="isEmployer && profileStore.profileForm.patentUrl && !profileStore.profileForm.isVerified"
+              class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-500 ring-1 ring-amber-500/20"
+              title="Employer verification is pending"
+            > 
+              <!-- Replaced with ClockIcon for better visual clarity -->
+              <ClockIcon class="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <span>Pending</span>
+            </span>
+
+
                 </div>
                 <p class="mt-2 text-base text-on-surface font-thin">{{ profileHandle }}</p>
               </div>
@@ -455,9 +474,12 @@ async function fetchTaggedPosts() {
             <p class="text-xs font-bold text-on-surface-variant mt-0.5">
               {{ app.post?.company }} • Applied on {{ new Date(app.createdAt).toLocaleDateString() }}
             </p>
-            <div v-if="app.status === 'ACCEPTED'" class="mt-2 text-xs font-semibold text-[#1f6c3b] bg-[#8fd99b]/15 px-3 py-1.5 rounded-xl inline-block">
-              🎉 Congratulations! You got the job offer! Keep an eye on your inbox/messages.
+            <div v-if="app.status === 'ACCEPTED'" class="mt-2 text-xs font-semibold text-[#1f6c3b] bg-[#8fd99b]/15 px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5">
+            <!-- Heroicon component with matching text color -->
+            <CheckCircleIcon class="w-4 h-4 text-[#1f6c3b] shrink-0" />
+            <span>Congratulations! You got the job offer! Keep an eye on your inbox/messages.</span>
             </div>
+
             <div v-else-if="app.status === 'REJECTED'" class="mt-2 text-xs font-semibold text-red-700 bg-red-500/10 px-3 py-1.5 rounded-xl inline-block">
               Thank you for applying. The employer has decided to pursue other applicants for this role.
             </div>
