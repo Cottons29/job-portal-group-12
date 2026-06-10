@@ -60,9 +60,20 @@ export class AuthController {
 
     const errors = await validate(dto);
 
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
+   if (errors.length > 0) {
+  const formattedErrors: Record<string, string> = {};
+
+  errors.forEach(error => {
+    if (error.constraints) {
+      formattedErrors[error.property] =
+        Object.values(error.constraints)[0];
     }
+  });
+
+  throw new BadRequestException({
+    errors: formattedErrors,
+  });
+}
     const { user, token } = await this.authService.register(
       dto.phone,
       dto.password,
