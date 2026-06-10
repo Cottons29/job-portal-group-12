@@ -32,7 +32,7 @@ withDefaults(defineProps<{
   loadError: ''
 })
 
-defineEmits(['close', 'update-status'])
+defineEmits(['close', 'update-status','open-profile'])
 
 const statusConfig = {
   PENDING: { label: 'Pending', icon: ClockIcon, bg: 'bg-[#ffc28e]/20', text: 'text-[#83460e]' },
@@ -112,7 +112,10 @@ function getUniLabel(key?: string) {
                 </div>
                 <div>
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <p class="font-black text-on-surface text-base">
+                    <p
+                      class="font-black text-on-surface text-base cursor-pointer transition-all duration-150 hover:underline hover:opacity-75"
+                      @click="$emit('open-profile', app.applicant)"
+                    >
                       {{ app.applicant?.fullName || app.applicant?.user_name || 'Candidate' }}
                     </p>
                     <span

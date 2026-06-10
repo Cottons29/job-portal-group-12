@@ -152,6 +152,7 @@
                 :load-error="applicantsLoadError"
                 @close="isApplicantsModalOpen = false"
                 @update-status="handleUpdateApplicantStatus"
+                @open-profile="openStudentProfile"
             />
           </Transition>
         </Teleport>
@@ -351,7 +352,11 @@ async function handleViewApplicants(postOrId) {
     isLoadingApplicants.value = false
   }
 }
-
+function openStudentProfile(student) {
+  isApplicantsModalOpen.value = false
+  profileStore.selectedUserProfile = student
+  profileStore.isProfileModalOpen = true
+}
 async function handleUpdateApplicantStatus({ applicationId, status }) {
   try {
     await api.patch(`/applications/${applicationId}/status`, { status })
