@@ -109,7 +109,7 @@ export class AuthService {
     const user = this.userRepository.create({
       phone,
       password: hashedPassword,
-      role: role === 'employer' ? UserRole.EMPLOYER : UserRole.STUDENT,
+      role: role.toUpperCase() === UserRole.EMPLOYER ? UserRole.EMPLOYER : UserRole.STUDENT,
       status: AccountStatus.ACTIVE,
     });
 

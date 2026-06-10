@@ -8,16 +8,20 @@ import {
   HttpStatus,
   UseGuards,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import type {
   AuthenticationResponseJSON,
   RegistrationResponseJSON,
 } from '@simplewebauthn/server';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import type { Request } from 'express';
 import { AuthService } from './auth.service';
 import { AuthenticatedGuard } from './authenticated.guard';
 import { PayloadEncryptionService } from './payload-encryption.service';
 import type { EncryptedPayloadDto } from './encrypted-payload.dto';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -43,15 +47,37 @@ export class AuthController {
     @Body() encryptedBody: EncryptedPayloadDto,
     @Req() req: Request,
   ) {
-    const body = await this.payloadEncryptionService.decrypt<{
+    
+    const rawBody = await this.payloadEncryptionService.decrypt<{
       phone: string;
       password: string;
       role: string;
     }>(encryptedBody);
+
+    rawBody.role = rawBody.role.toUpperCase();
+
+    const dto = plainToInstance(RegisterDto, rawBody);
+
+    const errors = await validate(dto);
+
+   if (errors.length > 0) {
+  const formattedErrors: Record<string, string> = {};
+
+  errors.forEach(error => {
+    if (error.constraints) {
+      formattedErrors[error.property] =
+        Object.values(error.constraints)[0];
+    }
+  });
+
+  throw new BadRequestException({
+    errors: formattedErrors,
+  });
+}
     const { user, token } = await this.authService.register(
-      body.phone,
-      body.password,
-      body.role,
+      dto.phone,
+      dto.password,
+      dto.role,
     );
     req.session.userId = user.id;
     (req.session as any).userRole = user.role;

@@ -102,7 +102,7 @@
           <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 class="font-display text-3xl font-black tracking-tighter text-on-surface sm:text-4xl">
-                {{ user.user_name ?? 'NotSet' }}
+                 {{ user.user_name ?? 'NotSet' }}
               </h2>
               <div class="mt-1 flex items-center gap-1.5 flex-wrap">
                 <p class="text-xl font-black text-on-surface">{{ user.name }}</p>

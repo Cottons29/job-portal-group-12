@@ -42,14 +42,27 @@ interface CurrentUserResponse {
 
 type SafeAuthUserUpdate = Partial<Omit<SafeAuthUser, 'id'>> & Pick<SafeAuthUser, 'id'>
 
-function getErrorMessage(error: unknown, fallback: string) {
-    if (isAxiosError<{ message?: string }>(error)) {
-        return error.response?.data?.message || fallback
+function getErrorMessage(error: unknown, fallback: string): string {
+    if (!isAxiosError(error)) {
+        return fallback
+    }
+
+    const data = error.response?.data
+
+    if (data?.errors) {
+        return Object.values(data.errors)[0] as string
+    }
+
+    if (data?.message?.errors) {
+        return Object.values(data.message.errors)[0] as string
+    }
+
+    if (typeof data?.message === 'string') {
+        return data.message
     }
 
     return fallback
 }
-
 function toSafeAuthUser(userPayload: AuthUserPayload | SafeAuthUserUpdate): SafeAuthUser {
     return {
         id: userPayload.id,
