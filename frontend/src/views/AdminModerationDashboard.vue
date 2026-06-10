@@ -79,14 +79,14 @@
       <!-- Bottom Links -->
       <div class="p-4 px-4 flex flex-col gap-1 mb-4 border-t border-slate-100/50">
         <button
-            @click="goHome; isSidebarOpen = false"
+            @click="goHome(); isSidebarOpen = false"
             class="flex items-center gap-3 px-4 py-2 rounded-xl text-slate-500 hover:bg-slate-50 transition-colors text-xs font-semibold w-full text-left"
         >
           <HomeIcon class="w-4 h-4" />
           Exit to Portal
         </button>
         <button
-            @click="handleLogout; isSidebarOpen = false"
+            @click="handleLogout(); isSidebarOpen = false"
             class="flex items-center gap-3 px-4 py-2 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors text-xs font-semibold w-full text-left"
         >
           <ArrowLeftOnRectangleIcon class="w-4 h-4" />
