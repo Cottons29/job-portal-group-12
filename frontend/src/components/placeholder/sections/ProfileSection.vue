@@ -61,6 +61,7 @@ const profileEducation = computed(() => {
   return u || m || ''
 })
 
+
 const availabilitySummary = computed(() => {
   const av = profileStore.profileForm.availability
   if (!av) return []
@@ -92,6 +93,7 @@ const expectedSalaryText = computed(() => {
 const followedByAvatars = ref([])
 
 const activeTab = ref('posts')
+const postTypeFilter = ref('all') // 'all', 'social', 'job'
 
 const profileTabs = computed(() => [
   { id: 'posts', label: t('profilePage.posts'), active: activeTab.value === 'posts' },
@@ -109,7 +111,16 @@ const filteredGallery = computed(() => {
   } else if (activeTab.value === 'tagged') {
     return profileTagged.value
   }
-  return profilePosts.value
+  
+  let posts = profilePosts.value
+  
+  // Filter by post type for employers
+  if (isEmployer.value && postTypeFilter.value !== 'all') {
+    const isJob = postTypeFilter.value === 'job'
+    posts = posts.filter(p => p.post?.isJob === isJob)
+  }
+  
+  return posts
 })
 
 const emptyStateIcon = computed(() => {
@@ -310,7 +321,7 @@ async function fetchTaggedPosts() {
 
             <div class="mt-4 max-w-2xl space-y-1.5 text-xs font-bold leading-5 text-on-surface sm:text-sm">
               <p v-if="profileCategory" class="text-on-surface-variant">{{ profileCategory }}</p>
-              <p v-if="profileBio">{{ profileBio }}</p>
+              <p v-if="profileBio"> {{  profileBio }}</p>
               <p v-if="profileEducation" class="text-on-surface-variant">{{ profileEducation }}</p>
               <p v-if="profileStore.profileForm.jobType" class="text-on-surface-variant">
                 {{ t('profilePage.lookingFor', { jobType: profileStore.profileForm.jobType }) }}
@@ -383,6 +394,39 @@ async function fetchTaggedPosts() {
       </button>
     </nav>
 
+    <!-- Post Type Filter for Employers (Posts Tab Only) -->
+    <div v-if="isEmployer && activeTab === 'posts'" class="flex rounded-2xl bg-surface-container-low p-1 max-w-[20rem]">
+      <button
+        type="button"
+        @click="postTypeFilter = 'all'"
+        :class="[
+          'flex-1 text-center py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all',
+          postTypeFilter === 'all' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+        ]"
+      >
+        All Posts
+      </button>
+      <button
+        type="button"
+        @click="postTypeFilter = 'social'"
+        :class="[
+          'flex-1 text-center py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all',
+          postTypeFilter === 'social' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+        ]"
+      >
+        Social
+      </button>
+      <button
+        type="button"
+        @click="postTypeFilter = 'job'"
+        :class="[
+          'flex-1 text-center py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all',
+          postTypeFilter === 'job' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+        ]"
+      >
+        Jobs
+      </button>
+    </div>
     <!-- Applications List for Students -->
     <div v-if="activeTab === 'tagged' && !isEmployer" class="space-y-4">
       <div v-if="filteredGallery.length === 0" class="flex flex-col items-center justify-center py-16 text-center px-4 bg-surface-container-low rounded-3xl border border-on-surface/5">
@@ -446,6 +490,8 @@ async function fetchTaggedPosts() {
       </div>
     </div>
 
+    
+
     <section v-else class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
       <!-- Empty State -->
       <div v-if="filteredGallery.length === 0" class="col-span-full flex flex-col items-center justify-center py-16 text-center px-4 bg-surface-container-low rounded-3xl border border-on-surface/5">
@@ -455,7 +501,7 @@ async function fetchTaggedPosts() {
         <h3 class="font-display text-lg font-black text-on-surface">{{ emptyStateTitle }}</h3>
         <p class="mt-1 text-xs text-on-surface-variant/70 max-w-xs leading-relaxed">{{ emptyStateDesc }}</p>
       </div>
-
+      
       <article
           v-else
           v-for="item in filteredGallery"
@@ -474,9 +520,14 @@ async function fetchTaggedPosts() {
             class="h-full w-full object-cover transition duration-150 group-hover:scale-101"
         />
         <div v-else class="grid h-full w-full place-items-center p-5 text-center bg-surface-container-high/30">
-          <h3 class="font-display text-xl font-black tracking-[-0.04em] text-on-surface">{{ item.title }}</h3>
+          <h3 class="font-display text-xl font-black tracking-[-0.04em] text-on-surface"> {{ item.title }} </h3>
+          <!-- <h3 class="font-display text-xl font-black tracking-[-0.04em] text-on-surface"> {{ item }} </h3> -->
+
         </div>
+         
       </article>
+  
     </section>
+    
   </section>
 </template>
