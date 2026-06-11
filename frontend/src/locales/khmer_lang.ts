@@ -177,6 +177,7 @@ const khmer_lang: AppLanguage = {
         noBio: 'គ្មានជីវប្រវត្តិ',
         highlights: 'ចំណុចលេចធ្លោ',
         tagged: 'បានដាក់ស្លាក',
+        savedJobs:'ការងារដែលបានរក្សា'
     },
     dashboardPages: {
         home: {

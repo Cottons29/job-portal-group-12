@@ -99,11 +99,15 @@ const profileTabs = computed(() => [
   { id: 'posts', label: t('profilePage.posts'), active: activeTab.value === 'posts' },
   { id: 'highlights', label: t('profilePage.highlights') || 'Highlights', active: activeTab.value === 'highlights' },
   { id: 'tagged', label: t('profilePage.tagged') || 'Tagged', active: activeTab.value === 'tagged' },
+  { id: 'savedJobs', label: t('profilePage.savedJobs') || 'SavedJobs', active: activeTab.value === 'savedJobs' },
+  
 ])
 
 const profilePosts = ref([])
 const profileHighlights = ref([])
 const profileTagged = ref([])
+const savedJobs=ref([])
+
 
 const filteredGallery = computed(() => {
   if (activeTab.value === 'highlights') {
@@ -111,6 +115,8 @@ const filteredGallery = computed(() => {
   } else if (activeTab.value === 'tagged') {
     return profileTagged.value
   }
+  if (activeTab.value === 'savedJobs')
+    return savedJobs.value
   
   let posts = profilePosts.value
   
@@ -154,6 +160,7 @@ onMounted(async () => {
   fetchFollowStats()
   await fetchUserPosts()
   await fetchTaggedPosts()
+  await  fetchSavedJobs()
 })
 
 async function fetchFollowStats() {
@@ -234,6 +241,22 @@ async function fetchTaggedPosts() {
     }
   } catch (e) {
     console.error('Failed to fetch tagged posts:', e)
+  }
+}
+
+async function fetchSavedJobs() {
+  try {
+    const { data } = await api.get('/posts/bookmarks')
+
+    const postStore = usePostStore()
+
+    savedJobs.value = (data.posts || []).map(p => ({
+      post: postStore.mapPost(p),
+      image: p.imageUrl,
+      title: p.title
+    }))
+  } catch (e) {
+    console.error('Failed to fetch saved jobs', e)
   }
 }
 </script>
@@ -396,7 +419,7 @@ async function fetchTaggedPosts() {
         </div>
       </div>
     </article>
-
+    <div>{{ profileTabs[3].id }}</div>
     <nav class="flex gap-1 rounded-[1.75rem] p-2 sm:inline-flex">
       <button
           v-for="tab in profileTabs"
@@ -448,6 +471,72 @@ async function fetchTaggedPosts() {
     </div>
     <!-- Applications List for Students -->
     <div v-if="activeTab === 'tagged' && !isEmployer" class="space-y-4">
+      <div v-if="filteredGallery.length === 0" class="flex flex-col items-center justify-center py-16 text-center px-4 bg-surface-container-low rounded-3xl border border-on-surface/5">
+        <div class="grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary mb-3">
+          <component :is="emptyStateIcon" class="h-8 w-8 text-primary" />
+        </div>
+        <h3 class="font-display text-lg font-black text-on-surface">{{ emptyStateTitle }}</h3>
+        <p class="mt-1 text-xs text-on-surface-variant/70 max-w-xs leading-relaxed">{{ emptyStateDesc }}</p>
+      </div>
+
+      <div
+        v-else
+        v-for="app in filteredGallery"
+        :key="app.id"
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-surface-container-low border border-on-surface/5 transition duration-150 hover:border-primary/20"
+      >
+        <div class="flex items-start gap-4">
+          <div class="h-12 w-12 shrink-0 grid place-items-center rounded-2xl bg-[#aecbfa] text-[#1a4fa3] font-black text-sm overflow-hidden">
+            <img v-if="app.post?.authorAvatar" :src="app.post.authorAvatar" class="h-full w-full object-cover" />
+            <span v-else>{{ app.post?.company?.charAt(0) || 'J' }}</span>
+          </div>
+          <div>
+            <h4 class="font-display text-lg font-black text-on-surface hover:underline cursor-pointer" @click="$emit('openPost', app.post)">
+              {{ app.post?.title || app.title }}
+            </h4>
+            <p class="text-xs font-bold text-on-surface-variant mt-0.5">
+              {{ app.post?.company }} • Applied on {{ new Date(app.createdAt).toLocaleDateString() }}
+            </p>
+            <div v-if="app.status === 'ACCEPTED'" class="mt-2 text-xs font-semibold text-[#1f6c3b] bg-[#8fd99b]/15 px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5">
+            <!-- Heroicon component with matching text color -->
+            <CheckCircleIcon class="w-4 h-4 text-[#1f6c3b] shrink-0" />
+            <span>Congratulations! You got the job offer! Keep an eye on your inbox/messages.</span>
+            </div>
+
+            <div v-else-if="app.status === 'REJECTED'" class="mt-2 text-xs font-semibold text-red-700 bg-red-500/10 px-3 py-1.5 rounded-xl inline-block">
+              Thank you for applying. The employer has decided to pursue other applicants for this role.
+            </div>
+            <div v-else-if="app.status === 'REVIEWED'" class="mt-2 text-xs font-semibold text-[#1a4fa3] bg-[#aecbfa]/15 px-3 py-1.5 rounded-xl inline-block">
+              Your application is currently under review by the hiring team.
+            </div>
+            <div v-else class="mt-2 text-xs font-semibold text-on-surface-variant/80 bg-surface-container-high px-3 py-1.5 rounded-xl inline-block">
+              Application submitted and pending initial employer review.
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 sm:self-center">
+          <span :class="[
+            'px-3 py-1 text-xs font-black uppercase tracking-wider rounded-full ring-1',
+            app.status === 'ACCEPTED' ? 'bg-[#8fd99b]/20 text-[#1f6c3b] ring-[#8fd99b]/35' :
+            app.status === 'REJECTED' ? 'bg-red-500/15 text-red-500 ring-red-500/25' :
+            app.status === 'REVIEWED' ? 'bg-primary/10 text-primary ring-primary/20' :
+            'bg-surface-container-highest text-on-surface-variant ring-on-surface/5'
+          ]">
+            {{ app.status }}
+          </span>
+          <button
+            type="button"
+            class="rounded-full bg-surface-container-high hover:bg-surface-container-highest px-4 py-2 text-xs font-black text-on-surface transition"
+            @click="$emit('openPost', app.post)"
+          >
+            View Job
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Render saved jobs for student -->
+    <div v-if="activeTab === 'savedJobs' && !isEmployer" class="space-y-4">
+      
       <div v-if="filteredGallery.length === 0" class="flex flex-col items-center justify-center py-16 text-center px-4 bg-surface-container-low rounded-3xl border border-on-surface/5">
         <div class="grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary mb-3">
           <component :is="emptyStateIcon" class="h-8 w-8 text-primary" />

@@ -180,6 +180,7 @@ const english_lang: AppLanguage = {
     noBio: 'No bio provided',
     highlights: 'Highlights',
     tagged: 'Tagged',
+    savedJobs:'Saved Jobs'
   },
   dashboardPages: {
     home: {

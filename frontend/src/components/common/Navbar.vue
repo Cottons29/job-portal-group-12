@@ -50,13 +50,13 @@
       </button>
 
       <!-- Bookmark -->
-      <button
-        type="button"
+      <RouterLink
+        :to="{ name: 'saved-jobs' }"
         aria-label="Saved jobs"
         class="w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-gray-100"
       >
         <Bookmark class="w-5 h-5" />
-      </button>
+      </RouterLink>
 
       <!-- Avatar -->
       <div class="w-8 h-8 bg-green-400 rounded-full"></div>
