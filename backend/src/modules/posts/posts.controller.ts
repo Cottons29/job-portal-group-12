@@ -16,8 +16,10 @@ import { AuthenticatedGuard } from '../../auth/authenticated.guard';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostsService } from './posts.service';
 
+
 @Controller('posts')
 export class PostsController {
+ 
   constructor(private readonly postsService: PostsService) {}
 
   @UseGuards(AuthenticatedGuard)
@@ -32,6 +34,13 @@ export class PostsController {
   @HttpCode(HttpStatus.OK)
   async toggleBookmark(@Req() req: any, @Param('postId') postId: string) {
     return this.postsService.toggleBookmark(postId, req.user.sub);
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get('bookmarks')
+  async listBookmarks(@Req() req: any) {
+    const userId = req.user.sub;
+    return this.postsService.getBookmarkedPosts(userId);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -98,6 +107,7 @@ export class PostsController {
     return { appliedPostIds: ids };
   }
 
+  @UseGuards(AuthenticatedGuard)
   @Get()
   async findAll(
     @Req() req: any,
@@ -107,6 +117,13 @@ export class PostsController {
     @Query('role') role?: string,
     @Query('authorId') authorId?: string,
   ) {
+    console.log({
+  page,
+  limit,
+  authorId
+})
+  
+
     return this.postsService.findAll(
       { page, limit, q, role, authorId },
       req.user?.sub,

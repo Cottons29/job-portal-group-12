@@ -346,6 +346,21 @@ export class PostsService {
     return applications.map((app) => app.post.id);
   }
 
+  async getBookmarkedPosts(userId: string) {
+    await this.requireUser(userId);
+
+    const bookmarks = await this.postBookmarksRepository.find({
+      where: { user: { id: userId } },
+      relations: ['post', 'post.author'],
+      order: { createdAt: 'DESC' },
+    });
+
+    const posts = bookmarks.map((b) => b.post);
+    const engagement = await this.loadEngagement(posts.map((p) => p.id), userId);
+
+    return { posts: posts.map((p) => this.serializePost(p, engagement)) };
+  }
+
   private async ensurePostExists(postId: string) {
     const exists = await this.postsRepository.exist({ where: { id: postId } });
     if (!exists) throw new NotFoundException('Post not found');

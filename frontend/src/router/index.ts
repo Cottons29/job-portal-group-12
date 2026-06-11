@@ -104,6 +104,12 @@ const routes: RouteRecordRaw[] = [
         meta: {title: 'Notifications', requiresAuth: true},
     },
     {
+        path: '/saved-jobs',
+        name: 'saved-jobs',
+        component: () => import('@/views/SavedJobs.vue'),
+        meta: {title: 'Saved Jobs', requiresAuth: true},
+    },
+    {
         path: '/create',
         name: 'create',
         component: () => import('@/views/PlaceholderView.vue'),
