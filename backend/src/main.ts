@@ -10,6 +10,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { TypeormStore } from 'connect-typeorm';
 import { DataSource } from 'typeorm';
 import { SessionEntity } from './auth/session.entity';
+import { seedCompanies } from './modules/company/company.seeder';
 
 declare module 'express-session' {
   interface SessionData {
@@ -38,6 +39,10 @@ async function bootstrap() {
   // console.log(`Process : ${process.env.SESSION_SECRET}`);
 
   const dataSource = app.get(DataSource);
+  
+  // Seed companies if table is empty
+  await seedCompanies(dataSource);
+
   const sessionRepository = dataSource.getRepository(SessionEntity);
 
   app.use(

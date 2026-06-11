@@ -73,6 +73,16 @@
             <FlagIcon class="w-5 h-5" />
             Flagged Posts
           </button>
+          <button
+              @click="activeTab = 'reports'; isSidebarOpen = false"
+              :class="[
+                'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-semibold w-full text-left',
+                activeTab === 'reports' ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600 hover:bg-slate-50'
+              ]"
+          >
+            <ExclamationTriangleIcon class="w-5 h-5 text-red-500" />
+            Disputes & Reports
+          </button>
         </nav>
       </div>
 
@@ -143,6 +153,12 @@
             <h2 class="text-3xl font-display font-bold text-blue-600 mb-2">Flagged Posts & Jobs</h2>
             <p class="text-slate-500 text-sm leading-relaxed">
               Review posts that have been flagged by users. You can approve them to clear flags or permanently delete them.
+            </p>
+          </template>
+          <template v-else-if="activeTab === 'reports'">
+            <h2 class="text-3xl font-display font-bold text-blue-600 mb-2">Disputes & User Reports</h2>
+            <p class="text-slate-500 text-sm leading-relaxed">
+              Investigate reports filed by students or employers regarding fraudulent jobs, abusive behavior, or policy violations.
             </p>
           </template>
         </div>
@@ -509,6 +525,83 @@
         </div>
       </div>
 
+      <!-- 6. DISPUTES / REPORTS LIST -->
+      <div v-if="activeTab === 'reports'" class="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+            <tr class="text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+              <th class="px-6 py-5">Target Content/User</th>
+              <th class="px-6 py-5">Reporter</th>
+              <th class="px-6 py-5">Reason & Details</th>
+              <th class="px-6 py-5">Status</th>
+              <th class="px-6 py-5 text-right font-bold">Actions</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+            <tr v-if="reportsList.length === 0">
+              <td colspan="5" class="px-6 py-12 text-center text-slate-400 text-sm">
+                No disputes or reports found.
+              </td>
+            </tr>
+            <tr v-for="report in reportsList" :key="report.id"
+                class="hover:bg-slate-50/50 transition-colors group">
+              <td class="px-6 py-4">
+                <div class="flex flex-col">
+                  <span class="font-bold text-slate-800 text-sm capitalize">{{ report.targetType }} Report</span>
+                  <span v-if="report.targetType === 'post' && report.targetPost" class="text-xs text-blue-600 font-semibold mt-1">
+                    Post: {{ report.targetPost.title }}
+                  </span>
+                  <span v-else-if="report.targetType === 'user' && report.targetUser" class="text-xs text-indigo-600 font-semibold mt-1">
+                    Account: {{ report.targetUser.fullName || report.targetUser.companyName }}
+                  </span>
+                  <span v-else class="text-xs text-slate-400 italic mt-1">Content deleted</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-xs font-medium text-slate-600">
+                <div class="flex flex-col">
+                  <span class="font-bold text-slate-700">{{ report.reporter?.fullName || report.reporter?.companyName || 'Anonymous' }}</span>
+                  <span class="text-[10px] text-slate-400 capitalize">{{ report.reporter?.role?.toLowerCase() }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex flex-col max-w-sm">
+                  <span class="text-xs font-bold text-slate-800">{{ report.reason }}</span>
+                  <span class="text-xs text-slate-500 mt-1">{{ report.details || 'No additional details provided.' }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span :class="[
+                  'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold',
+                  report.status === 'pending' ? 'bg-amber-50 text-amber-700' :
+                  report.status === 'resolved' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-700'
+                ]">
+                  {{ report.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div v-if="report.status === 'pending'" class="flex justify-end gap-2">
+                  <button @click="handleResolveReport(report.id, 'resolve')"
+                          class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-50 hover:bg-green-100 text-green-700 transition-colors">
+                    Resolve
+                  </button>
+                  <button @click="handleResolveReport(report.id, 'dismiss')"
+                          class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
+                    Dismiss
+                  </button>
+                  <button v-if="report.targetType === 'post' && report.targetPostId" @click="deletePost(report.targetPostId)"
+                          class="px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 hover:bg-red-100 text-red-600 transition-colors">
+                    Delete Content
+                  </button>
+                </div>
+                <div v-else class="text-xs text-slate-400 italic">No actions available</div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </main>
 
     <!-- Document Review Modal (Employer / Student) -->
@@ -685,13 +778,14 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const isSidebarOpen = ref(false)
-const activeTab = ref('dashboard') // 'dashboard' | 'pending' | 'verified' | 'stats' | 'posts'
+const activeTab = ref('dashboard') // 'dashboard' | 'pending' | 'verified' | 'stats' | 'posts' | 'reports'
 const currentEntity = ref('employer') // 'employer' | 'student'
 const pendingEmployers = ref([])
 const pendingStudents = ref([])
 const verifiedEmployersList = ref([])
 const verifiedStudentsList = ref([])
 const flaggedPostsList = ref([])
+const reportsList = ref([])
 const selectedItem = ref(null)
 const selectedEntity = ref('employer')
 const searchQuery = ref('')
@@ -883,6 +977,15 @@ const fetchFlaggedPosts = async () => {
   }
 }
 
+const fetchReports = async () => {
+  try {
+    const response = await api.get('/reports')
+    reportsList.value = response.data.reports || []
+  } catch (error) {
+    console.error('Failed to fetch reports:', error)
+  }
+}
+
 const loadData = async () => {
   await Promise.all([
     fetchPendingEmployers(),
@@ -890,6 +993,7 @@ const loadData = async () => {
     fetchPendingStudents(),
     fetchVerifiedStudents(),
     fetchFlaggedPosts(),
+    fetchReports(),
     fetchStats()
   ])
 }
@@ -987,6 +1091,16 @@ const deletePost = async (postId) => {
   } catch (error) {
     console.error('Failed to delete post:', error)
     alert('An error occurred while deleting the post.')
+  }
+}
+
+const handleResolveReport = async (reportId, action) => {
+  try {
+    await api.patch(`/reports/${reportId}/resolve`, { action })
+    await loadData()
+  } catch (error) {
+    console.error('Failed to resolve report:', error)
+    alert('An error occurred while updating the report status.')
   }
 }
 

@@ -236,6 +236,29 @@ async function fetchTaggedPosts() {
     console.error('Failed to fetch tagged posts:', e)
   }
 }
+
+async function respondToOffer(appId, response) {
+  const confirmMsg = response === 'ACCEPT' 
+    ? 'Are you sure you want to accept this job offer? This will notify the employer.'
+    : 'Are you sure you want to decline this job offer?';
+    
+  if (!confirm(confirmMsg)) return;
+
+  try {
+    const { data } = await api.patch(`/applications/${appId}/respond`, { response });
+    const app = profileTagged.value.find(a => a.id === appId);
+    if (app) {
+      app.status = data.application.status;
+    }
+  } catch (e) {
+    console.error('Failed to respond to offer:', e);
+    alert('Failed to respond to offer.');
+  }
+}
+
+function exportCV() {
+  window.print()
+}
 </script>
 
 <template>
@@ -300,12 +323,23 @@ async function fetchTaggedPosts() {
                 <p class="mt-2 text-base text-on-surface font-thin">{{ profileHandle }}</p>
               </div>
 
-              <RouterLink
-                  class="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-xs font-black text-on-primary transition hover:opacity-90"
-                  to="/settings"
-              >
-                {{ t('profilePage.editProfile') }}
-              </RouterLink>
+              <div class="flex items-center gap-2">
+                <button
+                    v-if="!isEmployer"
+                    @click="exportCV"
+                    class="inline-flex items-center justify-center gap-1.5 rounded-full bg-secondary text-on-primary hover:opacity-90 px-4 py-2 text-xs font-black transition cursor-pointer"
+                    type="button"
+                >
+                  <span>📄</span>
+                  <span>Export CV</span>
+                </button>
+                <RouterLink
+                    class="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-xs font-black text-on-primary transition hover:opacity-90"
+                    to="/settings"
+                >
+                  {{ t('profilePage.editProfile') }}
+                </RouterLink>
+              </div>
             </div>
 
             <dl class="mt-4 grid grid-cols-3 gap-2 text-center sm:max-w-lg sm:text-left">
@@ -456,7 +490,27 @@ async function fetchTaggedPosts() {
               {{ app.post?.company }} • Applied on {{ new Date(app.createdAt).toLocaleDateString() }}
             </p>
             <div v-if="app.status === 'ACCEPTED'" class="mt-2 text-xs font-semibold text-[#1f6c3b] bg-[#8fd99b]/15 px-3 py-1.5 rounded-xl inline-block">
-              🎉 Congratulations! You got the job offer! Keep an eye on your inbox/messages.
+              <div>🎉 Congratulations! You received a job offer! Please respond:</div>
+              <div class="mt-2 flex items-center gap-2">
+                <button
+                  @click="respondToOffer(app.id, 'ACCEPT')"
+                  class="bg-[#1f6c3b] hover:bg-[#1f6c3b]/95 text-white font-black text-[10px] uppercase tracking-wider px-3.5 py-1.5 rounded-xl transition shadow-sm"
+                >
+                  Accept Offer
+                </button>
+                <button
+                  @click="respondToOffer(app.id, 'DECLINE')"
+                  class="bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant font-black text-[10px] uppercase tracking-wider px-3.5 py-1.5 rounded-xl transition border border-on-surface/5"
+                >
+                  Decline
+                </button>
+              </div>
+            </div>
+            <div v-else-if="app.status === 'HIRED'" class="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-500/10 px-3 py-1.5 rounded-xl inline-block">
+              🎉 Offer Accepted! You officially got this job. Congratulations!
+            </div>
+            <div v-else-if="app.status === 'DECLINED'" class="mt-2 text-xs font-semibold text-amber-700 bg-amber-500/10 px-3 py-1.5 rounded-xl inline-block">
+              You declined this job offer.
             </div>
             <div v-else-if="app.status === 'REJECTED'" class="mt-2 text-xs font-semibold text-red-700 bg-red-500/10 px-3 py-1.5 rounded-xl inline-block">
               Thank you for applying. The employer has decided to pursue other applicants for this role.
@@ -473,6 +527,8 @@ async function fetchTaggedPosts() {
           <span :class="[
             'px-3 py-1 text-xs font-black uppercase tracking-wider rounded-full ring-1',
             app.status === 'ACCEPTED' ? 'bg-[#8fd99b]/20 text-[#1f6c3b] ring-[#8fd99b]/35' :
+            app.status === 'HIRED' ? 'bg-emerald-500/20 text-emerald-700 ring-emerald-500/35' :
+            app.status === 'DECLINED' ? 'bg-amber-500/20 text-amber-700 ring-amber-500/35' :
             app.status === 'REJECTED' ? 'bg-red-500/15 text-red-500 ring-red-500/25' :
             app.status === 'REVIEWED' ? 'bg-primary/10 text-primary ring-primary/20' :
             'bg-surface-container-highest text-on-surface-variant ring-on-surface/5'
@@ -530,4 +586,325 @@ async function fetchTaggedPosts() {
     </section>
     
   </section>
+
+  <!-- ═══ PRINT-ONLY CV RESUME TEMPLATE ═══ -->
+  <div v-if="!isEmployer" id="cv-print-template">
+    <!-- Resume Header -->
+    <div class="resume-header">
+      <div class="resume-header-left">
+        <img v-if="profileStore.profileForm.avatar" :src="resolveUrl(profileStore.profileForm.avatar)" class="resume-avatar" />
+        <div v-else class="resume-avatar-placeholder">{{ initials }}</div>
+        <div>
+          <h1 class="resume-name">{{ displayName }}</h1>
+          <p class="resume-subtitle">{{ profileStore.profileForm.major }} Student • {{ profileStore.profileForm.university }}</p>
+          <p class="resume-handle">{{ profileHandle }}</p>
+        </div>
+      </div>
+      <div v-if="profileStore.profileForm.isStudentVerified" class="resume-badge">
+        ✓ Verified Student
+      </div>
+    </div>
+
+    <!-- Resume Content Grid -->
+    <div class="resume-grid">
+      <!-- Left Sidebar Column -->
+      <div class="resume-col-sidebar">
+        <!-- Contact Details Section -->
+        <div class="resume-section">
+          <h3 class="resume-section-title">Contact Info</h3>
+          <ul class="resume-contact-list">
+            <li v-if="profileStore.profileForm.phone">📞 {{ profileStore.profileForm.phone }}</li>
+            <li v-if="profileStore.profileForm.email">✉️ {{ profileStore.profileForm.email }}</li>
+            <li v-if="profileStore.profileForm.website">🔗 {{ profileStore.profileForm.website }}</li>
+          </ul>
+        </div>
+
+        <!-- Skills Section -->
+        <div class="resume-section" v-if="profileStore.profileForm.skills?.length">
+          <h3 class="resume-section-title">Core Skills</h3>
+          <div class="resume-skills-grid">
+            <span v-for="skill in profileStore.profileForm.skills" :key="skill" class="resume-skill-tag">
+              {{ skill }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Availability Section -->
+        <div class="resume-section" v-if="availabilitySummary.length">
+          <h3 class="resume-section-title">Weekly Availability</h3>
+          <div class="resume-availability-list">
+            <div v-for="item in availabilitySummary" :key="item.day" class="resume-avail-row">
+              <span class="resume-avail-day">{{ item.day }}:</span>
+              <span class="resume-avail-slots">{{ item.slots }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Main Column -->
+      <div class="resume-col-main">
+        <!-- Bio / Profile Summary -->
+        <div class="resume-section">
+          <h3 class="resume-section-title">Professional Summary</h3>
+          <p class="resume-bio">{{ profileStore.profileForm.bio || 'Motivated student seeking part-time or internship opportunities to apply skills and gain practical industry experience.' }}</p>
+        </div>
+
+        <!-- Education Section -->
+        <div class="resume-section">
+          <h3 class="resume-section-title">Education</h3>
+          <div class="resume-edu-card">
+            <h4 class="resume-edu-uni">{{ profileStore.profileForm.university || 'University' }}</h4>
+            <p class="resume-edu-major">Bachelor of Science in {{ profileStore.profileForm.major || 'Field of Study' }}</p>
+            <p class="resume-edu-year" v-if="profileStore.profileForm.yearLevel">Current Status: Year {{ profileStore.profileForm.yearLevel }} Student</p>
+          </div>
+        </div>
+
+        <!-- Career Preferences Section -->
+        <div class="resume-section">
+          <h3 class="resume-section-title">Career Preferences</h3>
+          <div class="resume-prefs-grid">
+            <div>
+              <span class="resume-pref-label">Preferred Placement:</span>
+              <span class="resume-pref-value capitalize">{{ profileStore.profileForm.jobType || 'Any Part-Time / Internship' }}</span>
+            </div>
+            <div v-if="expectedSalaryText">
+              <span class="resume-pref-label">Expected Salary:</span>
+              <span class="resume-pref-value">{{ expectedSalaryText }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+#cv-print-template {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  
+  #cv-print-template, #cv-print-template * {
+    visibility: visible !important;
+  }
+  
+  #cv-print-template {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    min-height: 100% !important;
+    background: white !important;
+    color: #0b1c30 !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .resume-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding-bottom: 20px !important;
+    margin-bottom: 25px !important;
+  }
+  
+  .resume-header-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+  }
+  
+  .resume-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 2px solid #e2e8f0 !important;
+  }
+  
+  .resume-avatar-placeholder {
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 50% !important;
+    background: #2563eb !important;
+    color: white !important;
+    display: grid !important;
+    place-items: center !important;
+    font-size: 24px !important;
+    font-weight: 900 !important;
+  }
+  
+  .resume-name {
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin: 0 0 4px 0 !important;
+    letter-spacing: -0.02em !important;
+  }
+  
+  .resume-subtitle {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    margin: 0 !important;
+  }
+  
+  .resume-handle {
+    font-size: 12px !important;
+    color: #64748b !important;
+    margin: 2px 0 0 0 !important;
+  }
+  
+  .resume-badge {
+    background: #ecfdf5 !important;
+    color: #065f46 !important;
+    border: 1px solid #a7f3d0 !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    padding: 6px 12px !important;
+    border-radius: 9999px !important;
+  }
+  
+  .resume-grid {
+    display: grid !important;
+    grid-template-columns: 240px 1fr !important;
+    gap: 30px !important;
+  }
+  
+  .resume-col-sidebar {
+    border-right: 1px solid #f1f5f9 !important;
+    padding-right: 20px !important;
+  }
+  
+  .resume-section {
+    margin-bottom: 25px !important;
+  }
+  
+  .resume-section-title {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    color: #1e3a8a !important;
+    border-bottom: 1.5px solid #e2e8f0 !important;
+    padding-bottom: 6px !important;
+    margin: 0 0 12px 0 !important;
+  }
+  
+  .resume-contact-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 12px !important;
+    color: #334155 !important;
+  }
+  
+  .resume-contact-list li {
+    margin-bottom: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  
+  .resume-skills-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  
+  .resume-skill-tag {
+    background: #f8fafc !important;
+    color: #334155 !important;
+    border: 1px solid #e2e8f0 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+  }
+  
+  .resume-avail-row {
+    font-size: 11px !important;
+    margin-bottom: 6px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+  
+  .resume-avail-day {
+    font-weight: 800 !important;
+    color: #1e293b !important;
+  }
+  
+  .resume-avail-slots {
+    color: #475569 !important;
+  }
+  
+  .resume-bio {
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+    color: #334155 !important;
+    margin: 0 !important;
+    white-space: pre-line !important;
+  }
+  
+  .resume-edu-card {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 14px !important;
+    border-radius: 12px !important;
+  }
+  
+  .resume-edu-uni {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin: 0 0 4px 0 !important;
+  }
+  
+  .resume-edu-major {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    margin: 0 !important;
+  }
+  
+  .resume-edu-year {
+    font-size: 11px !important;
+    color: #64748b !important;
+    margin: 6px 0 0 0 !important;
+  }
+  
+  .resume-prefs-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 15px !important;
+  }
+  
+  .resume-pref-label {
+    display: block !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+    margin-bottom: 2px !important;
+  }
+  
+  .resume-pref-value {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+  }
+  
+  @page {
+    size: A4 !important;
+    margin: 15mm !important;
+  }
+}
+</style>

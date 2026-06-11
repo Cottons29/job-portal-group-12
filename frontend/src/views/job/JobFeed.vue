@@ -42,6 +42,34 @@
 
       <div class="flex-1 space-y-4">
 
+        <!-- Tabs -->
+        <div class="flex border-b border-slate-200 mb-4">
+          <button
+            @click="switchTab('all')"
+            :class="[
+              'px-6 py-3 text-sm font-bold border-b-2 transition-colors cursor-pointer',
+              activeTab === 'all'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            ]"
+          >
+            All Jobs
+          </button>
+          <button
+            v-if="authStore.user?.role?.toLowerCase() === 'student'"
+            @click="switchTab('recommended')"
+            :class="[
+              'px-6 py-3 text-sm font-bold border-b-2 transition-colors cursor-pointer flex items-center gap-2',
+              activeTab === 'recommended'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            ]"
+          >
+            <span>Recommended Jobs</span>
+            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider">AI Match</span>
+          </button>
+        </div>
+
         <!-- Header -->
         <div class="flex justify-between items-center">
           <p class="text-sm text-gray-500">
@@ -75,6 +103,7 @@
 import { ref, onMounted } from 'vue'
 import { BriefcaseBusiness, Search, MapPin } from 'lucide-vue-next'
 import api from '@/lib/api'
+import { useAuthStore } from '@/stores/auth'
 
 // Components
 import JobList from '@/components/job/JobList.vue'
@@ -83,6 +112,8 @@ import Pagination from '@/components/common/Pagination.vue'
 // Types
 import type { Job } from '@/types/job'
 
+const authStore = useAuthStore()
+const activeTab = ref('all')
 const keyword = ref('')
 const location = ref('')
 const currentPage = ref(1)
@@ -98,6 +129,26 @@ async function fetchJobs() {
     filterJobs()
   } catch (error) {
     console.error('Failed to fetch jobs:', error)
+  }
+}
+
+async function fetchRecommendations() {
+  try {
+    const { data } = await api.get('/posts/recommendations')
+    const recs = data.recommendations || []
+    allLoadedJobs.value = recs
+    filterJobs()
+  } catch (error) {
+    console.error('Failed to fetch recommendations:', error)
+  }
+}
+
+function switchTab(tab: string) {
+  activeTab.value = tab
+  if (tab === 'all') {
+    fetchJobs()
+  } else {
+    fetchRecommendations()
   }
 }
 
@@ -126,7 +177,8 @@ function filterJobs() {
     company: p.company || p.author?.user_name || 'Employer',
     salary: p.salary || 'Competitive',
     location: p.location || 'Phnom Penh',
-    tags: p.tags || (p.jobType ? [p.jobType] : ['Full-time'])
+    tags: p.tags || (p.jobType ? [p.jobType] : ['Full-time']),
+    matchScore: p.matchScore
   }))
 
   totalPages.value = Math.ceil(jobs.value.length / 10) || 1

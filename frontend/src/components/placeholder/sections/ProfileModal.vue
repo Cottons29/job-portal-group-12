@@ -5,6 +5,7 @@
   import type {UserProfile} from '@/types/profile'
   import api, { resolveUrl } from '@/lib/api'
   import { useAuthStore } from '@/stores/auth'
+  import ReportModal from './ReportModal.vue'
 
   const {t} = useI18n()
 
@@ -17,6 +18,7 @@
   const authStore = useAuthStore()
   const isFollowing = ref(false)
   const isSelf = computed(() => authStore.user?.id === props.user?.id)
+  const showReportModal = ref(false)
 
   const followersCount = ref(0)
   const followingCount = ref(0)
@@ -122,18 +124,27 @@
                 </span>
               </div>
             </div>
-            <button
-              v-if="!isSelf && user.id"
-              @click="handleConnectToggle"
-              :class="[
-                'rounded-full px-6 py-2.5 text-sm font-black transition cursor-pointer shadow-sm',
-                isFollowing 
-                  ? 'bg-surface-container-high text-on-surface hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 border border-transparent' 
-                  : 'bg-primary text-on-primary hover:opacity-90'
-              ]"
-            >
-              {{ isFollowing ? 'Connected' : 'Connect' }}
-            </button>
+            <div class="flex items-center gap-2">
+              <button
+                v-if="!isSelf && user.id"
+                @click="handleConnectToggle"
+                :class="[
+                  'rounded-full px-6 py-2.5 text-sm font-black transition cursor-pointer shadow-sm',
+                  isFollowing 
+                    ? 'bg-surface-container-high text-on-surface hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 border border-transparent' 
+                    : 'bg-primary text-on-primary hover:opacity-90'
+                ]"
+              >
+                {{ isFollowing ? 'Connected' : 'Connect' }}
+              </button>
+              <button
+                v-if="!isSelf && user.id"
+                @click="showReportModal = true"
+                class="rounded-full px-4 py-2.5 text-sm font-black border border-red-500/20 text-red-500 hover:bg-red-500/10 cursor-pointer shadow-sm"
+              >
+                Report
+              </button>
+            </div>
           </div>
 
           <dl class="mt-6 grid grid-cols-3 gap-3 text-center sm:max-w-lg sm:text-left">
@@ -184,6 +195,13 @@
       </div>
     </div>
   </div>
+  
+  <ReportModal
+    v-if="showReportModal"
+    target-type="user"
+    :target-id="user.id"
+    @close="showReportModal = false"
+  />
 </BaseModal>
 </template>
 

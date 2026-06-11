@@ -7,6 +7,7 @@ export const useEmployerProfileStore = defineStore('employerProfile', () => {
   const totalSteps = 2
 
   // ── Form Data ──
+  const companyId = ref('')
   const companyName = ref('')
   const industry = ref('')
   const location = ref('')
@@ -22,7 +23,7 @@ export const useEmployerProfileStore = defineStore('employerProfile', () => {
     return companyName.value.toString().trim() !== '' &&
            industry.value !== '' &&
            location.value !== '' &&
-           logoFile.value !== null &&
+           (logoFile.value !== null || companyId.value !== '') &&
            patentFile.value !== null
   })
 
@@ -51,6 +52,7 @@ export const useEmployerProfileStore = defineStore('employerProfile', () => {
 
   function resetForm() {
     currentStep.value = 1
+    companyId.value = ''
     companyName.value = ''
     industry.value = ''
     location.value = ''
@@ -63,6 +65,7 @@ export const useEmployerProfileStore = defineStore('employerProfile', () => {
   return {
     currentStep,
     totalSteps,
+    companyId,
     companyName,
     industry,
     location,

@@ -1,12 +1,14 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import api from '@/lib/api'
 import { isAxiosError } from 'axios'
 import { CheckCircleIcon, BellIcon } from '@heroicons/vue/24/outline'
+import { useSocket } from '@/composables/useSocket'
 
 const notifications = ref([])
 const isLoading = ref(false)
 const loadError = ref('')
+const { socket } = useSocket()
 
 async function fetchNotifications() {
   isLoading.value = true
@@ -23,7 +25,7 @@ async function fetchNotifications() {
 
 async function markNotificationAsRead(id) {
   try {
-    await api.post(`/notifications/${id}/read`)
+    await api.patch(`/notifications/${id}/read`)
     const target = notifications.value.find((n) => n.id === id)
     if (target) target.isRead = true
   } catch (error) {
@@ -33,6 +35,20 @@ async function markNotificationAsRead(id) {
 
 onMounted(() => {
   fetchNotifications()
+  if (socket) {
+    socket.on('notification.created', (notif) => {
+      // Prepend the new notification to the top of the list
+      if (!notifications.value.some(n => n.id === notif.id)) {
+        notifications.value.unshift(notif)
+      }
+    })
+  }
+})
+
+onUnmounted(() => {
+  if (socket) {
+    socket.off('notification.created')
+  }
 })
 </script>
 
