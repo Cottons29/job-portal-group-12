@@ -1,6 +1,7 @@
 export interface Sidebar {
   home: string;
   search: string;
+  jobs: string;
   messages: string;
   notifications: string;
   create: string;

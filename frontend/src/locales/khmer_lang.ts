@@ -6,6 +6,7 @@ const khmer_lang: AppLanguage = {
     sidebar: {
         home: 'ទំព័រដើម',
         search: 'ស្វែងរក',
+        jobs: 'ការងារ',
         messages: 'សារ',
         notifications: 'ការជូនដំណឹង',
         create: 'បង្កើត',

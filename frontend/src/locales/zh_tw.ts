@@ -6,6 +6,7 @@ const zh_tw: AppLanguage = {
   sidebar: {
     home: '首頁',
     search: '搜尋',
+    jobs: '職缺',
     messages: '訊息',
     notifications: '通知',
     create: '建立',

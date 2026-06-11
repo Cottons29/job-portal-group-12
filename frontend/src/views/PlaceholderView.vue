@@ -201,6 +201,7 @@ import {useToast} from '@/composables/useToast'
 
 import {
   BellIcon,
+  BriefcaseIcon,
   ChatBubbleOvalLeftEllipsisIcon,
   HomeIcon,
   MagnifyingGlassIcon,
@@ -417,6 +418,14 @@ const navigationItems = computed(() => {
       bg: 'bg-[#8fd99b]',
       color: 'text-[#1f6c3b]',
       to: '/search'
+    },
+    {
+      label: t('sidebar.jobs'),
+      page: 'job-feed',
+      icon: BriefcaseIcon,
+      bg: 'bg-[#ffda79]',
+      color: 'text-[#845c08]',
+      to: '/job-feed'
     },
     {
       label: t('sidebar.messages'),

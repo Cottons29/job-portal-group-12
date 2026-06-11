@@ -6,6 +6,7 @@ const fr: AppLanguage = {
   sidebar: {
     home: 'Accueil',
     search: 'Recherche',
+    jobs: 'Emplois',
     messages: 'Messages',
     notifications: 'Notifications',
     create: 'Créer',

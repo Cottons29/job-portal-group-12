@@ -8,6 +8,7 @@ const english_lang: AppLanguage = {
   sidebar: {
     home: 'Home',
     search: 'Search',
+    jobs: 'Jobs',
     messages: 'Message',
     notifications: 'Notification',
     create: 'Create',
