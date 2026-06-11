@@ -12,6 +12,7 @@ export interface SidebarItem {
   active?: boolean
   bg: string
   color: string
+  badge?: number
 }
 
 const props = defineProps<{
@@ -72,10 +73,17 @@ watch(
         <span
             :class="[
             item.active ? [item.bg, item.color, 'active-sidebar-shape '] : [item.bg, 'rounded-full border-2 border-transparent'],
-            'grid h-12 w-12 shrink-0 place-items-center  lg:h-10 lg:w-10'
+            'grid h-12 w-12 shrink-0 place-items-center lg:h-10 lg:w-10 relative'
           ]"
         >
           <component :is="item.icon" :class="[item.color, 'h-7 w-7 transition-all duration-300 lg:h-5 lg:w-5']"/>
+          <!-- Badge -->
+          <span 
+            v-if="item.badge && item.badge > 0" 
+            class="absolute -top-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white shadow-sm ring-2 ring-white/10"
+          >
+            {{ item.badge > 9 ? '9+' : item.badge }}
+          </span>
         </span>
         <SidebarLabel :show-labels="labelsVisible">{{ item.label }}</SidebarLabel>
       </component>

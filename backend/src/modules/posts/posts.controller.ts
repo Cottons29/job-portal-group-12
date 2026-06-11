@@ -57,6 +57,12 @@ export class PostsController {
     return this.postsService.flagPost(postId, req.user.sub);
   }
 
+  @UseGuards(AuthenticatedGuard)
+  @Get('recommendations')
+  async getRecommendations(@Req() req: any) {
+    return this.postsService.findRecommendations(req.user.sub);
+  }
+
   @Get(':postId')
   async findOne(@Req() req: any, @Param('postId') postId: string) {
     return this.postsService.findOne(postId, req.user?.sub);

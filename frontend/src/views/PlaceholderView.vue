@@ -196,6 +196,8 @@ import {useThemeMode} from '@/composables/useThemeMode'
 import {useAuthStore} from '@/stores/auth'
 import {usePostStore} from '@/stores/posts'
 import {useProfileStore} from '@/stores/profile'
+import {useSocket} from '@/composables/useSocket'
+import {useToast} from '@/composables/useToast'
 
 import {
   BellIcon,
@@ -223,6 +225,24 @@ const {appliedTheme, setThemePreference} = useThemeMode()
 
 const activePage = computed(() => route.name?.toString() || 'home')
 const searchQuery = ref('')
+
+const { socket } = useSocket()
+const { show } = useToast()
+const unreadNotificationsCount = ref(0)
+
+async function fetchUnreadNotifications() {
+  try {
+    const { data } = await api.get('/notifications')
+    const list = data.notifications || []
+    unreadNotificationsCount.value = list.filter(n => !n.isRead).length
+  } catch (err) {
+    console.error('Failed to fetch unread notifications:', err)
+  }
+}
+
+watch(() => route.path, () => {
+  fetchUnreadNotifications()
+})
 
 const pages = computed(() => ({
   home: {
@@ -412,7 +432,8 @@ const navigationItems = computed(() => {
       icon: BellIcon,
       bg: 'bg-[#d7b7ff]',
       color: 'text-[#5b36a8]',
-      to: '/notifications'
+      to: '/notifications',
+      badge: unreadNotificationsCount.value
     },
     {label: t('sidebar.create'), page: 'create', icon: PlusCircleIcon, bg: 'bg-[#f8a9dc]', color: 'text-[#9b1f70]', to: '/create'},
     {
@@ -459,11 +480,40 @@ onMounted(() => {
   if (mainScrollContainer.value) {
     mainScrollContainer.value.addEventListener('scroll', handleHomeScroll)
   }
+  
+  fetchUnreadNotifications()
+  
+  if (socket) {
+    socket.on('notification.created', (notif) => {
+      unreadNotificationsCount.value++
+      
+      // Toast if not on Notifications page
+      if (route.name !== 'notifications') {
+        show(notif.message, { title: 'New Notification', type: 'info' })
+      }
+    })
+    
+    socket.on('message.received', (msg) => {
+      // Toast if not on Messages page
+      if (route.name !== 'messages') {
+        const preview = msg.content.startsWith('[IMAGE]') 
+          ? '📷 Sent a photo' 
+          : msg.content.startsWith('[FILE]') 
+            ? '📁 Shared a file' 
+            : msg.content
+        show(preview, { title: 'New Message', type: 'success' })
+      }
+    })
+  }
 })
 
 onUnmounted(() => {
   if (mainScrollContainer.value) {
     mainScrollContainer.value.removeEventListener('scroll', handleHomeScroll)
+  }
+  if (socket) {
+    socket.off('notification.created')
+    socket.off('message.received')
   }
 })
 

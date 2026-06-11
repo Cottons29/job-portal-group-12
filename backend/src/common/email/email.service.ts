@@ -115,6 +115,31 @@ export class EmailService {
     return this.sendMail(studentEmail, subject, html);
   }
 
+  async sendOfferResponseEmail(
+    employerEmail: string,
+    employerName: string,
+    studentName: string,
+    postTitle: string,
+    response: 'ACCEPT' | 'DECLINE',
+  ) {
+    const responseText = response === 'ACCEPT' ? 'ACCEPTED' : 'DECLINED';
+    const subject = `Job Offer Update: ${studentName} has ${response === 'ACCEPT' ? 'accepted' : 'declined'} your offer`;
+    const color = response === 'ACCEPT' ? '#10b981' : '#ef4444';
+    const html = `
+      <div style="font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #f0f0f0; border-radius: 12px;">
+        <h2 style="color: ${color}; font-weight: 800;">Job Offer Response</h2>
+        <p>Dear ${employerName},</p>
+        <p>The candidate <strong>${studentName}</strong> has responded to the job offer you extended for: <strong>"${postTitle}"</strong>.</p>
+        <div style="background-color: #f9fafb; border-left: 4px solid ${color}; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p style="margin: 0; font-size: 16px;"><strong>Candidate's Response:</strong> <span style="color: ${color}; font-weight: bold;">${responseText}</span></p>
+        </div>
+        <p>You can connect with the student using the messaging system to discuss onboarding details or next steps.</p>
+        <a href="\${process.env.WEBAUTHN_ORIGIN || 'http://localhost:5173'}/home" style="display: inline-block; background-color: \${color}; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 10px;">Go to Dashboard</a>
+      </div>
+    `;
+    return this.sendMail(employerEmail, subject, html);
+  }
+
   async sendVerificationApprovedEmail(userEmail: string, userName: string, role: string) {
     const subject = 'FirstStep - Identity Verification Approved';
     const html = `

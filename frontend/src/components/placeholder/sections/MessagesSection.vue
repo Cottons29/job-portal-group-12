@@ -14,6 +14,7 @@
   } from '@heroicons/vue/24/outline'
   import api, { resolveUrl } from '@/lib/api'
   import { useAuthStore } from '@/stores/auth'
+  import { useSocket } from '@/composables/useSocket'
 
   const props = defineProps({
     userId: { type: String, required: true },
@@ -21,6 +22,7 @@
   })
 
   const authStore = useAuthStore()
+  const { socket } = useSocket()
 
   const contacts = ref([])
   const activeContact = ref(null)
@@ -155,14 +157,35 @@
 
   onMounted(() => {
     fetchContacts()
+    
+    // Register socket listener for real-time incoming messages
+    if (socket) {
+      socket.on('message.received', (msg) => {
+        // If message is related to current chat thread, append it
+        if (activeContact.value && (msg.senderId === activeContact.value.id || msg.receiverId === activeContact.value.id)) {
+          // Avoid duplicate messages
+          if (!messages.value.some(m => m.id === msg.id)) {
+            messages.value.push(msg)
+            scrollToBottom()
+          }
+        }
+        
+        // Refresh contact list/previews in real-time
+        fetchContacts()
+      })
+    }
+
+    // fallback background polling every 15 seconds
     pollInterval.value = setInterval(() => {
-      if (activeContact.value) fetchMessages(activeContact.value.id)
       fetchContacts()
-    }, 4000)
+    }, 15000)
   })
 
   onUnmounted(() => {
     if (pollInterval.value) clearInterval(pollInterval.value)
+    if (socket) {
+      socket.off('message.received')
+    }
   })
 
   watch(activeContact, () => scrollToBottom())

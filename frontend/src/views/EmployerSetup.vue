@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useEmployerProfileStore } from '@/stores/employerProfile'
 import { useAuthStore } from '@/stores/auth'
@@ -23,6 +23,58 @@ const logoPreview = ref(null)
 
 const isSaving = ref(false)
 const errorMsg = ref('')
+
+const companies = ref([])
+const searchQuery = ref(profile.companyName || '')
+const isDropdownOpen = ref(false)
+
+const filteredCompanies = computed(() => {
+  if (!searchQuery.value) return companies.value
+  return companies.value.filter(c =>
+    c.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
+onMounted(async () => {
+  try {
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+    const { data } = await axios.get(`${API_BASE}/companies`)
+    companies.value = data.companies
+    if (profile.companyName) {
+      searchQuery.value = profile.companyName
+    }
+  } catch (err) {
+    console.error('Failed to load companies:', err)
+  }
+})
+
+function handleInput() {
+  profile.companyId = '' // clear companyId if they start typing a custom name
+  profile.companyName = searchQuery.value
+}
+
+function handleBlur() {
+  setTimeout(() => {
+    isDropdownOpen.value = false
+  }, 200)
+}
+
+function selectCompany(company) {
+  profile.companyId = company.id
+  profile.companyName = company.name
+  searchQuery.value = company.name
+  
+  if (company.industry) {
+    profile.industry = company.industry
+  }
+  if (company.address) {
+    profile.location = company.address
+  }
+  if (company.logoUrl) {
+    logoPreview.value = company.logoUrl
+  }
+  isDropdownOpen.value = false
+}
 
 const industries = [
   { value: 'technology', label: 'Technology / IT' },
@@ -79,6 +131,9 @@ async function handleSave() {
   try {
     const formData = new FormData()
     formData.append('companyName', profile.companyName)
+    if (profile.companyId) {
+      formData.append('companyId', profile.companyId)
+    }
     formData.append('industry', profile.industry)
     formData.append('location', profile.location)
     
@@ -166,15 +221,43 @@ async function handleSave() {
         </div>
 
         <!-- Company Name -->
-        <div class="mb-6">
+        <div class="mb-6 relative">
           <label class="block text-[11px] font-bold text-slate-700 mb-2">Company Name</label>
           <div class="rounded-full bg-[#f8fafc] focus-within:bg-white transition-all duration-200 border border-transparent focus-within:border-[#2563eb]/20">
             <input
-              v-model="profile.companyName"
+              v-model="searchQuery"
               type="text"
-              placeholder="e.g. Creative Flow Digital"
+              placeholder="Search or type your company name..."
+              @focus="isDropdownOpen = true"
+              @blur="handleBlur"
+              @input="handleInput"
               class="w-full bg-transparent px-6 py-3.5 text-[13px] text-slate-800 placeholder:text-slate-400 outline-none rounded-full"
             />
+          </div>
+          <!-- Dropdown List -->
+          <div 
+            v-if="isDropdownOpen && filteredCompanies.length > 0" 
+            class="absolute z-50 left-0 right-0 mt-2 max-h-60 overflow-y-auto rounded-2xl bg-white border border-slate-100 shadow-xl py-2"
+          >
+            <div 
+              v-for="company in filteredCompanies" 
+              :key="company.id"
+              @mousedown="selectCompany(company)"
+              class="px-6 py-3 hover:bg-[#2563eb]/5 cursor-pointer flex items-center gap-3 transition-colors text-left"
+            >
+              <img 
+                v-if="company.logoUrl" 
+                :src="company.logoUrl" 
+                class="w-8 h-8 rounded-full object-cover border border-slate-100" 
+              />
+              <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-500" v-else>
+                {{ company.name.charAt(0).toUpperCase() }}
+              </div>
+              <div>
+                <div class="text-[13px] font-bold text-slate-800">{{ company.name }}</div>
+                <div class="text-[10px] text-slate-400 capitalize">{{ company.industry }} &bull; {{ company.address.replace('_', ' ') }}</div>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -17,6 +17,8 @@ export enum ApplicationStatus {
   REVIEWED = 'REVIEWED',
   ACCEPTED = 'ACCEPTED',
   REJECTED = 'REJECTED',
+  HIRED = 'HIRED',
+  DECLINED = 'DECLINED',
 }
 
 @Entity('job_applications')

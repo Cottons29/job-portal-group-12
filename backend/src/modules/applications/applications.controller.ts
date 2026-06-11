@@ -64,4 +64,18 @@ export class ApplicationsController {
     );
     return { message: 'Status updated', application };
   }
+
+  @Patch(':id/respond')
+  async respondToOffer(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: { response: 'ACCEPT' | 'DECLINE' },
+  ) {
+    const application = await this.applicationsService.respondToOffer(
+      req.user.sub,
+      id,
+      body.response,
+    );
+    return { message: `Offer ${body.response.toLowerCase()}ed`, application };
+  }
 }

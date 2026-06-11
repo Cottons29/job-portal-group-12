@@ -11,6 +11,8 @@ import zh_tw from '../locales/zh_tw'
 const savedLocale = localStorage.getItem('user-locale') || 'en'
 
 const i18n = createI18n({
+  legacy: false,
+  globalInjection: true,
   locale: savedLocale, // Default locale
   fallbackLocale: 'en',
   messages: {

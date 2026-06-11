@@ -183,6 +183,37 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    async function loginWithGoogle(idToken: string, router: Router) {
+        error.value = ''
+        isLoading.value = true
+        try {
+            const {data} = await api.post<AuthResponse>('/auth/google/login', {
+                token: idToken,
+                role: role.value,
+            })
+
+            token.value = data.token
+            setUser(data.user)
+            localStorage.setItem('fs_token', data.token)
+
+            if (!data.user.email) {
+                await router.push('/secure-account')
+            } else if (!data.user.profileCompleted) {
+                if (data.user.role?.toLowerCase() === 'employer') {
+                    await router.push('/onboarding/employer')
+                } else {
+                    await router.push('/onboarding/student')
+                }
+            } else {
+                await router.push('/home')
+            }
+        } catch (err) {
+            error.value = getErrorMessage(err, 'Google login failed. Please try again.')
+        } finally {
+            isLoading.value = false
+        }
+    }
+
     async function loginWithPasskey(router: Router) {
         error.value = ''
 
@@ -328,6 +359,7 @@ export const useAuthStore = defineStore('auth', () => {
         refreshUser,
         initializeSession,
         login,
+        loginWithGoogle,
         loginWithPasskey,
         register,
 

@@ -50,4 +50,13 @@ export class NotificationsGateway
     }
     return false; // User not currently online
   }
+
+  emitMessage(userId: string, payload: any) {
+    const socketId = this.activeUsers.get(userId);
+    if (socketId) {
+      this.server.to(socketId).emit('message.received', payload);
+      return true;
+    }
+    return false; // User not currently online
+  }
 }

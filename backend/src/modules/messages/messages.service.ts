@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Message } from './message.entity';
 import { User } from '../user/user.entity';
 import { UserRole } from '../../common/enums/user-role.enum';
+import { NotificationsGateway } from '../../notifications/notifications.gateway';
 
 @Injectable()
 export class MessagesService {
@@ -12,6 +13,7 @@ export class MessagesService {
     private readonly messageRepository: Repository<Message>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   async sendMessage(senderId: string, receiverId: string, content: string): Promise<Message> {
@@ -20,7 +22,12 @@ export class MessagesService {
       receiverId,
       content,
     });
-    return this.messageRepository.save(message);
+    const savedMessage = await this.messageRepository.save(message);
+    
+    // Emit real-time message event to receiver
+    this.notificationsGateway.emitMessage(receiverId, savedMessage);
+    
+    return savedMessage;
   }
 
   async getChatHistory(userId1: string, userId2: string): Promise<Message[]> {

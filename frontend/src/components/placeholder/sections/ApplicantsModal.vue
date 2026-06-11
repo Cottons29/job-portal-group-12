@@ -4,7 +4,7 @@ import type { Post } from '@/types/profile'
 
 export interface Applicant {
   id: string | number
-  status: 'PENDING' | 'REVIEWED' | 'ACCEPTED' | 'REJECTED'
+  status: 'PENDING' | 'REVIEWED' | 'ACCEPTED' | 'REJECTED' | 'HIRED' | 'DECLINED'
   createdAt: string
   coverLetter?: string
   cvUrl?: string
@@ -37,8 +37,10 @@ defineEmits(['close', 'update-status','open-profile'])
 const statusConfig = {
   PENDING: { label: 'Pending', icon: ClockIcon, bg: 'bg-[#ffc28e]/20', text: 'text-[#83460e]' },
   REVIEWED: { label: 'Reviewed', icon: ClockIcon, bg: 'bg-[#8ccaff]/20', text: 'text-[#235d84]' },
-  ACCEPTED: { label: 'Accepted', icon: CheckCircleIcon, bg: 'bg-[#8fd99b]/20', text: 'text-[#1f6c3b]' },
+  ACCEPTED: { label: 'Offered', icon: CheckCircleIcon, bg: 'bg-[#8fd99b]/20', text: 'text-[#1f6c3b]' },
   REJECTED: { label: 'Rejected', icon: XCircleIcon, bg: 'bg-red-500/10', text: 'text-red-400' },
+  HIRED: { label: 'Hired 🎉', icon: CheckCircleIcon, bg: 'bg-emerald-500/10', text: 'text-emerald-500 font-extrabold' },
+  DECLINED: { label: 'Declined', icon: XCircleIcon, bg: 'bg-amber-500/10', text: 'text-amber-500' },
 }
 
 const uniMap: Record<string, string> = {
@@ -221,7 +223,17 @@ function getUniLabel(key?: string) {
             <!-- Pipeline Actions -->
             <div class="pt-2 border-t border-on-surface/5">
               <p class="text-[10px] font-black uppercase text-on-surface-variant tracking-wider mb-2.5">Update Pipeline Stage</p>
-              <div class="flex flex-wrap gap-2">
+              <div v-if="app.status === 'HIRED'" class="rounded-xl bg-emerald-500/10 p-3 border border-emerald-500/25">
+                <p class="text-xs font-bold text-emerald-600 flex items-center gap-1.5">
+                  🎉 Offer Accepted! This candidate has joined the company.
+                </p>
+              </div>
+              <div v-else-if="app.status === 'DECLINED'" class="rounded-xl bg-amber-500/10 p-3 border border-amber-500/25">
+                <p class="text-xs font-bold text-amber-600">
+                  Offer Declined. The candidate has declined this job offer.
+                </p>
+              </div>
+              <div v-else class="flex flex-wrap gap-2">
                 <button
                   v-for="status in ['REVIEWED', 'ACCEPTED', 'REJECTED']"
                   :key="status"

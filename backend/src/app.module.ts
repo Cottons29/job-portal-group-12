@@ -13,6 +13,8 @@ import { StoriesModule } from "./modules/stories/stories.module";
 import { FollowsModule } from "./modules/follows/follows.module";
 import { MessagesModule } from "./modules/messages/messages.module";
 import { EmailModule } from './common/email/email.module';
+import { CompanyModule } from './modules/company/company.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { EmailModule } from './common/email/email.module';
     StoriesModule,
     FollowsModule,
     MessagesModule,
+    CompanyModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

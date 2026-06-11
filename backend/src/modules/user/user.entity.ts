@@ -5,7 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+
+import { Company } from '../company/company.entity';
 
 import { UserRole } from '../../common/enums/user-role.enum';
 import { AccountStatus } from '../../common/enums/account-status.enum';
@@ -101,6 +105,13 @@ export class User {
   currency?: string;
 
   // --- Employer Specific Fields ---
+  @ManyToOne(() => Company, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'companyId' })
+  company?: Company;
+
+  @Column({ nullable: true })
+  companyId?: string;
+
   @Column({ nullable: true })
   companyName: string;
 
