@@ -26,7 +26,7 @@
     </div>
 
     <div class="space-y-6">
-      <div class="grid gap-5 md:grid-cols-2">
+      <div class="grid gap-5 md:grid-cols-3">
         <label class="block">
           <span class="form-label">Position</span>
           <input
@@ -46,9 +46,19 @@
             class="form-control h-14"
           />
         </label>
+
+        <label class="block">
+          <span class="form-label">Location</span>
+          <input
+            v-model="form.location"
+            type="text"
+            placeholder="e.g. Phnom Penh"
+            class="form-control h-14"
+          />
+        </label>
       </div>
 
-      <div class="grid gap-5 md:grid-cols-2">
+      <div class="grid gap-5 md:grid-cols-3">
         <label class="block">
           <span class="form-label">Hires Needed</span>
           <input
@@ -60,6 +70,20 @@
             class="form-control h-14 px-4"
           />
           <p class="mt-2 text-xs text-slate-400">Number of people to hire for this position.</p>
+        </label>
+
+        <label class="block">
+          <span class="form-label">Job Type</span>
+          <select
+            v-model="form.jobType"
+            class="form-control h-14 px-4"
+          >
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Freelance">Freelance</option>
+            <option value="Internship">Internship</option>
+          </select>
+          <p class="mt-2 text-xs text-slate-400">Type of employment.</p>
         </label>
 
         <label class="block">
@@ -150,6 +174,10 @@
         </aside>
       </div>
 
+      <div v-if="submitError" class="mt-4 p-3 bg-red-50 text-red-700 text-sm font-semibold rounded-lg border border-red-200">
+        {{ submitError }}
+      </div>
+
       <div class="flex flex-col-reverse gap-4 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-xs text-slate-400">Review opportunity details before publishing.</p>
 
@@ -157,15 +185,17 @@
           <button
             type="button"
             class="rounded-[8px] bg-blue-50 px-6 py-3 text-sm font-bold text-blue-600 transition hover:bg-blue-100"
+            :disabled="isSubmitting"
           >
             Need Help?
           </button>
           <button
             type="submit"
-            class="inline-flex items-center justify-center gap-2 rounded-[8px] bg-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
+            class="inline-flex items-center justify-center gap-2 rounded-[8px] bg-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:opacity-50"
+            :disabled="isSubmitting"
           >
             <Send class="h-4 w-4" />
-            Create Job Posting
+            {{ isSubmitting ? 'Publishing...' : 'Create Job Posting' }}
           </button>
         </div>
       </div>
@@ -174,14 +204,21 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { Languages, Lightbulb, Send } from 'lucide-vue-next'
+import api from '@/lib/api'
 
+const router = useRouter()
 const languages = ['Khmer', 'English', 'Bilingual']
+const isSubmitting = ref(false)
+const submitError = ref('')
 
 const form = reactive({
   position: '',
   title: '',
+  location: '',
+  jobType: 'Full-time',
   hiresNeeded: 1,
   deadline: '',
   language: 'Khmer',
@@ -194,8 +231,68 @@ const form = reactive({
 
 const today = new Date().toISOString().split('T')[0]
 
-const handleSubmit = () => {
-  console.log('Create job posting:', { ...form })
+const handleSubmit = async () => {
+  if (isSubmitting.value) return
+  submitError.value = ''
+
+  const jobTitle = form.title?.trim() || form.position?.trim()
+  if (!jobTitle) {
+    submitError.value = 'Job Title or Position is required.'
+    return
+  }
+
+  const jobContent = form.description?.trim()
+  if (!jobContent) {
+    submitError.value = 'Job Description is required.'
+    return
+  }
+
+  isSubmitting.value = true
+  try {
+    // 1. Calculate pay range display
+    const payStr = form.minPay && form.maxPay
+      ? `$${form.minPay} - $${form.maxPay}`
+      : form.minPay
+      ? `From $${form.minPay}`
+      : 'Competitive'
+
+    // 2. Parse requirements lines
+    const reqLines = form.requirements
+      .split(/[\n,;]+/)
+      .map(line => line.trim().replace(/^[-*•]\s*/, ''))
+      .filter(Boolean)
+
+    // 3. Extract skill tags using common keywords
+    const skillKeywords = [
+      'javascript', 'typescript', 'vue', 'react', 'node', 'express', 'python',
+      'java', 'c++', 'c#', 'sql', 'php', 'swift', 'kotlin', 'flutter',
+      'tailwind', 'css', 'html', 'git', 'docker', 'aws', 'figma'
+    ]
+    const searchString = `${jobTitle} ${jobContent} ${form.requirements}`.toLowerCase()
+    const extractedSkills = skillKeywords.filter(skill => {
+      const regex = new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
+      return regex.test(searchString)
+    }).map(s => s === 'javascript' ? 'JavaScript' : s === 'typescript' ? 'TypeScript' : s === 'vue' ? 'Vue.js' : s === 'react' ? 'React.js' : s === 'node' ? 'Node.js' : s.toUpperCase())
+
+    const payload = {
+      title: jobTitle,
+      content: jobContent,
+      isJob: true,
+      salary: payStr,
+      location: form.location?.trim() || 'Phnom Penh',
+      jobType: form.jobType,
+      skills: extractedSkills,
+      requirements: reqLines,
+    }
+
+    await api.post('/posts', payload)
+    router.push('/job-feed')
+  } catch (error: any) {
+    console.error('Failed to publish job:', error)
+    submitError.value = error.response?.data?.message || 'Failed to publish job opportunity.'
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 

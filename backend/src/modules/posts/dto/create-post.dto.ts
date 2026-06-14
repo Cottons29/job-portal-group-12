@@ -12,4 +12,8 @@ export class CreatePostDto {
   location?: string;
 
   jobType?: string;
+
+  skills?: string[];
+
+  requirements?: string[];
 }

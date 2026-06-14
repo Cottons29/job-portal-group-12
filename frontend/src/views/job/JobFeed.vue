@@ -177,7 +177,7 @@ function filterJobs() {
     company: p.company || p.author?.user_name || 'Employer',
     salary: p.salary || 'Competitive',
     location: p.location || 'Phnom Penh',
-    tags: p.tags || (p.jobType ? [p.jobType] : ['Full-time']),
+    tags: p.skills && p.skills.length > 0 ? p.skills : (p.jobType ? [p.jobType] : ['Full-time']),
     matchScore: p.matchScore
   }))
 

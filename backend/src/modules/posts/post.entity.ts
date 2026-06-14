@@ -44,6 +44,20 @@ export class PostEntity {
   @Column({ nullable: true })
   jobType?: string;
 
+  @Column('text', {
+    array: true,
+    default: () => 'ARRAY[]::text[]',
+    nullable: true,
+  })
+  skills: string[];
+
+  @Column('text', {
+    array: true,
+    default: () => 'ARRAY[]::text[]',
+    nullable: true,
+  })
+  requirements: string[];
+
   @ManyToOne(() => User, { eager: true, nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'author_id' })
   author: User;
