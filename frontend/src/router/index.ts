@@ -136,19 +136,14 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/job-feed',
         name: 'job-feed',
-        component: () => import('@/layouts/DefaultLayout.vue'),
-        children: [
-            {
-                path: '',
-                name: 'job-feed-home',
-                component: () => import('@/views/job/JobFeed.vue'),
-            },
-            {
-                path: '/jobs/:id',
-                name: 'job-detail',
-                component: () => import('@/views/job/JobDetail.vue'),
-            },
-        ],
+        component: () => import('@/views/PlaceholderView.vue'),
+        meta: {title: 'Jobs', requiresAuth: true},
+    },
+    {
+        path: '/jobs/:id',
+        name: 'job-detail',
+        component: () => import('@/views/PlaceholderView.vue'),
+        meta: {title: 'Job Details', requiresAuth: true},
     },
     {
         path: '/job-posting',

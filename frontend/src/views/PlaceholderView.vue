@@ -58,6 +58,14 @@
                 />
               </label>
             </div>
+            <div v-else-if="activePage === 'job-feed' && auth.user?.role?.toLowerCase() === 'employer'" class="hidden flex-1 justify-end md:flex">
+              <RouterLink
+                to="/job-posting"
+                class="rounded-full bg-primary hover:bg-primary/95 text-on-primary font-bold px-6 py-3 transition shadow-sm text-sm"
+              >
+                Post Job
+              </RouterLink>
+            </div>
           </div>
         </header>
 
@@ -113,6 +121,14 @@
             v-else-if="activePage === 'messages' && auth.user?.profileCompleted"
             :user-id="auth.user?.id"
             :user-role="auth.user?.role"
+        />
+
+        <JobFeed
+            v-else-if="activePage === 'job-feed'"
+        />
+
+        <JobDetail
+            v-else-if="activePage === 'job-detail'"
         />
 
 
@@ -191,6 +207,8 @@ import ProfileModal from '@/components/placeholder/sections/ProfileModal.vue'
 import ApplicantsModal from '@/components/placeholder/sections/ApplicantsModal.vue'
 import ApplyModal from '@/components/placeholder/sections/ApplyModal.vue'
 import api from '@/lib/api'
+import JobFeed from '@/views/job/JobFeed.vue'
+import JobDetail from '@/views/job/JobDetail.vue'
 
 import {useThemeMode} from '@/composables/useThemeMode'
 import {useAuthStore} from '@/stores/auth'
@@ -280,6 +298,16 @@ const pages = computed(() => ({
     eyebrow: t('dashboardPages.settings.eyebrow'),
     title: t('dashboardPages.settings.title'),
     description: t('dashboardPages.settings.description'),
+  },
+  'job-feed': {
+    eyebrow: 'Opportunities',
+    title: 'Job Feed',
+    description: 'Find student jobs, part-time work, and internships matched to your skills.',
+  },
+  'job-detail': {
+    eyebrow: 'Opportunity Details',
+    title: 'Job Details',
+    description: 'Learn about the role requirements and submit your application.',
   },
 }))
 

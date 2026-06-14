@@ -7,7 +7,14 @@
       <p class="text-sm font-bold text-red-500">Job not found.</p>
     </div>
     <div v-else>
-      <p class="mb-4 text-sm text-slate-500">Job Details - {{ job.title }}</p>
+      <div class="mb-6">
+        <RouterLink
+          to="/job-feed"
+          class="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 transition"
+        >
+          ← Back to Job Feed
+        </RouterLink>
+      </div>
       <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section class="space-y-10">
           <header>
