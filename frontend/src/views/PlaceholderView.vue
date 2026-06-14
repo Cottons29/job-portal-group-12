@@ -121,6 +121,8 @@
             v-else-if="activePage === 'messages' && auth.user?.profileCompleted"
             :user-id="auth.user?.id"
             :user-role="auth.user?.role"
+            :initial-chat-user-id="preselectedChatUserId"
+            @chat-initialized="preselectedChatUserId = null"
         />
 
         <JobFeed
@@ -129,6 +131,19 @@
 
         <JobDetail
             v-else-if="activePage === 'job-detail'"
+            @apply="triggerApply"
+            @view-applicants="handleViewApplicants"
+        />
+
+        <JobForm
+            v-else-if="activePage === 'job-posting'"
+        />
+
+        <SavedJobs
+            v-else-if="activePage === 'saved-jobs'"
+            @open="openPost"
+            @apply="triggerApply"
+            @view-applicants="handleViewApplicants"
         />
 
 
@@ -155,6 +170,7 @@
                 v-if="profileStore.isProfileModalOpen"
                 :user="profileStore.selectedUserProfile || { name: profileStore.isProfileLoading ? 'Loading...' : 'User' }"
                 @close="profileStore.closeProfileModal"
+                @message-user="startMessageChat"
             />
           </Transition>
         </Teleport>
@@ -209,6 +225,8 @@ import ApplyModal from '@/components/placeholder/sections/ApplyModal.vue'
 import api from '@/lib/api'
 import JobFeed from '@/views/job/JobFeed.vue'
 import JobDetail from '@/views/job/JobDetail.vue'
+import JobForm from '@/components/job/JobForm.vue'
+import SavedJobs from '@/views/SavedJobs.vue'
 
 import {useThemeMode} from '@/composables/useThemeMode'
 import {useAuthStore} from '@/stores/auth'
@@ -300,14 +318,24 @@ const pages = computed(() => ({
     description: t('dashboardPages.settings.description'),
   },
   'job-feed': {
-    eyebrow: 'Opportunities',
-    title: 'Job Feed',
-    description: 'Find student jobs, part-time work, and internships matched to your skills.',
+    eyebrow: t('dashboardPages.job-feed.eyebrow'),
+    title: t('dashboardPages.job-feed.title'),
+    description: t('dashboardPages.job-feed.description'),
   },
   'job-detail': {
-    eyebrow: 'Opportunity Details',
-    title: 'Job Details',
-    description: 'Learn about the role requirements and submit your application.',
+    eyebrow: t('dashboardPages.job-detail.eyebrow'),
+    title: t('dashboardPages.job-detail.title'),
+    description: t('dashboardPages.job-detail.description'),
+  },
+  'job-posting': {
+    eyebrow: t('dashboardPages.job-posting.eyebrow'),
+    title: t('dashboardPages.job-posting.title'),
+    description: t('dashboardPages.job-posting.description'),
+  },
+  'saved-jobs': {
+    eyebrow: 'SAVED CONTENT',
+    title: t('home.savedJobs'),
+    description: 'Review the job opportunities you have bookmarked.',
   },
 }))
 
@@ -400,6 +428,12 @@ async function handleViewApplicants(postOrId) {
   } finally {
     isLoadingApplicants.value = false
   }
+}
+const preselectedChatUserId = ref(null)
+function startMessageChat(userId) {
+  profileStore.closeProfileModal()
+  preselectedChatUserId.value = userId
+  router.push({ name: 'messages' })
 }
 function openStudentProfile(student) {
   isApplicantsModalOpen.value = false

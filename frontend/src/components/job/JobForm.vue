@@ -1,24 +1,24 @@
 <template>
   <form
-    class="mx-auto max-w-5xl rounded-[8px] bg-white px-6 py-7 shadow-[0_18px_50px_rgba(15,23,42,0.08)] ring-1 ring-slate-100 sm:px-8"
+    class="mx-auto max-w-5xl rounded-3xl border border-on-surface/5 bg-surface-container-lowest px-6 py-7 shadow-sm sm:px-8"
     @submit.prevent="handleSubmit"
   >
-    <div class="mb-8 flex flex-col gap-4 border-b border-slate-100 pb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mb-8 flex flex-col gap-4 border-b border-on-surface/5 pb-6 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p class="mb-1 text-xs font-medium text-slate-400">Employer Hub / Post Opportunity</p>
-        <h1 class="text-3xl font-bold text-slate-950">Publish New Opportunity</h1>
+        <p class="mb-1 text-xs font-semibold text-on-surface-variant/50">Employer Hub / Post Opportunity</p>
+        <h1 class="text-2xl font-black font-display text-on-surface">Publish New Opportunity</h1>
       </div>
 
       <div class="flex items-center gap-3">
         <button
           type="button"
-          class="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+          class="rounded-full px-5 py-2.5 text-xs font-black text-on-surface-variant/85 transition hover:bg-on-surface/5 hover:text-on-surface"
         >
           Cancel
         </button>
         <button
           type="submit"
-          class="rounded-full bg-slate-950 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition hover:bg-blue-600"
+          class="rounded-full bg-primary px-6 py-3 text-xs font-black text-on-primary shadow-sm hover:bg-primary/95 transition-all duration-200"
         >
           Publish Job
         </button>
@@ -69,7 +69,7 @@
             placeholder="1"
             class="form-control h-14 px-4"
           />
-          <p class="mt-2 text-xs text-slate-400">Number of people to hire for this position.</p>
+          <p class="mt-2 text-[10px] font-semibold text-on-surface-variant/50">Number of people to hire for this position.</p>
         </label>
 
         <label class="block">
@@ -83,7 +83,7 @@
             <option value="Freelance">Freelance</option>
             <option value="Internship">Internship</option>
           </select>
-          <p class="mt-2 text-xs text-slate-400">Type of employment.</p>
+          <p class="mt-2 text-[10px] font-semibold text-on-surface-variant/50">Type of employment.</p>
         </label>
 
         <label class="block">
@@ -94,23 +94,51 @@
             :min="today"
             class="form-control h-14 px-4"
           />
-          <p class="mt-2 text-xs text-slate-400">Deadline must be today or later.</p>
+          <p class="mt-2 text-[10px] font-semibold text-on-surface-variant/50">Deadline must be today or later.</p>
         </label>
       </div>
 
-      <div class="rounded-[8px] bg-blue-50 px-5 py-5">
-        <p class="mb-4 flex items-center gap-2 text-sm font-bold text-slate-900">
-          <Languages class="h-4 w-4 text-blue-600" />
+      <div class="grid gap-5 md:grid-cols-2">
+        <label class="block">
+          <span class="form-label">Schedule</span>
+          <select
+            v-model="form.schedule"
+            class="form-control h-14 px-4"
+          >
+            <option value="Flexible">Flexible</option>
+            <option value="Weekend">Weekend</option>
+            <option value="Full-day">Full-day</option>
+          </select>
+          <p class="mt-2 text-[10px] font-semibold text-on-surface-variant/50">Work schedule/shifts.</p>
+        </label>
+
+        <label class="block">
+          <span class="form-label">Payment Frequency</span>
+          <select
+            v-model="form.paymentType"
+            class="form-control h-14 px-4"
+          >
+            <option value="Hourly">Hourly</option>
+            <option value="Daily">Daily</option>
+            <option value="Project">Project</option>
+          </select>
+          <p class="mt-2 text-[10px] font-semibold text-on-surface-variant/50">How the candidate will be paid.</p>
+        </label>
+      </div>
+
+      <div class="rounded-2xl bg-surface-container-low px-5 py-5 border border-on-surface/5">
+        <p class="mb-4 flex items-center gap-2 text-sm font-black text-on-surface">
+          <Languages class="h-4 w-4 text-primary" />
           Language Required
         </p>
 
-        <div class="inline-flex rounded-full bg-white p-1 shadow-sm ring-1 ring-blue-100">
+        <div class="inline-flex rounded-full bg-surface-container-lowest p-1 shadow-sm border border-on-surface/5">
           <button
             v-for="language in languages"
             :key="language"
             type="button"
             class="h-9 min-w-24 rounded-full px-5 text-xs font-bold transition"
-            :class="form.language === language ? 'bg-white text-blue-600 shadow-md' : 'text-slate-500 hover:text-blue-600'"
+            :class="form.language === language ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-primary'"
             @click="form.language = language"
           >
             {{ language }}
@@ -150,7 +178,7 @@
               placeholder="Min"
               class="form-control h-14"
             />
-            <span class="hidden text-sm font-semibold text-slate-300 sm:block">to</span>
+            <span class="hidden text-sm font-semibold text-on-surface-variant/40 sm:block">to</span>
             <input
               v-model="form.maxPay"
               type="number"
@@ -165,33 +193,33 @@
           </div>
         </fieldset>
 
-        <aside class="rounded-[8px] bg-amber-200 p-5 text-slate-900 shadow-[0_14px_30px_rgba(245,158,11,0.22)] lg:w-52">
+        <aside class="rounded-3xl bg-amber-500/10 border border-amber-500/20 p-5 text-amber-600 lg:w-52">
           <Lightbulb class="mb-3 h-5 w-5" />
-          <h2 class="mb-1 text-sm font-bold">Pro Tip</h2>
-          <p class="text-xs leading-5 text-slate-700">
+          <h2 class="mb-1 text-sm font-black">Pro Tip</h2>
+          <p class="text-xs leading-5 text-amber-600/90 font-semibold">
             Job descriptions with specific requirements get 40% more qualified applicants in Cambodia.
           </p>
         </aside>
       </div>
 
-      <div v-if="submitError" class="mt-4 p-3 bg-red-50 text-red-700 text-sm font-semibold rounded-lg border border-red-200">
+      <div v-if="submitError" class="mt-4 p-3 bg-red-500/10 text-red-400 text-xs font-bold rounded-2xl border border-red-500/20">
         {{ submitError }}
       </div>
 
       <div class="flex flex-col-reverse gap-4 pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p class="text-xs text-slate-400">Review opportunity details before publishing.</p>
+        <p class="text-xs font-semibold text-on-surface-variant/50">Review opportunity details before publishing.</p>
 
         <div class="flex gap-3">
           <button
             type="button"
-            class="rounded-[8px] bg-blue-50 px-6 py-3 text-sm font-bold text-blue-600 transition hover:bg-blue-100"
+            class="rounded-full bg-on-surface/5 px-6 py-3 text-xs font-black text-on-surface transition hover:bg-on-surface/10"
             :disabled="isSubmitting"
           >
             Need Help?
           </button>
           <button
             type="submit"
-            class="inline-flex items-center justify-center gap-2 rounded-[8px] bg-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:opacity-50"
+            class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3 text-xs font-black text-on-primary shadow-sm hover:bg-primary/95 transition disabled:opacity-50"
             :disabled="isSubmitting"
           >
             <Send class="h-4 w-4" />
@@ -218,10 +246,12 @@ const form = reactive({
   position: '',
   title: '',
   location: '',
-  jobType: 'Full-time',
+  jobType: 'Part-time',
   hiresNeeded: 1,
   deadline: '',
   language: 'Khmer',
+  schedule: 'Flexible',
+  paymentType: 'Hourly',
   description: '',
   requirements: '',
   minPay: '',
@@ -281,6 +311,11 @@ const handleSubmit = async () => {
       salary: payStr,
       location: form.location?.trim() || 'Phnom Penh',
       jobType: form.jobType,
+      language: form.language,
+      schedule: form.schedule,
+      paymentType: form.paymentType,
+      hiresNeeded: form.hiresNeeded,
+      deadline: form.deadline || undefined,
       skills: extractedSkills,
       requirements: reqLines,
     }
@@ -304,31 +339,33 @@ const handleSubmit = async () => {
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgb(148 163 184);
+  color: var(--color-on-surface-variant, rgb(148 163 184));
+  opacity: 0.7;
 }
 
 .form-control {
   width: 100%;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   border: 1px solid transparent;
-  background-color: rgb(241 245 249);
+  background-color: var(--color-surface-container-low, rgb(241 245 249));
   padding-left: 1rem;
   padding-right: 1rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: rgb(15 23 42);
+  color: var(--color-on-surface, rgb(15 23 42));
   outline: none;
   transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
 }
 
 .form-control::placeholder {
-  color: rgb(148 163 184);
+  color: var(--color-on-surface-variant, rgb(148 163 184));
+  opacity: 0.5;
   font-weight: 500;
 }
 
 .form-control:focus {
-  border-color: rgb(37 99 235);
-  background-color: white;
-  box-shadow: 0 0 0 4px rgb(37 99 235 / 0.1);
+  border-color: var(--color-primary, rgb(37 99 235));
+  background-color: var(--color-surface-container-lowest, white);
+  box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb, 37, 99, 235), 0.1);
 }
 </style>

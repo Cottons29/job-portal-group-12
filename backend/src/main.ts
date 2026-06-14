@@ -11,6 +11,7 @@ import { TypeormStore } from 'connect-typeorm';
 import { DataSource } from 'typeorm';
 import { SessionEntity } from './auth/session.entity';
 import { seedCompanies } from './modules/company/company.seeder';
+import { seedPostsAndJobs } from './modules/posts/posts.seeder';
 
 declare module 'express-session' {
   interface SessionData {
@@ -42,6 +43,7 @@ async function bootstrap() {
   
   // Seed companies if table is empty
   await seedCompanies(dataSource);
+  await seedPostsAndJobs(dataSource);
 
   const sessionRepository = dataSource.getRepository(SessionEntity);
 

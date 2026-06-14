@@ -13,6 +13,16 @@ export class CreatePostDto {
 
   jobType?: string;
 
+  language?: string;
+
+  schedule?: string;
+
+  paymentType?: string;
+
+  hiresNeeded?: number;
+
+  deadline?: string;
+
   skills?: string[];
 
   requirements?: string[];

@@ -18,8 +18,11 @@
 
   const props = defineProps({
     userId: { type: String, required: true },
-    userRole: { type: String, required: true }
+    userRole: { type: String, required: true },
+    initialChatUserId: { type: String, default: null }
   })
+
+  const emit = defineEmits(['chat-initialized'])
 
   const authStore = useAuthStore()
   const { socket } = useSocket()
@@ -41,14 +44,53 @@
     return contacts.value.filter(c => c.name.toLowerCase().includes(q))
   })
 
+  async function selectInitialOrFirstContact() {
+    if (props.initialChatUserId) {
+      const existing = contacts.value.find(c => c.id === props.initialChatUserId)
+      if (existing) {
+        selectContact(existing)
+        emit('chat-initialized')
+      } else {
+        try {
+          const { data } = await api.get(`/profile/${props.initialChatUserId}`)
+          if (data && data.profile) {
+            const u = data.profile
+            const isEmp = u.user?.role?.toLowerCase() === 'employer' || u.companyName
+            const name = isEmp
+              ? u.companyName || u.user_name || 'Employer'
+              : u.fullName || u.user_name || 'Student'
+            const avatar = isEmp ? u.logoUrl : u.profileImageUrl
+
+            const newContact = {
+              id: u.id,
+              name,
+              avatar,
+              lastMessage: null,
+              lastMessageAt: null
+            }
+            contacts.value.unshift(newContact)
+            selectContact(newContact)
+          }
+        } catch (err) {
+          console.error('Failed to load initial chat user:', err)
+          if (contacts.value.length > 0) {
+            selectContact(contacts.value[0])
+          }
+        } finally {
+          emit('chat-initialized')
+        }
+      }
+    } else if (contacts.value.length > 0 && !activeContact.value) {
+      selectContact(contacts.value[0])
+    }
+  }
+
   async function fetchContacts() {
     isLoadingContacts.value = true
     try {
       const { data } = await api.get('/messages/contacts')
       contacts.value = data || []
-      if (contacts.value.length > 0 && !activeContact.value) {
-        selectContact(contacts.value[0])
-      }
+      await selectInitialOrFirstContact()
     } catch (e) {
       console.error('Failed to load contacts:', e)
     } finally {
@@ -189,6 +231,11 @@
   })
 
   watch(activeContact, () => scrollToBottom())
+  watch(() => props.initialChatUserId, (newId) => {
+    if (newId) {
+      selectInitialOrFirstContact()
+    }
+  })
 
   const fileInput = ref(null)
   const isUploadingFile = ref(false)

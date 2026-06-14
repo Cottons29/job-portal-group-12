@@ -13,7 +13,7 @@
     user: UserProfile
   }>()
 
-  defineEmits(['close', 'openPost'])
+  defineEmits(['close', 'openPost', 'message-user'])
 
   const authStore = useAuthStore()
   const isFollowing = ref(false)
@@ -51,16 +51,27 @@
 
   async function handleConnectToggle() {
     if (isSelf.value || !props.user?.id) return
+    const prevState = isFollowing.value
+    const prevCount = followersCount.value
+
+    isFollowing.value = !prevState
+    if (isFollowing.value) {
+      followersCount.value++
+    } else {
+      followersCount.value = Math.max(0, followersCount.value - 1)
+    }
+
     try {
       const res = await api.post(`/follows/toggle/${props.user.id}`)
       isFollowing.value = res.data.followed
-      
       if (res.data.followed) {
-        followersCount.value++
+        followersCount.value = prevCount + (prevState ? 0 : 1)
       } else {
-        followersCount.value = Math.max(0, followersCount.value - 1)
+        followersCount.value = Math.max(0, prevCount - (prevState ? 1 : 0))
       }
     } catch (err) {
+      isFollowing.value = prevState
+      followersCount.value = prevCount
       console.error('Failed to toggle follow status:', err)
     }
   }
@@ -136,6 +147,13 @@
                 ]"
               >
                 {{ isFollowing ? 'Connected' : 'Connect' }}
+              </button>
+              <button
+                v-if="!isSelf && user.id"
+                @click="$emit('message-user', user.id)"
+                class="rounded-full px-5 py-2.5 text-sm font-black bg-primary/10 text-primary hover:bg-primary/20 transition cursor-pointer shadow-sm"
+              >
+                Message
               </button>
               <button
                 v-if="!isSelf && user.id"

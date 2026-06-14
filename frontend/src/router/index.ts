@@ -106,7 +106,7 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/saved-jobs',
         name: 'saved-jobs',
-        component: () => import('@/views/SavedJobs.vue'),
+        component: () => import('@/views/PlaceholderView.vue'),
         meta: {title: 'Saved Jobs', requiresAuth: true},
     },
     {
@@ -148,7 +148,8 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/job-posting',
         name: 'job-posting',
-        component: () => import('@/views/job/JobPosting.vue'),
+        component: () => import('@/views/PlaceholderView.vue'),
+        meta: {title: 'Post Job', requiresAuth: true},
     },
 
 ]
