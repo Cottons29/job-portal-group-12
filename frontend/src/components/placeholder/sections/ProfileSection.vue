@@ -259,6 +259,7 @@ async function fetchSavedJobs() {
     console.error('Failed to fetch saved jobs', e)
   }
 }
+
 async function respondToOffer(appId, response) {
   const confirmMsg = response === 'ACCEPT' 
     ? 'Are you sure you want to accept this job offer? This will notify the employer.'
@@ -531,15 +532,9 @@ function exportCV() {
               {{ app.post?.company }} • Applied on {{ new Date(app.createdAt).toLocaleDateString() }}
             </p>
             <div v-if="app.status === 'ACCEPTED'" class="mt-2 text-xs font-semibold text-[#1f6c3b] bg-[#8fd99b]/15 px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5">
-              <!-- Heroicon component with matching text color -->
-              <CheckCircleIcon class="w-4 h-4 text-[#1f6c3b] shrink-0" />
-              <span>Congratulations! You got the job offer! Please respond to accept or decline.</span>
-            </div>
-            <div v-else-if="app.status === 'HIRED'" class="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-500/10 px-3 py-1.5 rounded-xl inline-block">
-              🎉 Offer Accepted! You are hired for this position.
-            </div>
-            <div v-else-if="app.status === 'DECLINED'" class="mt-2 text-xs font-semibold text-amber-700 bg-amber-500/10 px-3 py-1.5 rounded-xl inline-block">
-              Offer Declined. You declined this job offer.
+            <!-- Heroicon component with matching text color -->
+            <CheckCircleIcon class="w-4 h-4 text-[#1f6c3b] shrink-0" />
+            <span>Congratulations! You got the job offer! Keep an eye on your inbox/messages.</span>
             </div>
             <div v-else-if="app.status === 'REJECTED'" class="mt-2 text-xs font-semibold text-red-700 bg-red-500/10 px-3 py-1.5 rounded-xl inline-block">
               Thank you for applying. The employer has decided to pursue other applicants for this role.
