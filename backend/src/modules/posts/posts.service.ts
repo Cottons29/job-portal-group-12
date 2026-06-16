@@ -169,6 +169,13 @@ export class PostsService {
       salary: dto.salary?.trim() || undefined,
       location: dto.location?.trim() || undefined,
       jobType: dto.jobType?.trim() || undefined,
+      language: dto.language?.trim() || undefined,
+      schedule: dto.schedule?.trim() || undefined,
+      paymentType: dto.paymentType?.trim() || undefined,
+      hiresNeeded: dto.hiresNeeded,
+      deadline: dto.deadline?.trim() || undefined,
+      skills: dto.skills || [],
+      requirements: dto.requirements || [],
     });
 
     const saved = await this.postsRepository.save(post);
@@ -409,6 +416,13 @@ export class PostsService {
       salary: post.salary,
       location: post.location,
       jobType: post.jobType,
+      language: post.language,
+      schedule: post.schedule,
+      paymentType: post.paymentType,
+      hiresNeeded: post.hiresNeeded,
+      deadline: post.deadline,
+      skills: post.skills || [],
+      requirements: post.requirements || [],
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       author: post.author,
@@ -519,6 +533,18 @@ export class PostsService {
     return bundle;
   }
 
+  private escapeRegExp(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private matchWord(text: string, word: string): boolean {
+    if (!word || !text) return false;
+    const escaped = this.escapeRegExp(word.toLowerCase());
+    const pattern = `(?<=^|[^a-zA-Z0-9_#+.\\-])` + escaped + `(?=$|[^a-zA-Z0-9_#+.\\-])`;
+    const regex = new RegExp(pattern, 'i');
+    return regex.test(text);
+  }
+
   async findRecommendations(userId: string) {
     const student = await this.usersRepository.findOne({ where: { id: userId } });
     if (!student) {
@@ -539,30 +565,54 @@ export class PostsService {
       let score = 0;
       const titleLower = (job.title || '').toLowerCase();
       const contentLower = (job.content || '').toLowerCase();
+      const jobSkills = job.skills || [];
 
-      if (studentMajor && (titleLower.includes(studentMajor.toLowerCase()) || contentLower.includes(studentMajor.toLowerCase()))) {
+      // 1. Major Match (Weight: 30%)
+      if (studentMajor && this.matchWord(titleLower + ' ' + contentLower, studentMajor)) {
         score += 30;
       }
 
+      // 2. Skill Matching (Weight: 50%)
       let matchedSkillsCount = 0;
-      studentSkills.forEach((skill) => {
-        if (skill && (titleLower.includes(skill.toLowerCase()) || contentLower.includes(skill.toLowerCase()))) {
-          matchedSkillsCount++;
-        }
-      });
-      score += Math.min(matchedSkillsCount * 10, 50);
+      if (jobSkills.length > 0) {
+        // Compare array intersections case-insensitively
+        const jobSkillsLower = jobSkills.map(s => s.toLowerCase());
+        studentSkills.forEach((skill) => {
+          if (skill && jobSkillsLower.includes(skill.toLowerCase())) {
+            matchedSkillsCount++;
+          }
+        });
+        const matchRatio = matchedSkillsCount / jobSkills.length;
+        score += matchRatio * 50;
+      } else {
+        // Fallback to text parsing if no structured skills on job
+        studentSkills.forEach((skill) => {
+          if (skill && this.matchWord(titleLower + ' ' + contentLower, skill)) {
+            matchedSkillsCount++;
+          }
+        });
+        score += Math.min(matchedSkillsCount * 10, 50);
+      }
 
-      if (studentJobType && job.jobType && (titleLower.includes(studentJobType.toLowerCase()) || studentJobType.toLowerCase() === job.jobType.toLowerCase())) {
+      // 3. Job Type Match (Weight: 20%)
+      if (studentJobType && job.jobType && (
+        studentJobType.toLowerCase() === job.jobType.toLowerCase() ||
+        this.matchWord(titleLower, studentJobType)
+      )) {
         score += 20;
       }
 
+      // 4. Recency Boost (Max 10%)
       const daysOld = (Date.now() - new Date(job.createdAt).getTime()) / (1000 * 60 * 60 * 24);
       const recencyBoost = Math.max(10 - daysOld, 0);
       score += recencyBoost;
 
+      // Cap final score at 100%
+      const finalScore = Math.min(Math.round(score), 100);
+
       return {
         job,
-        score: Math.round(score),
+        score: finalScore,
       };
     });
 

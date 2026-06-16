@@ -15,6 +15,7 @@ import { PostEntity } from '../posts/post.entity';
 export enum ApplicationStatus {
   PENDING = 'PENDING',
   REVIEWED = 'REVIEWED',
+  INTERVIEW = 'INTERVIEW',
   ACCEPTED = 'ACCEPTED',
   REJECTED = 'REJECTED',
   HIRED = 'HIRED',

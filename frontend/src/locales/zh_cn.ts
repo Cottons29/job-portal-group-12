@@ -6,6 +6,7 @@ const zh_cn: AppLanguage = {
   sidebar: {
     home: '首页',
     search: '搜索',
+    jobs: '职位',
     messages: '消息',
     notifications: '通知',
     create: '创建',

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { CheckCircleIcon, ClockIcon, XCircleIcon, AcademicCapIcon, BriefcaseIcon, DocumentTextIcon, PaperClipIcon } from '@heroicons/vue/24/outline'
 import type { Post } from '@/types/profile'
+import { resolveUrl } from '@/lib/api'
 
 export interface Applicant {
   id: string | number
-  status: 'PENDING' | 'REVIEWED' | 'ACCEPTED' | 'REJECTED' | 'HIRED' | 'DECLINED'
+  status: 'PENDING' | 'REVIEWED' | 'INTERVIEW' | 'ACCEPTED' | 'REJECTED' | 'HIRED' | 'DECLINED'
   createdAt: string
   coverLetter?: string
   cvUrl?: string
@@ -37,6 +38,7 @@ defineEmits(['close', 'update-status','open-profile'])
 const statusConfig = {
   PENDING: { label: 'Pending', icon: ClockIcon, bg: 'bg-[#ffc28e]/20', text: 'text-[#83460e]' },
   REVIEWED: { label: 'Reviewed', icon: ClockIcon, bg: 'bg-[#8ccaff]/20', text: 'text-[#235d84]' },
+  INTERVIEW: { label: 'Interview', icon: ClockIcon, bg: 'bg-[#aecbfa]/20', text: 'text-[#1a4fa3]' },
   ACCEPTED: { label: 'Offered', icon: CheckCircleIcon, bg: 'bg-[#8fd99b]/20', text: 'text-[#1f6c3b]' },
   REJECTED: { label: 'Rejected', icon: XCircleIcon, bg: 'bg-red-500/10', text: 'text-red-400' },
   HIRED: { label: 'Hired 🎉', icon: CheckCircleIcon, bg: 'bg-emerald-500/10', text: 'text-emerald-500 font-extrabold' },
@@ -197,9 +199,9 @@ function getUniLabel(key?: string) {
                 <PaperClipIcon class="h-4 w-4 text-primary" />
                 Resume Attachment:
               </span>
-              <a
+               <a
                 v-if="app.cvUrl"
-                :href="'/api' + app.cvUrl"
+                :href="resolveUrl(app.cvUrl)"
                 target="_blank"
                 class="inline-flex items-center gap-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 px-3.5 py-1.5 text-xs font-black text-primary transition"
               >
@@ -208,7 +210,7 @@ function getUniLabel(key?: string) {
               </a>
               <a
                 v-else-if="app.applicant?.cvUrl"
-                :href="'/api' + app.applicant.cvUrl"
+                :href="resolveUrl(app.applicant.cvUrl)"
                 target="_blank"
                 class="inline-flex items-center gap-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 px-3.5 py-1.5 text-xs font-black text-primary transition"
               >
@@ -235,7 +237,7 @@ function getUniLabel(key?: string) {
               </div>
               <div v-else class="flex flex-wrap gap-2">
                 <button
-                  v-for="status in ['REVIEWED', 'ACCEPTED', 'REJECTED']"
+                  v-for="status in ['REVIEWED', 'INTERVIEW', 'ACCEPTED', 'REJECTED']"
                   :key="status"
                   @click="$emit('update-status', { applicationId: app.id, status })"
                   :class="[

@@ -12,4 +12,18 @@ export class CreatePostDto {
   location?: string;
 
   jobType?: string;
+
+  language?: string;
+
+  schedule?: string;
+
+  paymentType?: string;
+
+  hiresNeeded?: number;
+
+  deadline?: string;
+
+  skills?: string[];
+
+  requirements?: string[];
 }

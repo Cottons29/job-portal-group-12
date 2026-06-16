@@ -58,6 +58,14 @@
                 />
               </label>
             </div>
+            <div v-else-if="activePage === 'job-feed' && auth.user?.role?.toLowerCase() === 'employer'" class="hidden flex-1 justify-end md:flex">
+              <RouterLink
+                to="/job-posting"
+                class="rounded-full bg-primary hover:bg-primary/95 text-on-primary font-bold px-6 py-3 transition shadow-sm text-sm"
+              >
+                Post Job
+              </RouterLink>
+            </div>
           </div>
         </header>
 
@@ -113,6 +121,29 @@
             v-else-if="activePage === 'messages' && auth.user?.profileCompleted"
             :user-id="auth.user?.id"
             :user-role="auth.user?.role"
+            :initial-chat-user-id="preselectedChatUserId"
+            @chat-initialized="preselectedChatUserId = null"
+        />
+
+        <JobFeed
+            v-else-if="activePage === 'job-feed'"
+        />
+
+        <JobDetail
+            v-else-if="activePage === 'job-detail'"
+            @apply="triggerApply"
+            @view-applicants="handleViewApplicants"
+        />
+
+        <JobForm
+            v-else-if="activePage === 'job-posting'"
+        />
+
+        <SavedJobs
+            v-else-if="activePage === 'saved-jobs'"
+            @open="openPost"
+            @apply="triggerApply"
+            @view-applicants="handleViewApplicants"
         />
 
 
@@ -139,6 +170,7 @@
                 v-if="profileStore.isProfileModalOpen"
                 :user="profileStore.selectedUserProfile || { name: profileStore.isProfileLoading ? 'Loading...' : 'User' }"
                 @close="profileStore.closeProfileModal"
+                @message-user="startMessageChat"
             />
           </Transition>
         </Teleport>
@@ -191,6 +223,10 @@ import ProfileModal from '@/components/placeholder/sections/ProfileModal.vue'
 import ApplicantsModal from '@/components/placeholder/sections/ApplicantsModal.vue'
 import ApplyModal from '@/components/placeholder/sections/ApplyModal.vue'
 import api from '@/lib/api'
+import JobFeed from '@/views/job/JobFeed.vue'
+import JobDetail from '@/views/job/JobDetail.vue'
+import JobForm from '@/components/job/JobForm.vue'
+import SavedJobs from '@/views/SavedJobs.vue'
 
 import {useThemeMode} from '@/composables/useThemeMode'
 import {useAuthStore} from '@/stores/auth'
@@ -201,6 +237,7 @@ import {useToast} from '@/composables/useToast'
 
 import {
   BellIcon,
+  BriefcaseIcon,
   ChatBubbleOvalLeftEllipsisIcon,
   HomeIcon,
   MagnifyingGlassIcon,
@@ -279,6 +316,26 @@ const pages = computed(() => ({
     eyebrow: t('dashboardPages.settings.eyebrow'),
     title: t('dashboardPages.settings.title'),
     description: t('dashboardPages.settings.description'),
+  },
+  'job-feed': {
+    eyebrow: t('dashboardPages.job-feed.eyebrow'),
+    title: t('dashboardPages.job-feed.title'),
+    description: t('dashboardPages.job-feed.description'),
+  },
+  'job-detail': {
+    eyebrow: t('dashboardPages.job-detail.eyebrow'),
+    title: t('dashboardPages.job-detail.title'),
+    description: t('dashboardPages.job-detail.description'),
+  },
+  'job-posting': {
+    eyebrow: t('dashboardPages.job-posting.eyebrow'),
+    title: t('dashboardPages.job-posting.title'),
+    description: t('dashboardPages.job-posting.description'),
+  },
+  'saved-jobs': {
+    eyebrow: 'SAVED CONTENT',
+    title: t('home.savedJobs'),
+    description: 'Review the job opportunities you have bookmarked.',
   },
 }))
 
@@ -372,6 +429,12 @@ async function handleViewApplicants(postOrId) {
     isLoadingApplicants.value = false
   }
 }
+const preselectedChatUserId = ref(null)
+function startMessageChat(userId) {
+  profileStore.closeProfileModal()
+  preselectedChatUserId.value = userId
+  router.push({ name: 'messages' })
+}
 function openStudentProfile(student) {
   isApplicantsModalOpen.value = false
   profileStore.selectedUserProfile = student
@@ -417,6 +480,14 @@ const navigationItems = computed(() => {
       bg: 'bg-[#8fd99b]',
       color: 'text-[#1f6c3b]',
       to: '/search'
+    },
+    {
+      label: t('sidebar.jobs'),
+      page: 'job-feed',
+      icon: BriefcaseIcon,
+      bg: 'bg-[#ffda79]',
+      color: 'text-[#845c08]',
+      to: '/job-feed'
     },
     {
       label: t('sidebar.messages'),

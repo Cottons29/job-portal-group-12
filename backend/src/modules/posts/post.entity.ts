@@ -44,6 +44,35 @@ export class PostEntity {
   @Column({ nullable: true })
   jobType?: string;
 
+  @Column({ nullable: true })
+  language?: string;
+
+  @Column({ nullable: true })
+  schedule?: string;
+
+  @Column({ nullable: true })
+  paymentType?: string;
+
+  @Column({ nullable: true, type: 'int' })
+  hiresNeeded?: number;
+
+  @Column({ nullable: true })
+  deadline?: string;
+
+  @Column('text', {
+    array: true,
+    default: () => 'ARRAY[]::text[]',
+    nullable: true,
+  })
+  skills: string[];
+
+  @Column('text', {
+    array: true,
+    default: () => 'ARRAY[]::text[]',
+    nullable: true,
+  })
+  requirements: string[];
+
   @ManyToOne(() => User, { eager: true, nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'author_id' })
   author: User;

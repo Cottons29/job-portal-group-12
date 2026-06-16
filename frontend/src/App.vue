@@ -7,7 +7,7 @@ import ThemeModeToggle from './components/ThemeModeToggle.vue'
 import ToastContainer from './components/placeholder/ToastContainer.vue'
 
 const route = useRoute()
-const placeholderRouteNames = ['welcome', 'home', 'search', 'messages', 'notifications', 'create', 'profile', 'settings']
+const placeholderRouteNames = ['welcome', 'home', 'search', 'messages', 'notifications', 'create', 'profile', 'settings', 'saved-jobs']
 const isPlaceholderRoute = computed(() => placeholderRouteNames.includes(route.name?.toString() || ''))
 const showGlobalThemeToggle = computed(() => !isPlaceholderRoute.value)
 const showFooter = computed(() => !isPlaceholderRoute.value)

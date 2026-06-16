@@ -314,13 +314,6 @@
                 <div class="flex items-center gap-4">
                   <div
                       class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100/80 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
-                    </div>
-                  <div class="flex flex-col">
-                    <div class="flex items-center gap-2">
-                      <!-- <span class="font-bold text-slate-800">{{ currentEntity === 'employer' ? item.companyName : item.fullName }}</span> -->
-                      <span v-if="currentEntity === 'student' && item.status !== 'Verified'" class="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Not Verified</span>
-                    </div>
-                    <!-- <span class="text-xs text-slate-400 font-semibold">{{ currentEntity === 'employer' ? item.industry : item.university }}</span> -->
                     <template v-if="currentEntity === 'employer'">
                       <BuildingOfficeIcon class="w-6 h-6"/>
                     </template>
@@ -329,7 +322,10 @@
                     </template>
                   </div>
                   <div class="flex flex-col">
-                    <span class="font-bold text-slate-800">{{ currentEntity === 'employer' ? item.companyName : item.fullName }}</span>
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-slate-800">{{ currentEntity === 'employer' ? item.companyName : item.fullName }}</span>
+                      <span v-if="currentEntity === 'student' && item.status !== 'Verified'" class="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Not Verified</span>
+                    </div>
                     <span class="text-xs text-slate-400 font-semibold">{{ currentEntity === 'employer' ? item.industry : item.university }}</span>
                   </div>
                 </div>

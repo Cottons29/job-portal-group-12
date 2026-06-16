@@ -18,7 +18,7 @@ export const usePostStore = defineStore('posts', () => {
   // @ts-ignore
   function mapPost(post) {
     const author = post.author
-    const authorName = author?.fullName || author?.companyName || author?.user_name || author?.phone || '<Blank>'
+    const authorName = author?.fullName || author?.companyName || author?.user_name || (author?.phone ? 'User_' + author.phone.slice(-4) : 'Member')
     const authorAvatar = author?.profileImageUrl || author?.logoUrl
     const createdAt = post.createdAt ? new Date(post.createdAt) : null
 

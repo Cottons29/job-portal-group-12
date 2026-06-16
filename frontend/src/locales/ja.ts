@@ -6,6 +6,7 @@ const ja: AppLanguage = {
   sidebar: {
     home: 'ホーム',
     search: '検索',
+    jobs: '求人',
     messages: 'メッセージ',
     notifications: '通知',
     create: '作成',

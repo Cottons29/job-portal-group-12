@@ -31,9 +31,9 @@ const profileHandle = computed(() => {
 
 const displayName = computed(() => {
   if (isEmployer.value) {
-    return profileStore.profileForm.companyName || authStore.user?.phone || 'Loading...'
+    return profileStore.profileForm.companyName || authStore.user?.user_name || (authStore.user?.phone ? 'User_' + authStore.user.phone.slice(-4) : 'Loading...')
   }
-  return profileStore.profileForm.name || authStore.user?.phone || 'Loading...'
+  return profileStore.profileForm.name || authStore.user?.user_name || (authStore.user?.phone ? 'User_' + authStore.user.phone.slice(-4) : 'Loading...')
 })
 
 const followersCount = ref(0)
@@ -536,75 +536,11 @@ function exportCV() {
             <CheckCircleIcon class="w-4 h-4 text-[#1f6c3b] shrink-0" />
             <span>Congratulations! You got the job offer! Keep an eye on your inbox/messages.</span>
             </div>
-
             <div v-else-if="app.status === 'REJECTED'" class="mt-2 text-xs font-semibold text-red-700 bg-red-500/10 px-3 py-1.5 rounded-xl inline-block">
               Thank you for applying. The employer has decided to pursue other applicants for this role.
             </div>
-            <div v-else-if="app.status === 'REVIEWED'" class="mt-2 text-xs font-semibold text-[#1a4fa3] bg-[#aecbfa]/15 px-3 py-1.5 rounded-xl inline-block">
-              Your application is currently under review by the hiring team.
-            </div>
-            <div v-else class="mt-2 text-xs font-semibold text-on-surface-variant/80 bg-surface-container-high px-3 py-1.5 rounded-xl inline-block">
-              Application submitted and pending initial employer review.
-            </div>
-          </div>
-        </div>
-        <div class="flex items-center gap-2 sm:self-center">
-          <span :class="[
-            'px-3 py-1 text-xs font-black uppercase tracking-wider rounded-full ring-1',
-            app.status === 'ACCEPTED' ? 'bg-[#8fd99b]/20 text-[#1f6c3b] ring-[#8fd99b]/35' :
-            app.status === 'REJECTED' ? 'bg-red-500/15 text-red-500 ring-red-500/25' :
-            app.status === 'REVIEWED' ? 'bg-primary/10 text-primary ring-primary/20' :
-            'bg-surface-container-highest text-on-surface-variant ring-on-surface/5'
-          ]">
-            {{ app.status }}
-          </span>
-          <button
-            type="button"
-            class="rounded-full bg-surface-container-high hover:bg-surface-container-highest px-4 py-2 text-xs font-black text-on-surface transition"
-            @click="$emit('openPost', app.post)"
-          >
-            View Job
-          </button>
-        </div>
-      </div>
-    </div>
-    <!-- Render saved jobs for student -->
-    <div v-if="activeTab === 'savedJobs' && !isEmployer" class="space-y-4">
-      
-      <div v-if="filteredGallery.length === 0" class="flex flex-col items-center justify-center py-16 text-center px-4 bg-surface-container-low rounded-3xl border border-on-surface/5">
-        <div class="grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary mb-3">
-          <component :is="emptyStateIcon" class="h-8 w-8 text-primary" />
-        </div>
-        <h3 class="font-display text-lg font-black text-on-surface">{{ emptyStateTitle }}</h3>
-        <p class="mt-1 text-xs text-on-surface-variant/70 max-w-xs leading-relaxed">{{ emptyStateDesc }}</p>
-      </div>
-
-      <div
-        v-else
-        v-for="app in filteredGallery"
-        :key="app.id"
-        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-surface-container-low border border-on-surface/5 transition duration-150 hover:border-primary/20"
-      >
-        <div class="flex items-start gap-4">
-          <div class="h-12 w-12 shrink-0 grid place-items-center rounded-2xl bg-[#aecbfa] text-[#1a4fa3] font-black text-sm overflow-hidden">
-            <img v-if="app.post?.authorAvatar" :src="app.post.authorAvatar" class="h-full w-full object-cover" />
-            <span v-else>{{ app.post?.company?.charAt(0) || 'J' }}</span>
-          </div>
-          <div>
-            <h4 class="font-display text-lg font-black text-on-surface hover:underline cursor-pointer" @click="$emit('openPost', app.post)">
-              {{ app.post?.title || app.title }}
-            </h4>
-            <p class="text-xs font-bold text-on-surface-variant mt-0.5">
-              {{ app.post?.company }} • Applied on {{ new Date(app.createdAt).toLocaleDateString() }}
-            </p>
-            <div v-if="app.status === 'ACCEPTED'" class="mt-2 text-xs font-semibold text-[#1f6c3b] bg-[#8fd99b]/15 px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5">
-            <!-- Heroicon component with matching text color -->
-            <CheckCircleIcon class="w-4 h-4 text-[#1f6c3b] shrink-0" />
-            <span>Congratulations! You got the job offer! Keep an eye on your inbox/messages.</span>
-            </div>
-
-            <div v-else-if="app.status === 'REJECTED'" class="mt-2 text-xs font-semibold text-red-700 bg-red-500/10 px-3 py-1.5 rounded-xl inline-block">
-              Thank you for applying. The employer has decided to pursue other applicants for this role.
+            <div v-else-if="app.status === 'INTERVIEW'" class="mt-2 text-xs font-semibold text-[#1a4fa3] bg-[#aecbfa]/15 px-3 py-1.5 rounded-xl inline-block">
+              Great news! The employer has invited you for an interview. Please check your messages.
             </div>
             <div v-else-if="app.status === 'REVIEWED'" class="mt-2 text-xs font-semibold text-[#1a4fa3] bg-[#aecbfa]/15 px-3 py-1.5 rounded-xl inline-block">
               Your application is currently under review by the hiring team.
@@ -622,16 +558,79 @@ function exportCV() {
             app.status === 'DECLINED' ? 'bg-amber-500/20 text-amber-700 ring-amber-500/35' :
             app.status === 'REJECTED' ? 'bg-red-500/15 text-red-500 ring-red-500/25' :
             app.status === 'REVIEWED' ? 'bg-primary/10 text-primary ring-primary/20' :
+            app.status === 'INTERVIEW' ? 'bg-[#aecbfa]/25 text-[#1a4fa3] ring-[#aecbfa]/35' :
             'bg-surface-container-highest text-on-surface-variant ring-on-surface/5'
           ]">
             {{ app.status }}
           </span>
+          <template v-if="app.status === 'ACCEPTED'">
+            <button
+              type="button"
+              class="rounded-full bg-emerald-500 hover:bg-emerald-600 px-3.5 py-1.5 text-xs font-black text-white transition cursor-pointer"
+              @click="respondToOffer(app.id, 'ACCEPT')"
+            >
+              Accept Offer
+            </button>
+            <button
+              type="button"
+              class="rounded-full bg-surface-container-high hover:bg-surface-container-highest px-3.5 py-1.5 text-xs font-black text-red-500 transition cursor-pointer"
+              @click="respondToOffer(app.id, 'DECLINE')"
+            >
+              Decline
+            </button>
+          </template>
           <button
+            v-else
             type="button"
-            class="rounded-full bg-surface-container-high hover:bg-surface-container-highest px-4 py-2 text-xs font-black text-on-surface transition"
+            class="rounded-full bg-surface-container-high hover:bg-surface-container-highest px-4 py-2 text-xs font-black text-on-surface transition cursor-pointer"
             @click="$emit('openPost', app.post)"
           >
             View Job
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Render saved jobs for student -->
+    <div v-if="activeTab === 'savedJobs' && !isEmployer" class="space-y-4">
+      
+      <div v-if="filteredGallery.length === 0" class="flex flex-col items-center justify-center py-16 text-center px-4 bg-surface-container-low rounded-3xl border border-on-surface/5">
+        <div class="grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary mb-3">
+          <component :is="emptyStateIcon" class="h-8 w-8 text-primary" />
+        </div>
+        <h3 class="font-display text-lg font-black text-on-surface">No saved jobs</h3>
+        <p class="mt-1 text-xs text-on-surface-variant/70 max-w-xs leading-relaxed">Bookmarked jobs will appear here for quick access.</p>
+      </div>
+
+      <div
+        v-else
+        v-for="item in filteredGallery"
+        :key="item.post?.id"
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-surface-container-low border border-on-surface/5 transition duration-150 hover:border-primary/20"
+      >
+        <div class="flex items-start gap-4">
+          <div class="h-12 w-12 shrink-0 grid place-items-center rounded-2xl bg-[#aecbfa] text-[#1a4fa3] font-black text-sm overflow-hidden">
+            <img v-if="item.post?.authorAvatar" :src="resolveUrl(item.post.authorAvatar)" class="h-full w-full object-cover" />
+            <span v-else>{{ item.post?.company?.charAt(0) || 'J' }}</span>
+          </div>
+          <div>
+            <h4 class="font-display text-lg font-black text-on-surface hover:underline cursor-pointer" @click="$emit('openPost', item.post)">
+              {{ item.post?.title || item.title }}
+            </h4>
+            <p class="text-xs font-bold text-on-surface-variant mt-0.5">
+              {{ item.post?.company || 'Employer' }} • {{ item.post?.location || 'Phnom Penh' }}
+            </p>
+            <div class="mt-2 text-xs font-semibold text-primary bg-primary/10 px-3 py-1.5 rounded-xl inline-block">
+              {{ item.post?.salary || 'Competitive Pay' }}
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 sm:self-center">
+          <button
+            type="button"
+            class="rounded-full bg-primary hover:opacity-90 px-5 py-2.5 text-xs font-black text-on-primary transition cursor-pointer"
+            @click="$emit('openPost', item.post)"
+          >
+            View & Apply
           </button>
         </div>
       </div>

@@ -8,6 +8,7 @@ const english_lang: AppLanguage = {
   sidebar: {
     home: 'Home',
     search: 'Search',
+    jobs: 'Jobs',
     messages: 'Message',
     notifications: 'Notification',
     create: 'Create',
@@ -267,6 +268,21 @@ const english_lang: AppLanguage = {
       eyebrow: 'Account settings',
       title: 'Manage your profile.',
       description: 'Update your name, email address, and password to keep your student account accurate and secure.',
+    },
+    'job-feed': {
+      eyebrow: 'Opportunities',
+      title: 'Job Feed',
+      description: 'Find student jobs, part-time work, and internships matched to your skills.',
+    },
+    'job-detail': {
+      eyebrow: 'Opportunity Details',
+      title: 'Job Details',
+      description: 'Learn about the role requirements and submit your application.',
+    },
+    'job-posting': {
+      eyebrow: 'Employer Hub',
+      title: 'Publish New Opportunity',
+      description: 'Post internships, part-time, or full-time roles and find matched students.',
     },
   },
   stories: {

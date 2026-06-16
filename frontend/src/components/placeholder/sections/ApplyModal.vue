@@ -14,7 +14,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import type { Post } from '@/types/profile'
 import { useAuthStore } from '@/stores/auth'
-import api from '@/lib/api'
+import api, { resolveUrl } from '@/lib/api'
 
 const props = withDefaults(defineProps<{
   post: Post
@@ -281,7 +281,7 @@ function handleSubmit() {
                     Apply using the resume uploaded in your student profile settings.
                   </p>
                   <a
-                    :href="'/api' + authStore.user.cvUrl"
+                    :href="resolveUrl(authStore.user.cvUrl)"
                     target="_blank"
                     class="inline-block mt-2 text-xs font-bold text-primary hover:underline"
                     @click.stop
