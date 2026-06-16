@@ -53,7 +53,7 @@
           @click.stop
       >
         <button
-            @click="flagPost"
+            @click="showMenu = false; showReportModal = true"
             class="w-full text-left px-4 py-2 text-xs font-black text-red-500 hover:bg-on-surface/5 flex items-center gap-2"
         >
           <FlagIcon class="h-4 w-4 shrink-0"/>
@@ -275,6 +275,13 @@
       </div>
     </div>
   </div>
+  
+  <ReportModal
+    v-if="showReportModal"
+    target-type="post"
+    :target-id="localPost.id"
+    @close="showReportModal = false"
+  />
 </div>
 </template>
 
@@ -296,6 +303,7 @@
   import type {Post, PostComment} from '@/types/profile'
   import {usePostStore} from '@/stores/posts'
   import {useAuthStore} from '@/stores/auth'
+  import ReportModal from './sections/ReportModal.vue'
 
   const props = defineProps<{
     post: Post
@@ -304,6 +312,8 @@
     userId?: string | null
     appliedPostIds?: Set<string | number>
   }>()
+
+  const showReportModal = ref(false)
 
   const emit = defineEmits<{
     (e: 'open', post: Post): void

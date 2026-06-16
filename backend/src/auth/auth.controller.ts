@@ -286,6 +286,20 @@ async verifyResetOtp(
     };
   }
 
+  @Post('google/login')
+  @HttpCode(HttpStatus.OK)
+  async googleLogin(
+    @Body() body: { token: string; role?: string },
+    @Req() req: Request,
+  ) {
+    const { user, token } = await this.authService.googleLogin(
+      body.token,
+      body.role,
+    );
+    req.session.userId = user.id;
+    (req.session as any).userRole = user.role;
+    return { message: 'Google login successful', user, token };
+  }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)

@@ -4,6 +4,7 @@ import {RouterView, useRoute} from 'vue-router'
 import Navbar from './components/navbar.vue'
 import Footer from './components/footer.vue'
 import ThemeModeToggle from './components/ThemeModeToggle.vue'
+import ToastContainer from './components/placeholder/ToastContainer.vue'
 
 const route = useRoute()
 const placeholderRouteNames = ['welcome', 'home', 'search', 'messages', 'notifications', 'create', 'profile', 'settings']
@@ -15,6 +16,7 @@ const showFooter = computed(() => !isPlaceholderRoute.value)
 
 <template>
   <ThemeModeToggle v-if="showGlobalThemeToggle"/>
+  <ToastContainer />
   <RouterView v-slot="{ Component }">
     <component :is="Component"/>
   </RouterView>

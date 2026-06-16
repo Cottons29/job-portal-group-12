@@ -26,6 +26,12 @@
             >
               {{ tag }}
             </span>
+            <span
+              v-if="job.matchScore !== undefined"
+              class="rounded-full bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-600 ring-1 ring-emerald-500/20"
+            >
+              ★ {{ job.matchScore }}% Match
+            </span>
           </div>
         </div>
 

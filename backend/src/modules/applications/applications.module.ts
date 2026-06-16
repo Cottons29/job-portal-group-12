@@ -8,11 +8,13 @@ import { ApplicationsController } from './applications.controller';
 import { ApplicationsService } from './applications.service';
 
 import { NotificationsModule } from '../../notifications/notifications.module';
+import { MessagesModule } from '../messages/messages.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([JobApplication, PostEntity, User]),
     NotificationsModule,
+    MessagesModule,
   ],
   controllers: [ApplicationsController],
   providers: [ApplicationsService],

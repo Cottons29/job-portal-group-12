@@ -11,6 +11,7 @@ import * as path from 'path';
 
 import { SheepFileService } from '../../common/sheep-file.service';
 import { User } from './user.entity';
+import { Company } from '../company/company.entity';
 import { UserRole } from '../../common/enums/user-role.enum';
 import { PostBookmark } from '../posts/post-bookmark.entity';
 import { PostEntity } from '../posts/post.entity';
@@ -153,6 +154,7 @@ export class ProfileService {
     
     // We only want to update specific fields to avoid overwriting password etc if 'data' is too broad
     const allowedFields = [
+      'companyId',
       'companyName',
       'industry',
       'address',
@@ -167,6 +169,21 @@ export class ProfileService {
     for (const field of allowedFields) {
       if (data[field] !== undefined) {
         user[field] = data[field];
+      }
+    }
+
+    if (data.companyId) {
+      const company = await this.userRepository.manager.findOne(Company, { where: { id: data.companyId } });
+      if (company) {
+        user.companyId = company.id;
+        user.companyName = company.name;
+        if (company.description) user.companyDescription = company.description;
+        if (company.industry) user.industry = company.industry;
+        if (company.address) user.address = company.address;
+        if (company.website) user.website = company.website;
+        if (company.logoUrl && !logoFile) {
+          user.logoUrl = company.logoUrl;
+        }
       }
     }
 

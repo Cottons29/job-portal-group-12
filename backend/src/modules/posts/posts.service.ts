@@ -518,4 +518,64 @@ export class PostsService {
 
     return bundle;
   }
+
+  async findRecommendations(userId: string) {
+    const student = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!student) {
+      throw new NotFoundException('Student not found');
+    }
+
+    const jobs = await this.postsRepository.find({
+      where: { isJob: true, status: 'approved' },
+      relations: ['author'],
+      order: { createdAt: 'DESC' },
+    });
+
+    const studentSkills = student.skills || [];
+    const studentMajor = student.major || '';
+    const studentJobType = student.jobType || '';
+
+    const scoredJobs = jobs.map((job) => {
+      let score = 0;
+      const titleLower = (job.title || '').toLowerCase();
+      const contentLower = (job.content || '').toLowerCase();
+
+      if (studentMajor && (titleLower.includes(studentMajor.toLowerCase()) || contentLower.includes(studentMajor.toLowerCase()))) {
+        score += 30;
+      }
+
+      let matchedSkillsCount = 0;
+      studentSkills.forEach((skill) => {
+        if (skill && (titleLower.includes(skill.toLowerCase()) || contentLower.includes(skill.toLowerCase()))) {
+          matchedSkillsCount++;
+        }
+      });
+      score += Math.min(matchedSkillsCount * 10, 50);
+
+      if (studentJobType && job.jobType && (titleLower.includes(studentJobType.toLowerCase()) || studentJobType.toLowerCase() === job.jobType.toLowerCase())) {
+        score += 20;
+      }
+
+      const daysOld = (Date.now() - new Date(job.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+      const recencyBoost = Math.max(10 - daysOld, 0);
+      score += recencyBoost;
+
+      return {
+        job,
+        score: Math.round(score),
+      };
+    });
+
+    scoredJobs.sort((a, b) => b.score - a.score);
+
+    const jobIds = scoredJobs.map((sj) => sj.job.id);
+    const engagement = await this.loadEngagement(jobIds, userId);
+
+    return {
+      recommendations: scoredJobs.map((sj) => ({
+        ...this.serializePost(sj.job, engagement),
+        matchScore: sj.score,
+      })),
+    };
+  }
 }

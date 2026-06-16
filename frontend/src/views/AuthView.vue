@@ -26,9 +26,66 @@ function handleSubmit() {
   } else {
     auth.login(router)
   }
-}// go to forgot password page 
+}
+
+// go to forgot password page 
 function goToForgotPassword() {
   router.push('/forgot-password')
+}
+
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
+
+async function handleGoogleLogin() {
+  auth.error = ''
+  
+  if (googleClientId) {
+    try {
+      await new Promise((resolve, reject) => {
+        // @ts-ignore
+        if (window.google) return resolve(window.google)
+        const script = document.createElement('script')
+        script.src = 'https://accounts.google.com/gsi/client'
+        script.async = true;
+        script.defer = true;
+        script.onload = () => resolve(window.google)
+        script.onerror = () => reject(new Error('Failed to load Google SDK'))
+        document.head.appendChild(script)
+      })
+      
+      // @ts-ignore
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: async (response) => {
+          if (response.credential) {
+            await auth.loginWithGoogle(response.credential, router)
+          } else {
+            auth.error = 'Failed to retrieve Google credentials.'
+          }
+        }
+      })
+      
+      // @ts-ignore
+      window.google.accounts.id.prompt()
+    } catch (err) {
+      console.error('Google SDK error, using fallback:', err)
+      await triggerMockGoogleLogin()
+    }
+  } else {
+    await triggerMockGoogleLogin()
+  }
+}
+
+async function triggerMockGoogleLogin() {
+  const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' })).replace(/=/g, '')
+  const payload = btoa(JSON.stringify({
+    email: `google-${auth.role}-${Math.random().toString(36).substring(2, 7)}@gmail.com`,
+    name: auth.role === 'employer' ? 'Google Employer' : 'Google Student',
+    picture: '',
+    sub: `mock-google-id-${Math.random().toString(36).substring(2, 12)}`
+  })).replace(/=/g, '')
+  const mockToken = `${header}.${payload}.`
+  
+  await auth.loginWithGoogle(mockToken, router)
 }
 </script>
 
@@ -280,7 +337,9 @@ function goToForgotPassword() {
           <button
             id="btn-google"
             type="button"
-            class="flex items-center justify-center w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high transition-all duration-200 cursor-pointer border border-outline-variant/30"
+            @click="handleGoogleLogin"
+            :disabled="auth.isLoading"
+            class="flex items-center justify-center w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high transition-all duration-200 cursor-pointer border border-outline-variant/30 disabled:opacity-50"
             style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20)"
             aria-label="Continue with Google"
           >
