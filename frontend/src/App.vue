@@ -15,9 +15,6 @@ const showFooter = computed(() => !isPlaceholderRoute.value)
 
 
 
-
-
-
 <template>
   <ThemeModeToggle v-if="showGlobalThemeToggle"/>
   <ToastContainer />
