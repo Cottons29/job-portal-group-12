@@ -1,0 +1,10 @@
+{
+  "name": "firststep-presentation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FirstStep — Group 12 project presentation built with reveal.js",
+  "scripts": {
+    "start": "npx --yes serve -l 4321 .",
+    "serve": "npx --yes serve -l 4321 ."
+  }
+}

@@ -29,5 +29,15 @@ services:
     ports:
       - "3082:80"
 
+  presentation:
+    build:
+      context: ./presentation
+      dockerfile: Dockerfile
+    image: ghcr.io/cottons29/job-portal-group-12/presentation:latest
+    container_name: job_portal_presentation
+    restart: always
+    ports:
+      - "3083:80"
+
 volumes:
   postgres_data:

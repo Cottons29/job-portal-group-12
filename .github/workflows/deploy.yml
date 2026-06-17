@@ -17,6 +17,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Detect changed paths
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'data_transfer/**'
+            frontend:
+              - 'frontend/**'
+              - 'data_transfer/**'
+            progress_book:
+              - 'progress_book/**'
+            presentation:
+              - 'presentation/**'
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -31,6 +47,7 @@ jobs:
         run: echo "IMAGE_REPOSITORY=$(printf '%s' "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
       - name: Build and push backend image
+        if: steps.changes.outputs.backend == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -40,6 +57,7 @@ jobs:
           tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}/backend:latest
 
       - name: Build and push frontend image
+        if: steps.changes.outputs.frontend == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -51,6 +69,7 @@ jobs:
           tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}/frontend:latest
 
       - name: Build and push progress_book image
+        if: steps.changes.outputs.progress_book == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./progress_book
@@ -58,6 +77,16 @@ jobs:
           push: true
           platforms: linux/arm64
           tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}/progress_book:latest
+
+      - name: Build and push presentation image
+        if: steps.changes.outputs.presentation == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./presentation
+          file: ./presentation/Dockerfile
+          push: true
+          platforms: linux/arm64
+          tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}/presentation:latest
 
       - name: Deploy to server with SSH
         uses: appleboy/ssh-action@v1.2.5
