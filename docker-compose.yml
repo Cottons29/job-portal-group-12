@@ -19,5 +19,15 @@ services:
     depends_on:
       - backend
 
+  progress_book:
+    build:
+      context: ./progress_book
+      dockerfile: Dockerfile
+    image: ghcr.io/cottons29/job-portal-group-12/progress_book:latest
+    container_name: job_portal_progress_book
+    restart: always
+    ports:
+      - "3082:80"
+
 volumes:
   postgres_data:

@@ -49,6 +49,16 @@ jobs:
           build-args: |
             VITE_API_URL=${{ secrets.FRONTEND_API_URL }}
           tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}/frontend:latest
+
+      - name: Build and push progress_book image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./progress_book
+          file: ./progress_book/Dockerfile
+          push: true
+          platforms: linux/arm64
+          tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}/progress_book:latest
+
       - name: Deploy to server with SSH
         uses: appleboy/ssh-action@v1.2.5
         with:
