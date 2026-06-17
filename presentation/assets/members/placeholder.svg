@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#282a2f"/>
+      <stop offset="1" stop-color="#1d2024"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#g)"/>
+  <circle cx="120" cy="96" r="44" fill="#44474e"/>
+  <path d="M40 214c0-44 36-72 80-72s80 28 80 72z" fill="#44474e"/>
+  <text x="120" y="232" text-anchor="middle" font-family="Roboto, sans-serif" font-size="16" fill="#8e9099">Add photo</text>
+</svg>

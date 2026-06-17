@@ -1,0 +1,671 @@
+/* ============================================================
+   FirstStep · Group 12 — Material 3 (Material You) reveal.js theme
+   Mirrors the website: dark M3 surfaces, tonal elevation,
+   large rounded shapes, expressive primary/secondary/tertiary.
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Flex:opsz,wght@8..144,400..900&display=swap");
+
+:root {
+    /* ---- M3 dark color tokens (key colors) ---- */
+    --md-primary: #9de81c; /* primary (tonal, dark scheme) */
+    --md-on-primary: #06305f;
+    --md-primary-container: #244b7a;
+    --md-on-primary-container: #d6e3ff;
+
+    --md-secondary: #f5bd4f; /* warm amber */
+    --md-secondary-container: #5b4300;
+    --md-on-secondary-container: #ffdf9e;
+
+    --md-tertiary: #e6e3ec; /* purple */
+    --md-tertiary-container: #4a2d77;
+    --md-on-tertiary-container: #ecdcff;
+
+    --md-green: #7ddc94;
+
+    /* Neutral surfaces with tonal elevation (dark) */
+    --md-surface: #111318;
+    --md-surface-dim: #111318;
+    --md-surface-bright: #373a40;
+    --md-sc-lowest: #0c0e13;
+    --md-sc-low: #191c20;
+    --md-sc: #1d2024;
+    --md-sc-high: #282a2f;
+    --md-sc-highest: #33353a;
+
+    --md-on-surface: #e2e2e9;
+    --md-on-surface-variant: #c4c6cf;
+    --md-outline: #8e9099;
+    --md-outline-variant: #44474e;
+
+    /* M3 shape scale */
+    --md-shape-sm: 12px;
+    --md-shape-md: 16px;
+    --md-shape-lg: 24px;
+    --md-shape-xl: 28px;
+
+    /* M3 elevation (dark uses shadow + tonal surface) */
+    --md-elev-1: 0 1px 2px rgba(0, 0, 0, .5), 0 1px 3px 1px rgba(0, 0, 0, .30);
+    --md-elev-2: 0 1px 2px rgba(0, 0, 0, .55), 0 2px 6px 2px rgba(0, 0, 0, .30);
+    --md-elev-3: 0 4px 8px 3px rgba(0, 0, 0, .30), 0 1px 3px rgba(0, 0, 0, .55);
+}
+
+/* ---------------------------------------------------------- */
+.reveal {
+    font-family: "Roboto Flex", "Roboto", "Inter", system-ui, sans-serif;
+    color: var(--md-on-surface);
+    font-size: 30px;
+    font-weight: 400;
+}
+
+.reveal .slides {
+    text-align: left;
+}
+
+.reveal .slides section {
+    height: 100%;
+}
+
+.reveal .backgrounds {
+    background: var(--md-surface);
+}
+
+/* M3 type scale */
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    color: #fff;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 800;
+    margin-bottom: 0.4em;
+    line-height: 1.12;
+}
+
+.reveal h1 {
+    font-size: 2.4em;
+}
+
+.reveal h2 {
+    font-size: 1.65em;
+    margin-bottom: 1.5em;
+}
+
+.reveal h3 {
+    font-size: 1.2em;
+}
+
+/* Section title — M3 headline with tonal accent underline */
+.reveal h2.title-bar {
+    display: inline-block;
+    padding-bottom: 0.1em;
+    border-bottom: 4px solid var(--md-primary);
+}
+
+/* Lists */
+.reveal ul {
+    display: block;
+    margin-left: 1.1em;
+}
+
+.reveal li {
+    margin: 0.3em 0;
+    line-height: 1.36;
+    color: var(--md-on-surface);
+}
+
+.reveal strong {
+    color: #fff;
+    font-weight: 700;
+}
+
+.reveal .muted {
+    color: var(--md-on-surface-variant);
+}
+
+.reveal code {
+    color: var(--md-secondary);
+    background: var(--md-sc-low);
+    padding: 1px 7px;
+    border-radius: 6px;
+}
+
+/* M3 "assist chip" eyebrow / kicker */
+.reveal .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.5em;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--md-primary);
+    background: color-mix(in srgb, var(--md-primary) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--md-primary) 38%, transparent);
+    border-radius: 999px;
+    padding: 7px 16px;
+    margin-bottom: 0.7em;
+}
+
+/* Footer (M3 label-small) */
+.reveal .footer {
+    position: absolute;
+    bottom: 14px;
+    left: 26px;
+    font-size: 0.46em;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--md-on-surface-variant);
+}
+
+.reveal .footer::before {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 3px;
+    background: var(--md-primary);
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Two-column layout */
+.cols {
+    display: flex;
+    gap: 36px;
+    align-items: center;
+}
+
+.cols .col {
+    flex: 1;
+    min-width: 0;
+}
+
+.cols .col-shot {
+    flex: 1.05;
+}
+
+/* ---- Screenshot frame: M3 large rounded surface ---- */
+.shot {
+    width: 100%;
+    border-radius: var(--md-shape-lg);
+    border: 1px solid var(--md-outline-variant);
+    box-shadow: var(--md-elev-3);
+}
+
+.shot.tall {
+    max-height: 600px;
+    width: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Phone-ish framed device for theming pair */
+.device {
+    border-radius: var(--md-shape-lg);
+    overflow: hidden;
+    border: 1px solid var(--md-outline-variant);
+    box-shadow: var(--md-elev-2);
+}
+
+.device img {
+    display: block;
+    width: 100%;
+}
+
+.device .cap {
+    font-size: 0.5em;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--md-on-surface-variant);
+    background: var(--md-sc);
+    padding: 8px 14px;
+}
+
+/* ---- M3 chips ---- */
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 0.4em;
+}
+
+.chip {
+    font-size: 0.58em;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--md-sc-high);
+    border: 1px solid var(--md-outline-variant);
+    color: var(--md-on-surface);
+}
+
+.chip.b {
+    background: var(--md-primary-container);
+    border-color: transparent;
+    color: var(--md-on-primary-container);
+}
+
+.chip.a {
+    background: var(--md-secondary-container);
+    border-color: transparent;
+    color: var(--md-on-secondary-container);
+}
+
+.chip.p {
+    background: var(--md-tertiary-container);
+    border-color: transparent;
+    color: var(--md-on-tertiary-container);
+}
+
+.chip.g {
+    background: #0f3d23;
+    border-color: transparent;
+    color: var(--md-green);
+}
+
+/* ---- M3 filled cards (with state layer on hover) ---- */
+.grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.card {
+    position: relative;
+    background: var(--md-sc);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--md-shape-lg);
+    padding: 20px 22px;
+    transition: box-shadow .2s ease, transform .2s ease, background .2s ease;
+    min-height: 4em;
+}
+
+.card:hover {
+    box-shadow: var(--md-elev-2);
+    background: var(--md-sc-high);
+}
+
+.card h3 {
+    font-size: 0.92em;
+    margin-bottom: 1.05em;
+    color: #fff;
+}
+
+.card p, .card ul {
+    font-size: 0.62em;
+    color: var(--md-on-surface-variant);
+    margin: 0;
+}
+
+.card .ico {
+    font-size: 1.15em;
+    margin-bottom: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--md-shape-md);
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+}
+
+.card.t .ico {
+    background: var(--md-tertiary-container);
+    color: var(--md-on-tertiary-container);
+}
+
+.card.s .ico {
+    background: var(--md-secondary-container);
+    color: var(--md-on-secondary-container);
+}
+
+.card.g .ico {
+    background: #0f3d23;
+    color: var(--md-green);
+}
+
+/* Title slide */
+.title-slide {
+    text-align: center;
+}
+
+.title-slide .brand {
+    font-size: 3.7em;
+    font-weight: 900;
+    letter-spacing: -1px;
+    background: var(--md-tertiary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.7em;
+    margin-top: 0.7em;
+}
+
+.title-slide .tagline {
+    color: var(--md-on-surface-variant);
+    font-size: 1.0em;
+    margin-top: 0.2em;
+}
+
+/* Stat numbers (M3 display) */
+.stats {
+    display: flex;
+    gap: 40px;
+}
+
+.stat .num {
+    font-size: 1.8em;
+    font-weight: 900;
+    color: var(--md-primary);
+}
+
+.stat .lbl {
+    font-size: 0.5em;
+    color: var(--md-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* code blocks */
+.reveal pre {
+    width: 100%;
+    box-shadow: none;
+    font-size: 0.5em;
+}
+
+.reveal pre code {
+    border-radius: var(--md-shape-md);
+    padding: 18px;
+    max-height: 520px;
+    background: var(--md-sc-lowest);
+    border: 1px solid var(--md-outline-variant);
+}
+
+/* helpers */
+.reveal .small {
+    font-size: 0.68em;
+}
+
+.reveal .center {
+    text-align: center;
+}
+
+.reveal em.note {
+    color: var(--md-secondary);
+    font-style: normal;
+}
+
+/* M3 progress bar + controls tint */
+.reveal .progress {
+    color: var(--md-primary);
+    height: 5px;
+}
+
+.reveal .controls {
+    color: var(--md-primary);
+}
+
+.reveal .slide-number {
+    background: color-mix(in srgb, var(--md-sc) 75%, transparent);
+    color: var(--md-on-surface-variant);
+    border-radius: 8px;
+}
+
+/* M3 segmented buttons (used on theming slide) */
+.segmented {
+    display: inline-flex;
+    border: 1px solid var(--md-outline);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.segmented span {
+    font-size: 0.55em;
+    font-weight: 600;
+    padding: 8px 18px;
+    color: var(--md-on-surface-variant);
+}
+
+.segmented span.on {
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+}
+
+/* ---- Architecture diagram (How It Fits Together) ---- */
+.arch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 1.1em;
+}
+
+.arch-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* A node: filled tonal pill card with a leading accent dot */
+.arch-node {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    --accent: var(--md-outline);
+    background: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 70%, #000);
+    border-radius: var(--md-shape-md);
+    padding: 14px 20px;
+    min-width: 230px;
+    box-shadow: var(--md-elev-1);
+    transition: box-shadow .2s ease, transform .2s ease, background .2s ease;
+}
+
+.arch-node:hover {
+    box-shadow: var(--md-elev-3);
+    transform: translateY(-2px);
+    background: color-mix(in srgb, var(--accent) 88%, #fff);
+}
+
+.arch-node .dot {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .35);
+    box-shadow: 0 0 0 5px rgba(0, 0, 0, .12);
+}
+
+.arch-node .nt h3 {
+    font-size: 0.78em;
+    margin: 0 0 0.15em;
+    color: #0a0a0a;
+    line-height: 1.1;
+}
+
+.arch-node .nt p {
+    font-size: 0.52em;
+    margin: 0;
+    color: rgba(0, 0, 0, .7);
+}
+
+/* Accent colors per tier (fills the whole node) */
+.arch-node.primary { --accent: var(--md-primary); }
+.arch-node.blue    { --accent: #6aa6ff; }
+.arch-node.green   { --accent: var(--md-green); }
+.arch-node.amber   { --accent: var(--md-secondary); }
+.arch-node.purple  { --accent: #c79dff; }
+
+/* Connector with label + arrow line */
+.arch-link {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 110px;
+    padding: 0 4px;
+}
+
+.arch-link .lbl {
+    font-size: 0.42em;
+    font-weight: 600;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--md-on-surface-variant);
+    margin-bottom: 6px;
+    white-space: nowrap;
+}
+
+.arch-link .line {
+    position: relative;
+    width: 100%;
+    height: 2px;
+    background: var(--md-outline);
+}
+
+.arch-link .line::after {
+    content: "";
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-style: solid;
+    border-width: 5px 0 5px 8px;
+    border-color: transparent transparent transparent var(--md-outline);
+}
+
+/* Fan-out connector (one source → three services) */
+.arch-link.fan .line {
+    background: linear-gradient(90deg, var(--md-outline), var(--md-outline-variant));
+}
+
+/* Feature row with leading M3 icon */
+.frow {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin: 0.5em 0;
+}
+
+.frow .fic {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--md-shape-md);
+    background: var(--md-sc-high);
+    font-size: 0.8em;
+}
+
+.frow .ft {
+    font-size: 0.72em;
+    line-height: 1.3;
+}
+
+.frow .ft b {
+    color: #fff;
+}
+
+/* ---- Meet the Team: members with distinct Material 3 shapes ---- */
+.members {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 26px 34px;
+    margin-top: 0.9em;
+}
+
+.member {
+    margin: 0;
+    width: 150px;
+    text-align: center;
+    --accent: var(--md-primary);
+}
+
+/* Photo holder — also the placeholder when no image is set */
+.member .m-photo {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 1.5em 0;
+    background: var(--md-sc-high);
+    box-shadow: var(--md-elev-2);
+    transition: transform .2s ease, box-shadow .2s ease;
+    /* some radius on the holder + clip the image to it */
+    border-radius: var(--md-shape-lg);
+    overflow: hidden;
+    /* tonal accent ring drawn behind via outline */
+    /*outline: 4px solid color-mix(in srgb, var(--accent) 70%, transparent);*/
+    outline-offset: 4px;
+}
+
+.member:hover .m-photo {
+    transform: translateY(-4px);
+    box-shadow: var(--md-elev-3);
+}
+
+.member .m-photo img {
+    scale: 1.5;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Material 3 expressive shapes — one per member (corners softened with some radius) */
+.shape-circle   { border-radius: 50%; }
+.shape-rounded  { border-radius: var(--md-shape-xl); }
+.shape-blob     { border-radius: 62% 38% 47% 53% / 55% 47% 53% 45%; }
+.shape-hexagon  { clip-path: polygon(20.5% 12.3%, 34% 4%, 66% 4%, 79.5% 12.3%, 95.5% 41.7%, 95.5% 58.3%, 79.5% 87.7%, 66% 96%, 34% 96%, 20.5% 87.7%, 4.5% 58.3%, 4.5% 41.7%); outline: none; }
+.shape-diamond  { clip-path: polygon(41% 9%, 59% 9%, 91% 41%, 91% 59%, 59% 91%, 41% 91%, 9% 59%, 9% 41%); outline: none; }
+.shape-pentagon { clip-path: polygon(41% 6.8%, 59% 6.8%, 91% 31.2%, 96.8% 49.2%, 85.2% 88.8%, 70.5% 100%, 29.5% 100%, 14.8% 88.8%, 3.2% 49.2%, 9% 31.2%); outline: none; }
+.shape-octagon  { clip-path: polygon(24.6% 5.4%, 37.2% 0%, 62.8% 0%, 75.4% 5.4%, 94.6% 24.6%, 100% 37.2%, 100% 62.8%, 94.6% 75.4%, 75.4% 94.6%, 62.8% 100%, 37.2% 100%, 24.6% 94.6%, 5.4% 75.4%, 0% 62.8%, 0% 37.2%, 5.4% 24.6%); outline: none; }
+
+/* Clipped shapes: drop the inset so the image fills the whole shape */
+.member .m-photo.shape-hexagon,
+.member .m-photo.shape-diamond,
+.member .m-photo.shape-pentagon,
+.member .m-photo.shape-octagon {
+    background: color-mix(in srgb, var(--accent) 28%, var(--md-sc-high));
+    padding: 0;
+}
+
+.member figcaption {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.member .m-name {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.62em;
+}
+
+.member .m-role {
+    color: var(--md-on-surface-variant);
+    font-size: 0.46em;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+/* Accent rotation across the 7 members */
+.member:nth-child(1) { --accent: var(--md-primary); }
+.member:nth-child(2) { --accent: #6aa6ff; }
+.member:nth-child(3) { --accent: var(--md-green); }
+.member:nth-child(4) { --accent: var(--md-secondary); }
+.member:nth-child(5) { --accent: #c79dff; }
+.member:nth-child(6) { --accent: var(--md-tertiary); }
+.member:nth-child(7) { --accent: #ff8a65; }

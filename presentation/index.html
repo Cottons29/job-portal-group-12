@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>FirstStep — Student Part-Time Job Portal · Group 12</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css"/>
+    <link rel="stylesheet" href="assets/custom.css"/>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+
+        <!-- 1 · TITLE -->
+        <section>
+            <div class="title-slide">
+
+                <div class="brand">FirstStep</div>
+                <h3 class="muted" style="font-weight:500;margin-top:0.1em;">A Student Part-Time Job Portal</h3>
+                <p class="tagline">Connecting students with part-time jobs, employers, and a community feed.</p>
+                <div class="chips center" style="justify-content:center;margin-top:1.2em;">
+                    <span class="chip b">Vue 3</span>
+                    <span class="chip b">NestJS</span>
+                    <span class="chip g">PostgreSQL</span>
+                    <span class="chip a">Rust</span>
+                    <span class="chip p">Docker</span>
+                </div>
+                <p class="small muted" style="margin-top:1.4em;">Group 12</p>
+            </div>
+            <aside class="notes">A platform where students build a profile, discover part-time work, and engage in a
+                social feed, while employers post and get verified, and admins moderate.
+            </aside>
+        </section>
+
+        <!-- 2 · MEET THE TEAM -->
+        <section>
+            <h2 class="title-bar">Meet the Team</h2>
+            <div class="members">
+                <figure class="member">
+                    <div class="m-photo shape-circle">
+                        <img src="assets/members/sothiphak.jpeg" alt="Member 1 photo"/>
+                    </div>
+                    <figcaption>
+                        <span class="m-name">Sothiphak</span>
+                    </figcaption>
+                </figure>
+                <figure class="member">
+                    <div class="m-photo shape-rounded">
+                        <img src="assets/members/lypheng.png" alt="Member 2 photo"/>
+                    </div>
+                    <figcaption>
+                        <span class="m-name">Lypheng</span>
+                    </figcaption>
+                </figure>
+                <figure class="member">
+                    <div class="m-photo shape-rounded">
+                        <img src="assets/members/lyhour.jpeg" alt="Member 3 photo"/>
+                    </div>
+                    <figcaption>
+                        <span class="m-name">Lyhor</span>
+                    </figcaption>
+                </figure>
+                <figure class="member">
+                    <div class="m-photo shape-rounded">
+                        <img src="assets/members/placeholder.svg" alt="Member 4 photo"/>
+                    </div>
+                    <figcaption>
+                        <span class="m-name">Mengkung</span>
+                    </figcaption>
+                </figure>
+                <figure class="member">
+                    <div class="m-photo shape-rounded">
+                        <img src="https://pbs.twimg.com/media/HGCjjcKa8AIdyUo.jpg" alt="Member 5 photo"/>
+                    </div>
+                    <figcaption>
+                        <span class="m-name">Claude</span>
+                    </figcaption>
+                </figure>
+                <figure class="member">
+                    <div class="m-photo shape-rounded">
+                        <img src="https://c8.alamy.com/comp/2R1CG61/chatgpt-black-logo-on-white-background-vector-illustration-2R1CG61.jpg" alt="Member 6 photo"/>
+                    </div>
+                    <figcaption>
+                        <span class="m-name">ChatGpt</span>
+                    </figcaption>
+                </figure>
+                <figure class="member">
+                    <div class="m-photo shape-rounded">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2IjbfpPVzpRug-6RUaytQVw-lyEaIJrkE9g&s" alt="Member 7 photo"/>
+                    </div>
+                    <figcaption>
+                        <span class="m-name">Gemini</span>
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">Our seven-person team. Photo placeholders use distinct Material 3 expressive
+                shapes; replace the placeholder image with each member's real photo.
+            </aside>
+        </section>
+
+        <!-- 3 · AGENDA -->
+        <section>
+
+            <h2 class="title-bar">Agenda</h2>
+            <div class="grid3" style="margin-top:0.6em;">
+                <div class="card">
+                    <h3>Why & What</h3>
+                    <p>Problem, solution, roles and key features.</p></div>
+                <div class="card">
+                    <h3>The Product</h3>
+                    <p>Live UI: landing, auth, student, feed, employer, admin.</p></div>
+                <div class="card">
+                    <h3>Under the Hood</h3>
+                    <p>Architecture, tech stack, security, file service, data model.</p></div>
+                <div class="card">
+                    <h3>Trust & Safety</h3>
+                    <p>Verification, privacy, terms, moderation.</p></div>
+                <div class="card">
+                    <h3>Demo</h3>
+                    <p>End-to-end walkthrough of the core flow.</p></div>
+                <div class="card">
+                    <h3>Wrap-up</h3>
+                    <p>Challenges, learnings and roadmap.</p></div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 3 · THE PROBLEM -->
+        <section>
+
+            <h2 class="title-bar">The Problem</h2>
+            <ul>
+                <li>Students struggle to find <strong>legitimate, flexible</strong> part-time jobs that fit study
+                    schedules.
+                </li>
+                <li>Listings are <strong>scattered</strong> and hard to filter by skills, availability, or salary.</li>
+                <li>Trust is low — <strong>fake employers and scams</strong> are common.</li>
+                <li>No single place to manage a <strong>profile, CV, applications, and updates</strong>.</li>
+            </ul>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">Frame the pain points from both the student's and the employer's perspective. This sets
+                up why our platform exists.
+            </aside>
+        </section>
+
+        <!-- 4 · OUR SOLUTION -->
+        <section>
+
+            <h2 class="title-bar">Our Solution — “FirstStep”</h2>
+            <ul>
+                <li><strong>One portal</strong> for students, employers, and admins.</li>
+                <li>Student profiles with <strong>CV upload</strong> and skills.</li>
+                <li>Employer profiles with <strong>verification</strong> (anti-scam).</li>
+                <li><strong>Admin moderation</strong> for trust and safety.</li>
+                <li>A <strong>social-style feed</strong> (posts &amp; stories) to build community.</li>
+            </ul>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">Emphasize the three roles and the trust layer. The social feed differentiates us from a
+                plain job board.
+            </aside>
+        </section>
+
+        <!-- 5 · LANDING SCREENSHOT -->
+        <section>
+
+            <h2 class="title-bar">First Impression</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li>Clear hero: <em class="note">“Your first career step”</em></li>
+                        <li>Instant job search + category chips.</li>
+                        <li>Featured matches &amp; live campus role gaps.</li>
+                        <li>Trusted partner network for credibility.</li>
+                    </ul>
+                    <div class="stats" style="margin-top:0.8em; margin-left: 1.5em">
+                        <div class="stat">
+                            <div class="num">50+</div>
+                            <div class="lbl">Businesses</div>
+                        </div>
+                        <div class="stat">
+                            <div class="num">1.2k+</div>
+                            <div class="lbl">Students</div>
+                        </div>
+                        <div class="stat">
+                            <div class="num">200+</div>
+                            <div class="lbl">Active jobs</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-shot">
+                    <img class="shot" src="assets/landing-hero.png" alt="FirstStep landing page"/>
+                </div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 6 · THREE ROLES -->
+        <section>
+
+            <h2 class="title-bar">Three Roles</h2>
+            <div class="grid3" style="margin-top:0.6em;">
+                <div class="card">
+                    <h3>Student</h3>
+                    <p>Builds a profile, uploads a CV, discovers jobs, applies, and posts.</p></div>
+                <div class="card">
+                    <h3>Employer</h3>
+                    <p>Creates a company profile, gets verified, posts jobs, reviews applicants.</p></div>
+                <div class="card">
+                    <h3>Admin</h3>
+                    <p>Verifies employers, moderates content, and handles disputes.</p></div>
+            </div>
+            <p class="small muted" style="margin-top:0.8em;">Role selection happens at registration and drives the
+                onboarding flow.</p>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 7 · KEY FEATURES -->
+        <section>
+
+            <h2 class="title-bar">Key Features</h2>
+            <div class="grid2">
+                <div class="card"><h3>- Secure Auth</h3>
+                    <p>Password + passkeys (WebAuthn) + OTP email.</p></div>
+                <div class="card"><h3>- Student Onboarding</h3>
+                    <p>University, major, skills, CV, salary.</p></div>
+                <div class="card"><h3>- Employer Verification</h3>
+                    <p>Profiles reviewed by admins before going live.</p></div>
+                <div class="card"><h3>- Social Feed</h3>
+                    <p>Posts, stories, follows, messages.</p></div>
+                <div class="card"><h3>- File Service</h3>
+                    <p>CVs, logos and media via a Rust microservice.</p></div>
+                <div class="card"><h3>- Moderation</h3>
+                    <p>Admin dashboard for trust &amp; safety.</p></div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">The "menu" slide — we'll go deeper on auth, the feed, employer verification, and
+                architecture next.
+            </aside>
+        </section>
+
+        <!-- 8 · AUTH SCREENSHOT -->
+        <section>
+
+            <h2 class="title-bar">One Door, Two Audiences</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li>Unified <strong>Log In / Sign Up</strong> screen.</li>
+                        <li>Pick a role: <strong>Student</strong> or <strong>Employer</strong>.</li>
+                        <li>Phone + password, with “forgot password” recovery.</li>
+                        <li>Light / dark / system theme switch.</li>
+                    </ul>
+                </div>
+                <div class="col col-shot">
+                    <img class="shot" src="assets/auth.png" alt="FirstStep authentication screen"/>
+                </div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 9 · SYSTEM ARCHITECTURE -->
+        <section>
+
+            <h2 class="title-bar">System Architecture</h2>
+            <ul>
+                <li><strong>Frontend:</strong> Vue 3 + Vite + Pinia + Vue Router + Vue I18n</li>
+                <li><strong>Backend:</strong> NestJS (TypeScript), modular structure</li>
+                <li><strong>Database:</strong> PostgreSQL via TypeORM</li>
+                <li><strong>File Service:</strong> standalone Rust (Axum) microservice</li>
+                <li><strong>Delivery:</strong> Docker / docker-compose, images on GHCR</li>
+            </ul>
+            <p class="small muted">A monorepo: <code>backend</code>, <code>frontend</code>, the Rust
+                <code>file_service</code>, and shared <code>data_transfer</code> DTOs.</p>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 10 · ARCHITECTURE DIAGRAM -->
+        <section>
+
+            <h2 class="title-bar">How It Fits Together</h2>
+            <div class="arch">
+                <!-- Client tier -->
+                <div class="arch-node primary">
+                    <span class="dot"></span>
+                    <div class="nt">
+                        <h3>Vue 3 SPA</h3>
+                        <p>Browser client</p>
+                    </div>
+                </div>
+
+                <div class="arch-link">
+                    <span class="lbl">REST / WebSocket</span>
+                    <span class="line"></span>
+                </div>
+
+                <!-- API tier -->
+                <div class="arch-node blue">
+                    <span class="dot"></span>
+                    <div class="nt">
+                        <h3>NestJS API</h3>
+                        <p>Socket.IO gateway</p>
+                    </div>
+                </div>
+
+                <div class="arch-link fan">
+                    <span class="line"></span>
+                </div>
+
+                <!-- Backing services -->
+                <div class="arch-col">
+                    <div class="arch-node green">
+                        <span class="dot"></span>
+                        <div class="nt">
+                            <h3>PostgreSQL</h3>
+                            <p>TypeORM</p>
+                        </div>
+                    </div>
+                    <div class="arch-node amber">
+                        <span class="dot"></span>
+                        <div class="nt">
+                            <h3>Rust File Service</h3>
+                            <p>API-key protected</p>
+                        </div>
+                    </div>
+                    <div class="arch-node purple">
+                        <span class="dot"></span>
+                        <div class="nt">
+                            <h3>Email / OTP</h3>
+                            <p>SendGrid · Nodemailer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="small muted center" style="margin-top:1em;">The Vue app talks to NestJS, which persists to
+                Postgres and delegates files to the Rust service. WebSockets power live updates.</p>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 11 · TECH STACK -->
+        <section>
+
+            <h2 class="title-bar">Technology Stack</h2>
+            <div class="grid2">
+                <div class="card"><h3>Frontend</h3>
+                    <p>Vue 3 · Vite · Pinia · Vue Router · Vue I18n · Tailwind Typography</p></div>
+                <div class="card"><h3>Backend</h3>
+                    <p>NestJS 11 · TypeORM · class-validator · Socket.IO</p></div>
+                <div class="card"><h3>Auth</h3>
+                    <p>bcrypt · JWT · SimpleWebAuthn (passkeys) · express-session</p></div>
+                <div class="card"><h3>File Service</h3>
+                    <p>Rust · Axum · Tokio</p></div>
+                <div class="card"><h3>Database</h3>
+                    <p>PostgreSQL</p></div>
+                <div class="card"><h3>DevOps</h3>
+                    <p>Docker · docker-compose · GitHub Container Registry</p></div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">NestJS for a clean modular backend, Vue for a reactive SPA, Rust for a fast, safe
+                file/streaming service.
+            </aside>
+        </section>
+
+        <!-- 12 · AUTH & SECURITY -->
+        <section>
+
+            <h2 class="title-bar">Authentication &amp; Security</h2>
+            <ul>
+                <li>Email / phone registration + login</li>
+                <li>Passwords hashed with <strong>bcrypt</strong></li>
+                <li><strong>JWT</strong> issued on register / login / passkey login</li>
+                <li><strong>Passkeys / WebAuthn</strong> — passwordless biometrics</li>
+                <li>OTP email verification &amp; secure-account recovery</li>
+                <li>Hybrid <strong>JWT + session</strong> support</li>
+            </ul>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">Highlight passkeys as a modern, phishing-resistant login. Auth is being standardized
+                and role-based guards are still being hardened.
+            </aside>
+        </section>
+
+        <!-- 13 · STUDENT EXPERIENCE -->
+        <section>
+
+            <h2 class="title-bar">Student Experience</h2>
+            <ul>
+                <li>Guided onboarding at <code>/onboarding/student</code></li>
+                <li>Profile: university, major, year, skills, bio, job type, availability, salary</li>
+                <li>Optional <strong>CV upload</strong> (multipart)</li>
+                <li>Profile page with avatar, stats, education, and post gallery</li>
+                <li>Settings: edit info, register passkeys, change password</li>
+            </ul>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">The CV is stored via the file service and referenced by URL.</aside>
+        </section>
+
+        <!-- 14 · AFTER LOGIN · HOME FEED -->
+        <section>
+
+            <h2 class="title-bar">Your Home Feed</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li><b>Welcome to your feed</b> — latest posts &amp; opportunities from your network.</li>
+                        <li><b>Stories bar</b> with “Add Story” and live ring avatars.</li>
+                        <li><b>Composer</b>: share an update, Browse Jobs, or Message — right inline.</li>
+                        <li><b>“Your focus”</b> panel: saved jobs, applications &amp; profile strength.</li>
+                        <li><b>Suggested for you</b> — one-tap Connect with peers.</li>
+                    </ul>
+                </div>
+                <div class="col col-shot">
+                    <img class="shot" src="assets/home.png" alt="FirstStep home feed after login"/>
+                </div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">This is the first screen after login. Two tabs split the stream: Community Feed and Job
+                Opportunities. The right rail keeps the student goal-focused.
+            </aside>
+        </section>
+
+        <!-- 15 · POSTS · COMMUNITY + JOB FEED -->
+        <section>
+
+            <h2 class="title-bar">Posts &amp; Job Opportunities</h2>
+            <div class="cols">
+                <div class="col col-shot">
+                    <img class="shot" src="assets/job-feed.png" alt="FirstStep job feed with opportunity posts"/>
+                </div>
+                <div class="col">
+                    <ul>
+                        <li><b>Community posts</b> with title, Markdown body, and optional image.</li>
+                        <li><b>Job posts</b>: type, salary range &amp; location chips, one-tap <b>Apply</b>.</li>
+                        <li><b>Recommended</b> tab with an <em class="note">AI MATCH</em> badge.</li>
+                        <li>Like · comment · share · <b>save</b> actions on every post.</li>
+                        <li>Search + filters and Newest / Oldest sorting.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">Posts and jobs live side by side so a student can read community updates and discover
+                roles in one place.
+            </aside>
+        </section>
+
+        <!-- 16 · NEW POST · COMPOSER & SETTINGS -->
+        <section>
+
+            <h2 class="title-bar">Create a Post</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li><b>Title</b> + body composer to “Share with your network”.</li>
+                        <li><b>Friendly ⇄ Markdown</b> mode toggle for the editor.</li>
+                        <li>Rich toolbar: <b>bold, italic, heading, list, link, image</b>.</li>
+                        <li><b>Live preview</b> pane renders the post as you type.</li>
+                        <li>One <b>Publish post</b> button + handy Markdown tips.</li>
+                    </ul>
+                </div>
+                <div class="col col-shot">
+                    <img class="shot" src="assets/create-post.png"
+                         alt="FirstStep create-post composer with live preview"/>
+                </div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">The composer balances ease (Friendly mode) and power (Markdown) with an instant
+                preview, lowering the barrier to posting.
+            </aside>
+        </section>
+
+        <!-- 17 · THEMING -->
+        <section>
+
+            <h2 class="title-bar">Light, Dark &amp; System</h2>
+<!--            <div class="center" style="margin:0.2em 0 0.6em;">-->
+<!--                <span class="segmented"><span>System</span><span class="on">Light</span><span>Dark</span></span>-->
+<!--            </div>-->
+            <div class="grid2" style="align-items:start;">
+                <div class="device">
+                    <div class="cap">- Dark theme</div>
+                    <img src="assets/home.png" alt="FirstStep home in dark theme"/></div>
+                <div class="device">
+                    <div class="cap">- Light theme</div>
+                    <img src="assets/home-light.png" alt="FirstStep home in light theme"/></div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">Theme preference (System / Light / Dark) is persisted and applied everywhere through
+                shared design tokens, just like Material You.
+            </aside>
+        </section>
+
+        <!-- 18 · LANGUAGE / LOCALIZATION -->
+        <section>
+
+            <h2 class="title-bar">Speak the User's Language</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li><b>In-app language picker</b> under Settings → Languages.</li>
+                        <li>Built for Cambodia: <b>English</b> &amp; <b>ខ្មែរ (Khmer)</b> first.</li>
+                        <li>Plus 简体中文 · 繁體中文 · 日本語 · Français.</li>
+                        <li>Powered by <b>Vue I18n</b> — switches instantly, no reload.</li>
+                    </ul>
+                </div>
+                <div class="col col-shot">
+                    <img class="shot" src="assets/language.png" alt="FirstStep language settings"/>
+                </div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">Localization is a first-class setting. Khmer support is core to reaching Cambodian
+                students; the architecture scales to more locales.
+            </aside>
+        </section>
+
+        <!-- 15 · EMPLOYER EXPERIENCE -->
+        <section>
+
+            <h2 class="title-bar">Employer Experience</h2>
+            <ul>
+                <li>Company profile: name, industry, description, website, logo.</li>
+                <li>Proof / patent document upload for legitimacy.</li>
+                <li><code>isVerified</code> flag drives a <strong>trust badge</strong>.</li>
+                <li>Verification reviewed by admins before going live.</li>
+                <li>Roadmap: job posting, applicant tracking, contact reveal.</li>
+            </ul>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">The verification gate prevents scams. Employer self-service onboarding UI and job
+                posting are upcoming.
+            </aside>
+        </section>
+
+        <!-- 16 · ADMIN & MODERATION -->
+        <section>
+
+            <h2 class="title-bar">Admin &amp; Moderation</h2>
+            <ul>
+                <li>Admin dashboard at <code>/admin/moderation</code></li>
+                <li>List pending employers · approve · reject</li>
+                <li>Proof-review modal with review metrics</li>
+            </ul>
+            <pre><code class="language-http" data-trim>GET    /admin/employers/pending
+PATCH  /admin/employers/:id/approve
+DELETE /admin/employers/:id/reject</code></pre>
+            <p class="small muted">Roadmap: post/job moderation, dispute handling, admin-only guards.</p>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 17 · FILE SERVICE -->
+        <section>
+
+            <h2 class="title-bar">Dedicated File Service (Rust)</h2>
+            <ul>
+                <li>Standalone <strong>Axum</strong> microservice for media (CVs, logos, images).</li>
+                <li>API-key protected (<code>x-api-key</code> / Bearer).</li>
+                <li>Upload (multipart), download, list media.</li>
+                <li>Streaming with <strong>HTTP range requests</strong> (video / large files).</li>
+                <li>Configurable storage root + upload size limits.</li>
+            </ul>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">We separated file handling for performance, safety, and streaming. Range-request
+                support means efficient media playback.
+            </aside>
+        </section>
+
+        <!-- 18 · DATA MODEL -->
+        <section>
+
+            <h2 class="title-bar">Data Model Highlights</h2>
+            <div class="grid2">
+                <div class="card"><h3>Users</h3>
+                    <p>Role &amp; account-status enums; student &amp; employer profiles.</p></div>
+                <div class="card"><h3>Content</h3>
+                    <p>Posts (+ likes, comments, shares, bookmarks), Stories.</p></div>
+                <div class="card"><h3>Social</h3>
+                    <p>Follows, Messages, Job applications.</p></div>
+                <div class="card"><h3>Auth</h3>
+                    <p>Sessions + passkey credentials.</p></div>
+            </div>
+            <p class="small muted" style="margin-top:0.7em;">Shared <code>data_transfer</code> DTOs keep the API
+                contract consistent across frontend &amp; backend; TypeORM auto-loads entities.</p>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 19 · ABOUT PAGE -->
+        <section>
+
+            <h2 class="title-bar">Our Story &amp; Mission</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li>Clear mission statement for students &amp; SMEs.</li>
+                        <li>Consistent dark-theme brand system.</li>
+                        <li>Builds credibility for first-time visitors.</li>
+                    </ul>
+                </div>
+                <div class="col col-shot">
+                    <img class="shot" src="assets/about.png" alt="FirstStep about us page"/>
+                </div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 20 · TRUST: PRIVACY & TERMS -->
+        <section>
+
+            <h2 class="title-bar">Privacy &amp; Terms</h2>
+            <div class="cols">
+                <div class="col col-shot"><img class="shot" src="assets/privacy.png" alt="Privacy policy page"/></div>
+                <div class="col col-shot"><img class="shot" src="assets/terms.png" alt="Terms of service page"/></div>
+            </div>
+            <p class="small muted center" style="margin-top:0.6em;">Dedicated Privacy Policy and Terms of Service pages
+                set clear expectations for users.</p>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 21 · CONTACT PAGE -->
+        <section>
+
+            <h2 class="title-bar">Stay in Touch</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li>Simple contact form for support &amp; partnerships.</li>
+                        <li>Single entry point for students and employers.</li>
+                        <li>Reinforces a trustworthy, responsive brand.</li>
+                    </ul>
+                </div>
+                <div class="col col-shot">
+                    <img class="shot" src="assets/contact.png" alt="Contact page"/>
+                </div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 22 · LIVE DEMO -->
+        <section>
+            <div class="center">
+
+                <h2 style="font-size:2.4em;">Demo</h2>
+            </div>
+            <div class="grid3" style="margin-top:0.6em;">
+                <div class="card">
+                    <h3>Register</h3>
+                    <p>Choose a role → onboarding.</p></div>
+                <div class="card">
+                    <h3>Post</h3>
+                    <p>Create &amp; view a post in the feed.</p></div>
+                <div class="card">
+                    <h3>Employer</h3>
+                    <p>Submit company proof.</p></div>
+                <div class="card">
+                    <h3>Admin</h3>
+                    <p>Approve the employer.</p></div>
+                <div class="card">
+                    <h3>Passkey</h3>
+                    <p>Optional passwordless login.</p></div>
+                <div class="card">
+                    <h3>Wow</h3>
+                    <p>The admin-approval moment.</p></div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">Keep the demo to 3–4 minutes. Pre-seed accounts to jump straight to the admin approval
+                moment.
+            </aside>
+        </section>
+
+        <!-- 23 · CHALLENGES -->
+        <section>
+
+            <h2 class="title-bar">Challenges &amp; Learnings</h2>
+            <ul>
+                <li>Standardizing auth (JWT vs session) and adding role-based guards.</li>
+                <li>Designing a trustworthy employer-verification flow.</li>
+                <li>Integrating a <strong>polyglot stack</strong> (TS + Rust) cleanly.</li>
+                <li>File storage and media streaming done safely.</li>
+                <li>Coordinating work as a team in a monorepo.</li>
+            </ul>
+            <div class="footer">FirstStep · Group 12</div>
+            <aside class="notes">Be genuine about trade-offs — it shows growth and engineering maturity.</aside>
+        </section>
+
+        <!-- 24 · ROADMAP -->
+        <section>
+
+            <h2 class="title-bar">Roadmap</h2>
+            <div class="grid2">
+                <div class="card"><h3>Job Discovery</h3>
+                    <p>Posting + searchable, paginated jobs.</p></div>
+                <div class="card"><h3>Application Tracking</h3>
+                    <p>Submitted → Viewed → Interview → Result.</p></div>
+                <div class="card"><h3>Social UI</h3>
+                    <p>Likes/comments UI, feed pagination.</p></div>
+                <div class="card"><h3>Localization</h3>
+                    <p>Bilingual English / Khmer.</p></div>
+                <div class="card"><h3>Hardening</h3>
+                    <p>Role guards, secure file storage, tests.</p></div>
+                <div class="card"><h3>Phase 2</h3>
+                    <p>Smart recommendations &amp; skill matching.</p></div>
+            </div>
+            <div class="footer">FirstStep · Group 12</div>
+        </section>
+
+        <!-- 25 · THANK YOU -->
+        <section>
+            <div class="title-slide">
+                <div class="brand" style="font-size:2.8em;">Thank You!</div>
+                <h3 class="muted" style="font-weight:500;">Questions?</h3>
+                <p class="tagline">FirstStep — turning a free afternoon into experience.</p>
+                <div class="chips center" style="justify-content:center;margin-top:1em;">
+                    <span class="chip b">Vue 3</span>
+                    <span class="chip b">NestJS</span>
+                    <span class="chip g">PostgreSQL</span>
+                    <span class="chip a">Rust</span>
+                </div>
+                <p class="small muted" style="margin-top:1.2em;">Group 12 · Project II</p>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        slideNumber: 'c/t',
+        transition: 'slide',
+        backgroundTransition: 'fade',
+        width: 1280,
+        height: 720,
+        margin: 0.06,
+        plugins: [RevealMarkdown, RevealHighlight, RevealNotes]
+    });
+</script>
+</body>
+</html>
