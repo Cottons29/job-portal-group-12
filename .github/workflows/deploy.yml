@@ -65,7 +65,7 @@ jobs:
           push: true
           platforms: linux/arm64
           build-args: |
-            VITE_API_URL=${{ secrets.FRONTEND_API_URL }}
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
           tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}/frontend:latest
 
       - name: Build and push progress_book image
