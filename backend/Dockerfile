@@ -27,3 +27,6 @@ COPY --from=build /app/backend/dist ./dist
 EXPOSE 3080
 
 CMD ["npm", "run", "start:prod"]
+
+
+
