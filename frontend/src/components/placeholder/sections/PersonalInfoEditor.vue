@@ -52,7 +52,7 @@ defineEmits(['update:editValue', 'close', 'save'])
         <span class="text-sm font-black text-on-surface">{{ t('settings.personal.enterField', { field: editingField.label }) }}</span>
         <input
             :value="editValue"
-            @input="$emit('update:editValue', $event.target.value)"
+            @input="$emit('update:editValue', $event.target!.value)"
             :placeholder="editingField.placeholder"
             :type="editingField.inputType"
             class="w-full mt-4 rounded-2xl bg-surface px-4 py-3 text-sm font-bold text-on-surface outline-none ring-1 ring-outline/30 transition placeholder:text-on-surface-variant/70 focus:ring-2 focus:ring-primary"
