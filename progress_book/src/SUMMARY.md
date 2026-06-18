@@ -2,6 +2,7 @@
 
 - [Introduction](./introduction.md)
 - [Table of Contents](./table_of_contents.md)
+- [Member Contributions](./member_contributions.md)
 
 # Weeks
 
