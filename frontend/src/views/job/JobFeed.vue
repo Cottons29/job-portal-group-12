@@ -10,6 +10,8 @@
             v-model="keyword"
             type="text"
             placeholder="Search jobs"
+            @input="filterJobs"
+            @keydown.enter="handleSearch"
             class="min-w-0 flex-1 bg-transparent text-sm text-on-surface outline-none placeholder:text-on-surface-variant/50"
           />
         </label>
@@ -22,6 +24,8 @@
             v-model="location"
             type="text"
             placeholder="Location"
+            @input="filterJobs"
+            @keydown.enter="handleSearch"
             class="min-w-0 flex-1 bg-transparent text-sm text-on-surface outline-none placeholder:text-on-surface-variant/50"
           />
         </label>
@@ -266,19 +270,21 @@ function filterJobs() {
   let filtered = [...allLoadedJobs.value]
 
   if (keyword.value.trim()) {
-    const q = keyword.value.toLowerCase()
-    filtered = filtered.filter(j => 
-      j.title?.toLowerCase().includes(q) || 
-      j.company?.toLowerCase().includes(q) || 
-      j.content?.toLowerCase().includes(q)
-    )
+    const q = keyword.value.toLowerCase().replace(/[^a-z0-9]/g, '')
+    filtered = filtered.filter(j => {
+      const title = (j.title || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+      const company = (j.company || j.author?.user_name || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+      const content = (j.content || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+      return title.includes(q) || company.includes(q) || content.includes(q)
+    })
   }
 
   if (location.value.trim()) {
-    const loc = location.value.toLowerCase()
-    filtered = filtered.filter(j => 
-      j.location?.toLowerCase().includes(loc)
-    )
+    const loc = location.value.toLowerCase().replace(/[^a-z0-9]/g, '')
+    filtered = filtered.filter(j => {
+      const jLoc = (j.location || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+      return jLoc.includes(loc)
+    })
   }
 
   // Job Type Filter
