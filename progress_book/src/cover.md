@@ -26,13 +26,11 @@
       </tr>
     </thead>
     <tbody>
-      <tr><td>SOK&nbsp;&nbsp;&nbsp;&nbsp;LYPHENG</td><td>e2022……</td><td>……</td></tr>
-      <tr><td>SOPHEAP&nbsp;&nbsp;&nbsp;&nbsp;SOTHIPHAK</td><td>e2022……</td><td>……</td></tr>
-      <tr><td>CHANTHA&nbsp;&nbsp;&nbsp;&nbsp;MENGKONG</td><td>e2022……</td><td>……</td></tr>
-      <tr><td>LUY&nbsp;&nbsp;&nbsp;&nbsp;LYHOR</td><td>e2022……</td><td>……</td></tr>
-      <tr><td>CHHON&nbsp;&nbsp;&nbsp;&nbsp;PHEAKDEY</td><td>e2022……</td><td>……</td></tr>
-      <tr><td>KEO&nbsp;&nbsp;&nbsp;&nbsp;SIENGHENG</td><td>e2022……</td><td>……</td></tr>
-      <tr><td>CHENG&nbsp;&nbsp;&nbsp;&nbsp;SAKDA</td><td>e2022……</td><td>……</td></tr>
+      <tr><td>SOK&nbsp;&nbsp;&nbsp;&nbsp;LYPHENG</td><td>e20221611</td><td>……</td></tr>
+      <tr><td>SOPHEAP&nbsp;&nbsp;&nbsp;&nbsp;SOTHIPHAK</td><td>e20221038</td><td>……</td></tr>
+      <tr><td>CHANTHA&nbsp;&nbsp;&nbsp;&nbsp;MENGKONG</td><td>e20221526</td><td>……</td></tr>
+      <tr><td>LUY&nbsp;&nbsp;&nbsp;&nbsp;LYHOR</td><td>e20220355</td><td>……</td></tr>
+      <tr><td>CHHON&nbsp;&nbsp;&nbsp;&nbsp;PHEAKDEY</td><td>e20221063</td><td>……</td></tr>
     </tbody>
   </table>
 
@@ -105,7 +103,7 @@
 .cover-members tr:nth-child(2n) { background: transparent !important; }
 
 .cover-lecturer {
-  text-align: right;
+  text-align: left;
   color: #4a90e2;
   font-weight: 700;
   font-size: 1.1rem;
@@ -116,6 +114,6 @@
   color: #4a90e2;
   font-weight: 800;
   font-size: 1.3rem;
-  margin-top: 40px;
+  margin-top: 80px;
 }
 </style>
