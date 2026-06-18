@@ -28,10 +28,6 @@ async function bootstrap() {
     'http://127.0.0.1:5173',
     'http://localhost:3081',
     'http://127.0.0.1:3081',
-    'https://firststep.cottons.app',
-    'https://www.firststep.cottons.app',
-    'https://firststep.cottonsofficial.com',
-    'https://www.firststep.cottonsofficial.com',
   ];
   if (process.env.FRONTEND_URL) {
     corsOrigins.push(process.env.FRONTEND_URL);
