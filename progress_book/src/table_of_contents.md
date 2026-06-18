@@ -1,5 +1,34 @@
 # Table of Contents
 
+A map of the book. The **Overall Report** documents the project end to end, and the
+**Weekly Reports** track the project's development week by week.
+
+## Overall Report
+
+A comprehensive, end-to-end write-up of the Student Part-Time Job Portal.
+
+| Section | Title                                                                     |
+|---------|---------------------------------------------------------------------------|
+| 1       | [Executive Summary](./report/executive_summary.md)                        |
+| 2       | [Introduction](./report/introduction.md)                                  |
+| 2.1     | [Problem Statement](./report/problem_statement.md)                        |
+| 2.2     | [Project Objectives](./report/project_objectives.md)                      |
+| 2.3     | [Target Audience](./report/target_audience.md)                            |
+| 2.4     | [Success Metrics](./report/intro_success_metrics.md)                      |
+| 3       | [System Analysis & Requirements](./report/system_analysis.md)             |
+| 3.1     | [Functional Requirements](./report/functional_requirements.md)            |
+| 3.2     | [Non-Functional Requirements](./report/non_functional_requirements.md)    |
+| 3.3     | [Success Metrics](./report/system_success_metrics.md)                     |
+| 4       | [Technical Architecture & Design](./report/technical_architecture.md)     |
+| 5       | [Implementation & Core Features](./report/implementation.md)              |
+| 6       | [Development Process & Team Dynamics](./report/development_process.md)    |
+| 7       | [Security, Performance & DevOps](./report/security_performance_devops.md) |
+| 8       | [Challenges & Solutions](./report/challenges.md)                          |
+| 9       | [Conclusion & Future Work](./report/conclusion.md)                        |
+| 10      | [References & Appendices](./report/references_appendices.md)              |
+
+## Weekly Reports
+
 A week-by-week map of the project's development. Each week links to its full entry
 and summarizes the focus and the main challenge.
 
