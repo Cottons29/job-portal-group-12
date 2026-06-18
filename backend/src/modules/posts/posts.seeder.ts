@@ -3,6 +3,7 @@ import { PostEntity } from './post.entity';
 import { User } from '../user/user.entity';
 import { Company } from '../company/company.entity';
 import { UserRole } from '../../common/enums/user-role.enum';
+import { AccountStatus } from '../../common/enums/account-status.enum';
 import * as bcrypt from 'bcrypt';
 
 export async function seedPostsAndJobs(dataSource: DataSource) {
@@ -10,70 +11,78 @@ export async function seedPostsAndJobs(dataSource: DataSource) {
   const userRepo = dataSource.getRepository(User);
   const companyRepo = dataSource.getRepository(Company);
 
-  const hasSeeded = await postRepo.findOne({ where: { title: 'Frontend Developer (Vue 3 / Tailwind)' } });
-  if (hasSeeded) {
-    console.log('Posts and jobs already seeded.');
-    return;
-  }
-
-  console.log('Seeding mock users, posts and jobs...');
-
-  // 1. Get or create mock users
-  let employers = await userRepo.find({ where: { role: UserRole.EMPLOYER } });
-  let students = await userRepo.find({ where: { role: UserRole.STUDENT } });
+  console.log('Running idempotent database seeding...');
 
   const hashedPassword = await bcrypt.hash('password123', 10);
 
-  if (employers.length === 0) {
-    console.log('Creating mock employer users...');
-    const companies = await companyRepo.find();
-    
-    const employerData = [
-      {
-        phone: '012345678',
-        email: 'employer1@firststep.com',
-        password: hashedPassword,
-        role: UserRole.EMPLOYER,
-        profileCompleted: true,
-        companyName: 'Smart Axiata',
-        companyDescription: 'Smart Axiata Co., Ltd. is Cambodia\'s leading mobile telecommunications operator.',
-        industry: 'technology',
-        address: 'phnom_penh',
-        website: 'https://www.smart.com.kh',
-        logoUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&h=150&fit=crop&q=80',
-        isVerified: true,
-      },
-      {
-        phone: '087654321',
-        email: 'employer2@firststep.com',
-        password: hashedPassword,
-        role: UserRole.EMPLOYER,
-        profileCompleted: true,
-        companyName: 'ABA Bank',
-        companyDescription: 'ABA Bank is Cambodia\'s leading private financial institution.',
-        industry: 'finance',
-        address: 'phnom_penh',
-        website: 'https://www.ababank.com',
-        logoUrl: 'https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?w=150&h=150&fit=crop&q=80',
-        isVerified: true,
-      },
-      {
-        phone: '099999999',
-        email: 'employer3@firststep.com',
-        password: hashedPassword,
-        role: UserRole.EMPLOYER,
-        profileCompleted: true,
-        companyName: 'Brown Coffee',
-        companyDescription: 'Brown Coffee & Bakery is a homegrown Cambodian cafe brand.',
-        industry: 'fnb',
-        address: 'phnom_penh',
-        website: 'https://www.browncoffee.com.kh',
-        logoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=150&h=150&fit=crop&q=80',
-        isVerified: true,
-      }
-    ];
+  // 0. Ensure Admin User exists
+  const adminPhone = '+85500000000';
+  const existingAdmin = await userRepo.findOne({ where: { phone: adminPhone } });
+  if (!existingAdmin) {
+    console.log('Creating mock admin user...');
+    const admin = userRepo.create({
+      phone: adminPhone,
+      email: 'admin@firststep.com',
+      password: hashedPassword,
+      role: UserRole.ADMIN,
+      status: AccountStatus.ACTIVE,
+      profileCompleted: true,
+      fullName: 'System Administrator',
+    });
+    await userRepo.save(admin);
+  }
 
-    for (const data of employerData) {
+  // 1. Get or create mock employers
+  const companies = await companyRepo.find();
+  const employerData = [
+    {
+      phone: '+85512345678',
+      email: 'employer1@firststep.com',
+      password: hashedPassword,
+      role: UserRole.EMPLOYER,
+      profileCompleted: true,
+      companyName: 'Smart Axiata',
+      companyDescription: 'Smart Axiata Co., Ltd. is Cambodia\'s leading mobile telecommunications operator.',
+      industry: 'technology',
+      address: 'phnom_penh',
+      website: 'https://www.smart.com.kh',
+      logoUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&h=150&fit=crop&q=80',
+      isVerified: true,
+    },
+    {
+      phone: '+85587654321',
+      email: 'employer2@firststep.com',
+      password: hashedPassword,
+      role: UserRole.EMPLOYER,
+      profileCompleted: true,
+      companyName: 'ABA Bank',
+      companyDescription: 'ABA Bank is Cambodia\'s leading private financial institution.',
+      industry: 'finance',
+      address: 'phnom_penh',
+      website: 'https://www.ababank.com',
+      logoUrl: 'https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?w=150&h=150&fit=crop&q=80',
+      isVerified: true,
+    },
+    {
+      phone: '+85599999999',
+      email: 'employer3@firststep.com',
+      password: hashedPassword,
+      role: UserRole.EMPLOYER,
+      profileCompleted: true,
+      companyName: 'Brown Coffee',
+      companyDescription: 'Brown Coffee & Bakery is a homegrown Cambodian cafe brand.',
+      industry: 'fnb',
+      address: 'phnom_penh',
+      website: 'https://www.browncoffee.com.kh',
+      logoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=150&h=150&fit=crop&q=80',
+      isVerified: true,
+    }
+  ];
+
+  for (const data of employerData) {
+    const existing = await userRepo.findOne({ where: { phone: data.phone } });
+    if (!existing) {
+      console.log(`Creating mock employer user: ${data.phone}`);
       const company = companies.find(c => c.name.toLowerCase() === data.companyName.toLowerCase());
       const emp = userRepo.create({
         ...data,
@@ -82,50 +91,52 @@ export async function seedPostsAndJobs(dataSource: DataSource) {
       } as any);
       await userRepo.save(emp);
     }
-
-    employers = await userRepo.find({ where: { role: UserRole.EMPLOYER } });
   }
 
-  if (students.length === 0) {
-    console.log('Creating mock student users...');
-    const studentData = [
-      {
-        phone: '011111111',
-        email: 'student1@paragon.edu',
-        password: hashedPassword,
-        role: UserRole.STUDENT,
-        profileCompleted: true,
-        fullName: 'Chan Mengkong',
-        university: 'Paragon International University',
-        major: 'Computer Science',
-        yearOfStudy: 3,
-        skills: ['Vue.js', 'TypeScript', 'Tailwind CSS', 'Node.js', 'PostgreSQL'],
-        isStudentVerified: true,
-      },
-      {
-        phone: '022222222',
-        email: 'student2@rupp.edu',
-        password: hashedPassword,
-        role: UserRole.STUDENT,
-        profileCompleted: true,
-        fullName: 'Sok Mean',
-        university: 'Royal University of Phnom Penh',
-        major: 'Information Technology',
-        yearOfStudy: 4,
-        skills: ['React.js', 'JavaScript', 'Express', 'MongoDB'],
-        isStudentVerified: true,
-      }
-    ];
+  // 2. Get or create mock students
+  const studentData = [
+    {
+      phone: '+85511111111',
+      email: 'student1@paragon.edu',
+      password: hashedPassword,
+      role: UserRole.STUDENT,
+      profileCompleted: true,
+      fullName: 'Chan Mengkong',
+      university: 'Paragon International University',
+      major: 'Computer Science',
+      yearOfStudy: 3,
+      skills: ['Vue.js', 'TypeScript', 'Tailwind CSS', 'Node.js', 'PostgreSQL'],
+      isStudentVerified: true,
+    },
+    {
+      phone: '+85522222222',
+      email: 'student2@rupp.edu',
+      password: hashedPassword,
+      role: UserRole.STUDENT,
+      profileCompleted: true,
+      fullName: 'Sok Mean',
+      university: 'Royal University of Phnom Penh',
+      major: 'Information Technology',
+      yearOfStudy: 4,
+      skills: ['React.js', 'JavaScript', 'Express', 'MongoDB'],
+      isStudentVerified: true,
+    }
+  ];
 
-    for (const data of studentData) {
+  for (const data of studentData) {
+    const existing = await userRepo.findOne({ where: { phone: data.phone } });
+    if (!existing) {
+      console.log(`Creating mock student user: ${data.phone}`);
       const std = userRepo.create(data);
       await userRepo.save(std);
     }
-
-    students = await userRepo.find({ where: { role: UserRole.STUDENT } });
   }
 
-  // 2. Seed Jobs
+  // Fetch updated lists of users for assigning to posts/jobs
+  const employers = await userRepo.find({ where: { role: UserRole.EMPLOYER } });
+  const students = await userRepo.find({ where: { role: UserRole.STUDENT } });
+
+  // 3. Seed Jobs
   const jobsData = [
     {
       title: 'Frontend Developer (Vue 3 / Tailwind)',
@@ -184,17 +195,22 @@ export async function seedPostsAndJobs(dataSource: DataSource) {
     }
   ];
 
-  // Pick an employer randomly to post
-  for (let i = 0; i < jobsData.length; i++) {
-    const employer = employers[i % employers.length];
-    const job = postRepo.create({
-      ...jobsData[i],
-      author: employer,
-    });
-    await postRepo.save(job);
+  if (employers.length > 0) {
+    for (let i = 0; i < jobsData.length; i++) {
+      const existingJob = await postRepo.findOne({ where: { title: jobsData[i].title } });
+      if (!existingJob) {
+        console.log(`Creating mock job post: ${jobsData[i].title}`);
+        const employer = employers[i % employers.length];
+        const job = postRepo.create({
+          ...jobsData[i],
+          author: employer,
+        });
+        await postRepo.save(job);
+      }
+    }
   }
 
-  // 3. Seed Feed Posts
+  // 4. Seed Feed Posts
   const feedsData = [
     {
       title: 'Mid-term project finished!',
@@ -238,14 +254,19 @@ export async function seedPostsAndJobs(dataSource: DataSource) {
     }
   ];
 
-  // Pick a student randomly to post
-  for (let i = 0; i < feedsData.length; i++) {
-    const student = students[i % students.length];
-    const feed = postRepo.create({
-      ...feedsData[i],
-      author: student,
-    });
-    await postRepo.save(feed);
+  if (students.length > 0) {
+    for (let i = 0; i < feedsData.length; i++) {
+      const existingFeed = await postRepo.findOne({ where: { title: feedsData[i].title } });
+      if (!existingFeed) {
+        console.log(`Creating mock feed post: ${feedsData[i].title}`);
+        const student = students[i % students.length];
+        const feed = postRepo.create({
+          ...feedsData[i],
+          author: student,
+        });
+        await postRepo.save(feed);
+      }
+    }
   }
 
   console.log('Seeding completed successfully!');
