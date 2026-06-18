@@ -37,6 +37,11 @@ async function bootstrap() {
     app.enableCors({
         origin: process.env.FRONTEND_URL ?? corsOrigins,
         credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: [
+            'Content-Type',
+            'Authorization',
+        ],
     });
 
     console.log(`FRONTEND_URL : ${process.env.FRONTEND_URL}`);
