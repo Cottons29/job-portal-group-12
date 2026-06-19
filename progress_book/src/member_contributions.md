@@ -7,8 +7,8 @@ project's development history and git commits.
 
 | Member Name           | Role                        | Git Commit Count | Primary Areas of Contribution                                                                                                                                                                                                      |
 |:----------------------|:----------------------------|:-----------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Sok Lypheng**       | Lead Full-Stack Developer   | 224              | Monorepo setup, Pinia stores, Stories, Messages, Follows modules, Rust File Service integration, TypeScript migration. Slide presentation (Reveal.js HTML structure), progress book content drafting, final project documentation. |
-| **SOPHEAP Sothiphak** | Integration & Security      | 47               | CORS & SSL server fixes, real-time WebSocket notifications, recruitment pipeline status tracking, match recommendations.                                                                                                           |
+| **Sok Lypheng**       | Lead Full-Stack Developer   | 224              | Monorepo setup, Pinia stores, Stories, Messages, Follows modules, Rust File Service integration, TypeScript migration. Slide presentation (Reveal.js HTML structure), CORS & SSL server fixes,progress book content drafting, final project documentation. |
+| **SOPHEAP Sothiphak** | Integration & Security      | 47               |  real-time WebSocket notifications, recruitment pipeline status tracking, match recommendations.                                                                                                           |
 | **Chantha Mengkong**  | Core Feature Developer      | 29               | Authentication validation (DTOs), Forgot password (OTP via email), Employer post management, Job detail views.                                                                                                                     |
 | **Luy Lyhor**         | Frontend & Layout Developer | 2                | Core Layout (Navbar & Footer), frontend dependencies.                                                                                                                                                                              |
 | **CHHON PHEAKDEY**    | UI/UX & Design              | Design Focus     | High-fidelity Figma layouts, Material 3 design tokens, responsive mobile wireframes, branding elements.                                                                                                                            |
@@ -31,11 +31,12 @@ project's development history and git commits.
 * **Messaging Infrastructure**: Built the core chat schema, contact lists, and message retrieval controllers.
 * **File Handling Integration**: Integrated the remote Rust-based image and document upload service ("Sheep").
 * **Localization**: Implemented default locale persistence using localStorage and global i18n configurations.
+* **CORS & Server Security**: Configured CORS settings for production domains (`cottonsofficial.com`),
+  solved secure HTTPS routing, and resolved SSL certificate mismatch issues.
 
 ### SOPHEAP Sothiphak
 
-* **CORS & Server Security**: Configured CORS settings for production domains (`cottonsofficial.com`),
-  solved secure HTTPS routing, and resolved SSL certificate mismatch issues.
+
 * **Job Application Pipeline**: Built backend logic for applicants to apply for jobs and track their status (Submitted →
   Viewed → Interview → Offer → Result).
 * **Real-time Notifications**: Implemented WebSocket gateways and NestJS event listeners to deliver live, real-time user
