@@ -1,5 +1,4 @@
 <div class="report-cover">
-
   <div class="cover-header">
     <img class="cover-logo cover-logo-itc" src="./assets/itc_logo.png" alt="Institut de Technologie du Cambodge" />
     <div class="cover-kingdom">
