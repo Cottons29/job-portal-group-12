@@ -594,23 +594,11 @@
 .member .m-photo {
     position: relative;
     aspect-ratio: 1/1;
-    /*margin: 0 auto 1.5em 0;*/
-    background: var(--md-sc-high);
-    box-shadow: var(--md-elev-2);
-    transition: transform .2s ease, box-shadow .2s ease;
-    /* some radius on the holder + clip the image to it */
     border-radius: var(--md-shape-lg);
     overflow: hidden;
-    /* tonal accent ring drawn behind via outline */
-    /*outline: 4px solid color-mix(in srgb, var(--accent) 70%, transparent);*/
     outline-offset: 4px;
     padding: 0;
     margin: 0;
-}
-
-.member:hover .m-photo {
-    transform: translateY(-4px);
-    box-shadow: var(--md-elev-3);
 }
 
 .member .m-photo img {
@@ -628,15 +616,6 @@
 .shape-diamond  { clip-path: polygon(41% 9%, 59% 9%, 91% 41%, 91% 59%, 59% 91%, 41% 91%, 9% 59%, 9% 41%); outline: none; }
 .shape-pentagon { clip-path: polygon(41% 6.8%, 59% 6.8%, 91% 31.2%, 96.8% 49.2%, 85.2% 88.8%, 70.5% 100%, 29.5% 100%, 14.8% 88.8%, 3.2% 49.2%, 9% 31.2%); outline: none; }
 .shape-octagon  { clip-path: polygon(24.6% 5.4%, 37.2% 0%, 62.8% 0%, 75.4% 5.4%, 94.6% 24.6%, 100% 37.2%, 100% 62.8%, 94.6% 75.4%, 75.4% 94.6%, 62.8% 100%, 37.2% 100%, 24.6% 94.6%, 5.4% 75.4%, 0% 62.8%, 0% 37.2%, 5.4% 24.6%); outline: none; }
-
-/* Clipped shapes: drop the inset so the image fills the whole shape */
-.member .m-photo.shape-hexagon,
-.member .m-photo.shape-diamond,
-.member .m-photo.shape-pentagon,
-.member .m-photo.shape-octagon {
-    background: color-mix(in srgb, var(--accent) 28%, var(--md-sc-high));
-    padding: 0;
-}
 
 .member figcaption {
     display: flex;
@@ -658,12 +637,3 @@
     text-transform: uppercase;
     margin-top: 2px;
 }
-
-/* Accent rotation across the 7 members */
-.member:nth-child(1) { --accent: var(--md-primary); }
-.member:nth-child(2) { --accent: #6aa6ff; }
-.member:nth-child(3) { --accent: var(--md-green); }
-.member:nth-child(4) { --accent: var(--md-secondary); }
-.member:nth-child(5) { --accent: #c79dff; }
-.member:nth-child(6) { --accent: var(--md-tertiary); }
-.member:nth-child(7) { --accent: #ff8a65; }
